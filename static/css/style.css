@@ -8,6 +8,12 @@ body {
     margin: 0;
     font-family: Roboto, -apple-system, 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
     background: #3b4465;
+
+}
+body{
+    width: 100%;
+    margin: 0 auto;
+    padding: 100px;
 }
 
 .forms-section {

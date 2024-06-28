@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visual Learner Courses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #5a627a;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        .course-card {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .course-card img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .course-content {
+            padding: 20px;
+            flex: 1;
+        }
+        .course-title {
+            font-size: 1.5em;
+            margin: 0 0 10px;
+        }
+        .course-description {
+            margin: 0 0 10px;
+        }
+        .course-link {
+            color: #5a627a;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .course-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Auditory Learner Courses</h1>
+    </div>
+    <div class="container">
+        <div class="course-card">
+            <img src="{{ url_for('static', filename='images/course1.jpg') }}" alt="Course 1">
+            <div class="course-content">
+                <h2 class="course-title">Course Title 1</h2>
+                <p class="course-description">Brief description of the course content. This course will help you learn about various visual learning techniques and strategies.</p>
+                <a href="#" class="course-link">Enroll Now</a>
+            </div>
+        </div>
+        <div class="course-card">
+            <img src="{{ url_for('static', filename='images/course2.jpg') }}" alt="Course 2">
+            <div class="course-content">
+                <h2 class="course-title">Course Title 2</h2>
+                <p class="course-description">Brief description of the course content. This course will help you learn about various visual learning techniques and strategies.</p>
+                <a href="#" class="course-link">Enroll Now</a>
+            </div>
+        </div>
+        <div class="course-card">
+            <img src="{{ url_for('static', filename='images/course3.jpg') }}" alt="Course 3">
+            <div class="course-content">
+                <h2 class="course-title">Course Title 3</h2>
+                <p class="course-description">Brief description of the course content. This course will help you learn about various visual learning techniques and strategies.</p>
+                <a href="#" class="course-link">Enroll Now</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
