@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Class Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #444c5e; /* Background color for the entire page */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff; /* Background color for the main content area */
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio (responsive video) */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .notes {
+            margin-bottom: 20px;
+        }
+
+        .notes h2 {
+            color: #333;
+        }
+
+        .notes ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .notes ul li {
+            margin-bottom: 10px;
+        }
+
+        .closed-captions {
+            margin-bottom: 20px;
+        }
+
+        .closed-captions h2 {
+            color: #333;
+        }
+
+        .closed-captions p {
+            margin-bottom: 10px;
+        }
+
+        .live-class-info {
+            background-color: #ddd; /* Background color for the live class info section */
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .live-class-info h2 {
+            color: #333;
+        }
+
+        .live-class-info p {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Live Class Title</h1>
+        
+        <!-- Video Section -->
+        <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/VIDEO_ID_HERE" frameborder="0" allowfullscreen></iframe>
+        </div>
+        
+        <!-- Notes Section -->
+        <div class="notes">
+            <h2>Notes</h2>
+            <ul>
+                <li>Note 1: Description or key points.</li>
+                <li>Note 2: Description or key points.</li>
+                <li>Note 3: Description or key points.</li>
+                <!-- Add more notes as needed -->
+            </ul>
+        </div>
+        
+        <!-- Closed Captions Section -->
+        <div class="closed-captions">
+            <h2>Closed Captions</h2>
+            <p>English subtitles are available for this video.</p>
+        </div>
+        
+        <!-- Live Class Information -->
+        <div class="live-class-info">
+            <h2>Live Class Information</h2>
+            <p><strong>Date:</strong> January 1, 2025</p>
+            <p><strong>Time:</strong> 10:00 AM - 12:00 PM</p>
+            <p><strong>Instructor:</strong> John Doe</p>
+        </div>
+        
+    </div>
+</body>
+</html>

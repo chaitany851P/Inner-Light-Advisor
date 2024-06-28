@@ -5,18 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot Integration</title>
     <!-- Include Crisp chat SDK -->
-    <script type="text/javascript">
-        window.$crisp=[];
-        window.CRISP_WEBSITE_ID="ab3f1e8d-7e73-4c4e-bab5-dca547d4365f";
-        (function(){
-            d=document;
-            s=d.createElement("script");
-            s.src="https://client.crisp.chat/l.js";
-            s.async=1;
-            d.getElementsByTagName("head")[0].appendChild(s);
-        })();
-    </script>
+    
     <style>
+
         body {
             font-family: Arial, sans-serif;
             color: #333;
@@ -69,6 +60,31 @@
             color: #999;
         }
     </style>
+    <script>
+        (function (w, d, s, o, f, js, fjs) {
+                w[o] = w[o] || function () {
+                    (w[o].q = w[o].q || []).push(arguments) };
+                js = d.createElement(s), fjs = d.getElementsByTagName(s)[0];
+                js.id = o; js.src = f; js.async = 1;
+                fjs.parentNode.insertBefore(js, fjs) }
+            (window, document, 'script', 'nw', 'https://chat.norby.io/widget'));
+                nw('init', {
+                    apiKey: '036d3af5-af66-4c3e-ba52-339f44359d35',
+                    serviceBaseUrl: 'https://api.norby.io',
+                    lang: 'en',
+                    languageList: ['EN','RU','EE','IT','FR','DE','UA','ES','FI','SV','DA','NO','PL','PT','TR','ZH','JA','AR'],
+                    mainColor: '#3E247E',
+                    popupBotAvatarColor: '#3E247E',
+                    multichat: true,
+                    botName: 'Bot',
+                    imageTransferEnabled: true,
+                    side: 'right',
+                    marginSideDesktop: 80,
+                    marginBottomDesktop: 48,
+                    marginSideMobile: 16,
+                    marginBottomMobile: 16
+                });
+            </script>
 </head>
 <body>
     <div class="container">
