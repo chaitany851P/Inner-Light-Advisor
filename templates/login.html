@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>I-L-A Login and Signup</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
 </head>
 <body>
     <section class="forms-section">
@@ -25,6 +26,9 @@
                         <div class="input-block">
                             <label for="login-password">Password</label>
                             <input id="login-password" type="password" name="password" required>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('forgot_password') }}">Forgot Password?</a>
                         </div>
                     </fieldset>
                     <button type="submit" class="btn-login">Login</button>
@@ -70,8 +74,11 @@
                             </select>
                         </div>
                     </fieldset>
-                    <button type="submit" class="btn-signup">Sign Up</button>
+                    <button type="submit" class="btn-login">Sign Up</button>
                 </form>
+                <div id="user-exists-message" style="display: none; color: red;">
+                    User already exists. Please use a different email.
+                </div>
             </div>
         </div>
     </section>
@@ -83,7 +90,14 @@
                 });
             });
         });
+
+        // Example JavaScript to display the "User Exists" message
+        // This would typically be set on the server side and passed to the template
+        const userExists = false; // Change this to true to simulate a user already exists scenario
+
+        if (userExists) {
+            document.getElementById('user-exists-message').style.display = 'block';
+        }
     </script>
 </body>
 </html>
-    

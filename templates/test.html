@@ -2,39 +2,55 @@
 <html>
 <head>
     <title>Learning Style Test</title>
-    
-     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-     <style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
         .container {
             width: 100%;
             margin: 0 auto;
-            }
-
-        body{
-            color:#fff;
         }
+
+        body {
+            color: #fff;
+            background-color: #333; /* Optional: Dark background for better visibility */
+        }
+
         .question {
             margin-bottom: 20px;
         }
+
         .results {
             margin-top: 20px;
             color: #fff;
         }
-        input{
+
+        input {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-            
         }
-        .test{
-            font-family:cursive;
+
+        .test {
+            font-family: cursive;
         }
-        .dis{
+
+        .dis {
             font-family: 'Times New Roman', Times, serif;
         }
-        strong{
+
+        strong {
             font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
 
-     </style>
+        button {
+            background-color: #5a627a; /* Dark button background */
+            color: white; /* Button text color */
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 10%;
+        }
+
+        
+    </style>
 </head>
 <body>
     <h1 style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;">Learning Style Test</h1>
@@ -46,7 +62,7 @@
     
      You are part of an archaeological team that has discovered an ancient artifact buried in a remote jungle. As you approach the artifact, you need to document your findings.</p>
 
-    <form id="learningStyleForm">
+    <form id="learningStyleForm" action="{{ url_for('submit') }}" method="post">
         <div class="question">
             <p class="test">1. How do you document the artifact?</p>
             <input type="radio" name="q1" value="A"> Take detailed notes and sketches<br>
@@ -178,10 +194,26 @@
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = `
                 <h2>Results</h2>
+                
                 <p>Visual Learner: ${percentA.toFixed(2)}%</p>
                 <p>Auditory Learner: ${percentB.toFixed(2)}%</p>
                 <p>Kinesthetic Learner: ${percentC.toFixed(2)}%</p>
             `;
+
+            // Redirect based on the highest percentage
+            let maxPercentage = Math.max(percentA, percentB, percentC);
+            let redirectUrl = '';
+
+            if (maxPercentage === percentA) {
+                redirectUrl = '{{ url_for("vcoures") }}'; // Visual Learner
+            } else if (maxPercentage === percentB) {
+                redirectUrl = '{{ url_for("acoures") }}'; // Auditory Learner
+            } else if (maxPercentage === percentC) {
+                redirectUrl = '{{ url_for("kcoures") }}'; // Kinesthetic Learner
+            }
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 3000); // Redirect after 3 seconds
         }
     </script>
 </body>
