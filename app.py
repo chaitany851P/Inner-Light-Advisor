@@ -126,6 +126,37 @@ def chatbot():
 
     return jsonify({'message': bot_response})
 
+@app.route('/tinfo')
+def tinfo():
+    return render_template('tinfo.html', user=user_data)
+
+@app.route('/update_email', methods=['POST'])
+def update_email():
+    new_email = request.form['email']
+    user_data['email'] = new_email
+    return redirect(url_for('index'))
+
+@app.route('/update_password', methods=['POST'])
+def update_password():
+    new_password = request.form['password']
+    # Here you would add logic to update the password in your database
+    return redirect(url_for('index'))
+
+@app.route('/add_education', methods=['POST'])
+def add_education():
+    education_info = {
+        'degree': request.form['degree'],
+        'university': request.form['university'],
+        'year': request.form['year']
+    }
+    user_data['education'].append(education_info)
+    return redirect(url_for('tinfo'))
+
+@app.route('/logout')
+def logout():
+    # Add your logout logic here
+    return redirect(url_for('index'))
+
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -150,12 +181,7 @@ def user_exists(email):
 def dashboard():
     return render_template('dashboard.html', username=current_user.username)
 
-# Route to handle user logout
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
+
 
 # Route to render test.html for signup form
 @app.route('/test')
