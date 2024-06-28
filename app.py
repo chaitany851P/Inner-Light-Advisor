@@ -109,6 +109,23 @@ def submit():
 
     return render_template('results.html', percentA=percentA, percentB=percentB, percentC=percentC, redirect_url=redirect_url)
 
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    user_message = request.json['message']
+
+    # Replace with your actual chatbot API endpoint
+    api_endpoint = 'https://client.crisp.chat/l.js  '
+
+    # Example: Sending user message to chatbot API
+    response = requests.post(api_endpoint, json={'message': user_message})
+    
+    if response.status_code == 200:
+        bot_response = response.json()['message']
+    else:
+        bot_response = "Sorry, I couldn't process your request at the moment."
+
+    return jsonify({'message': bot_response})
+
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':

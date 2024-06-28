@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Integration</title>
+    <!-- Include Crisp chat SDK -->
+    <script type="text/javascript">
+        window.$crisp=[];
+        window.CRISP_WEBSITE_ID="ab3f1e8d-7e73-4c4e-bab5-dca547d4365f";
+        (function(){
+            d=document;
+            s=d.createElement("script");
+            s.src="https://client.crisp.chat/l.js";
+            s.async=1;
+            d.getElementsByTagName("head")[0].appendChild(s);
+        })();
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #5a627a;
+        }
+        .content {
+            font-size: 1.2em;
+            color: #666;
+        }
+        .chat-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f5f5f5;
+        }
+        .chat-section h2 {
+            margin-top: 0;
+            color: #5a627a;
+        }
+        .chat-section p {
+            margin-bottom: 20px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Our Chatbot</h1>
+        </div>
+        <div class="content">
+            <p>If you have any questions, feel free to ask us through the chat below!</p>
+        </div>
+        <div class="chat-section">
+            <h2>Live Chat</h2>
+            <p>The chat widget for live communication will appear here shortly. Please wait...</p>
+        </div>
+        <div class="footer">
+            <p>Powered by Crisp Chat</p>
+        </div>
+    </div>
+</body>
+</html>
