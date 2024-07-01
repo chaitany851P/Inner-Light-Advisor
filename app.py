@@ -1,13 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, current_user
+import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
-app.config['SECRET_KEY'] = 'your_secret_key'  # Set your secret key for Flask sessions
+app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy(app)
 
+# Flask-Login configuration
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -22,6 +24,7 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
     role = db.Column(db.String(50), nullable=False)
+    learning_style = db.Column(db.String(50))  # New field for learning style
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -41,7 +44,13 @@ def login():
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            if user.role == 'student':
+                return redirect(url_for('student_test'))
+            elif user.role == 'teacher':
+                return redirect(url_for('teacher_test'))
+            else:
+                flash('Unknown role!', 'danger')
+                return redirect(url_for('index'))
         else:
             flash('Login Unsuccessful. Please check your email and password', 'danger')
     return render_template('login.html')
@@ -70,93 +79,46 @@ def signup():
         db.session.commit()
         
         login_user(new_user)  # Login the user after successful signup
-        return redirect(url_for('test'))  # Redirect to test.html after signup
+
+        # Redirect logic based on role
+        if role == 'student':
+            return redirect(url_for('student_test'))
+        elif role == 'teacher':
+            return redirect(url_for('teacher_test'))
+        else:
+            flash('Unknown role!', 'danger')
+            return redirect(url_for('index'))
     
-    return render_template('test.html') 
+    return render_template('login.html')
 
-@app.route('/vcoures.html')
-def vcoures():
-    return render_template('student/vcoures.html')
-
-@app.route('/acoures.html')
-def acoures():
-    return render_template('student/acoures.html')
-
-@app.route('/kcoures.html')
-def kcoures():
-    return render_template('student/kcoures.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    data = request.form
-
-    countA = sum(1 for k, v in data.items() if v == 'A')
-    countB = sum(1 for k, v in data.items() if v == 'B')
-    countC = sum(1 for k, v in data.items() if v == 'C')
-
-    total = countA + countB + countC
-    percentA = (countA / total) * 100
-    percentB = (countB / total) * 100
-    percentC = (countC / total) * 100
-
-    # Determine the highest percentage
-    if percentA > percentB and percentA > percentC:
-        redirect_url = url_for('vcoures')
-    elif percentB > percentA and percentB > percentC:
-        redirect_url = url_for('acoures')
+# Route to render student test.html
+@app.route('/student/test')
+def student_test():
+    if current_user.is_authenticated and current_user.role == 'student':
+        return render_template('student/test.html')
     else:
-        redirect_url = url_for('kcoures')
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
 
-    return render_template('results.html', percentA=percentA, percentB=percentB, percentC=percentC, redirect_url=redirect_url)
-
-@app.route('/chatbot', methods=['POST'])
-def chatbot():
-    user_message = request.json['message']
-
-    # Replace with your actual chatbot API endpoint
-    api_endpoint = 'https://client.crisp.chat/l.js  '
-
-    # Example: Sending user message to chatbot API
-    response = requests.post(api_endpoint, json={'message': user_message})
-    
-    if response.status_code == 200:
-        bot_response = response.json()['message']
+# Route to render teacher test.html
+@app.route('/teacher/test')
+def teacher_test():
+    if current_user.is_authenticated and current_user.role == 'teacher':
+        return render_template('teacher/test.html')
     else:
-        bot_response = "Sorry, I couldn't process your request at the moment."
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
 
-    return jsonify({'message': bot_response})
+# Route to render user dashboard (protected route)
+@app.route('/dashboard')
+def dashboard():
+    if current_user.is_authenticated:
+        return render_template('dashboard.html', username=current_user.username)
+    else:
+        flash('Please log in to access this page.', 'danger')
+        return redirect(url_for('login'))
 
-@app.route('/tinfo')
-def tinfo():
-    return render_template('tinfo.html', user=user_data)
-
-@app.route('/update_email', methods=['POST'])
-def update_email():
-    new_email = request.form['email']
-    user_data['email'] = new_email
-    return redirect(url_for('index'))
-
-@app.route('/update_password', methods=['POST'])
-def update_password():
-    new_password = request.form['password']
-    # Here you would add logic to update the password in your database
-    return redirect(url_for('index'))
-
-@app.route('/add_education', methods=['POST'])
-def add_education():
-    education_info = {
-        'degree': request.form['degree'],
-        'university': request.form['university'],
-        'year': request.form['year']
-    }
-    user_data['education'].append(education_info)
-    return redirect(url_for('tinfo'))
-
-@app.route('/logout')
-def logout():
-    # Add your logout logic here
-    return redirect(url_for('index'))
-
+# Route to handle forgot password
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -175,21 +137,79 @@ def user_exists(email):
     # Implement your user existence check logic here
     return True  # Example return value 
 
-# Route to render user dashboard (protected route)
-@app.route('/dashboard')
-@login_required
-def dashboard():
-    return render_template('dashboard.html', username=current_user.username)
+# Route to handle form submission from learning style test
+@app.route('/submit', methods=['POST'])
+def submit():
+    if request.method == 'POST':
+        form_data = request.form
+        # Assuming you have form_data['q1'] to form_data['q10'] for answers
+        answers = [form_data[f'q{i}'] for i in range(1, 11)]
+        
+        countA = answers.count('A')
+        countB = answers.count('B')
+        countC = answers.count('C')
 
+        total = len(answers)
+        percentA = (countA / total) * 100
+        percentB = (countB / total) * 100
+        percentC = (countC / total) * 100
 
+        # Determine the learning style based on max percentage
+        if percentA >= percentB and percentA >= percentC:
+            learning_style = 'Visual'
+        elif percentB >= percentA and percentB >= percentC:
+            learning_style = 'Auditory'
+        else:
+            learning_style = 'Kinesthetic'
 
-# Route to render test.html for signup form
-@app.route('/test')
-def test():
+        # Update the current user's learning style if logged in
+        if current_user.is_authenticated:
+            current_user.learning_style = learning_style
+            db.session.commit()
 
-    return render_template('test.html')
+            # Redirect logic based on the learning style
+            if learning_style == 'Visual':
+                return redirect(url_for('vcourse'))
+            elif learning_style == 'Auditory':
+                return redirect(url_for('acourse'))
+            elif learning_style == 'Kinesthetic':
+                return redirect(url_for('kcourse'))
+            else:
+                flash('Unknown learning style!', 'danger')
+                return redirect(url_for('index'))
+        else:
+            flash('Please log in to access this page.', 'danger')
+            return redirect(url_for('login'))
+
+# Route to render Visual course page
+@app.route('/vcourse')
+def vcourse():
+    if current_user.is_authenticated and current_user.learning_style == 'Visual':
+        return render_template('student/vcoures.html')
+    else:
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
+
+# Route to render Auditory course page
+@app.route('/acourse')
+def acourse():
+    if current_user.is_authenticated and current_user.learning_style == 'Auditory':
+        return render_template('student/acoures.html')
+    else:
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
+
+# Route to render Kinesthetic course page
+@app.route('/kcourse')
+def kcourse():
+    if current_user.is_authenticated and current_user.learning_style == 'Kinesthetic':
+        return render_template('student/kcoures.html')
+    else:
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Create database tables based on the models
+        if not os.path.exists('user.db'):  # Check if the database file doesn't exist
+            db.create_all()  # Create database tables based on the models
     app.run(debug=True)
