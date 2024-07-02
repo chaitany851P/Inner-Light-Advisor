@@ -17,14 +17,39 @@ login_manager.login_view = 'login'
 # Define the User model
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(150), nullable=False)
-    dob = db.Column(db.String(150), nullable=False)
-    phone = db.Column(db.String(150), nullable=False)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    dob = db.Column(db.Date, nullable=False)
+    phone_number = db.Column(db.String(15), nullable=False)
+    username = db.Column(db.String(50), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(50), nullable=False)
-    learning_style = db.Column(db.String(50))  # New field for learning style
+    learner_style = db.Column(db.String(50), nullable=False)
+    __mapper_args__ = {'polymorphic_identity': 'user', 'polymorphic_on': 'role'}
+
+class Student(User):
+    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    courses_enrolled = db.Column(db.PickleType, nullable=False)
+    courses_completed = db.Column(db.PickleType, nullable=False)
+    img = db.Column(db.String(200), nullable=True)
+    __mapper_args__ = {'polymorphic_identity': 'student'}
+
+class Teacher(User):
+    id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    education = db.Column(db.PickleType, nullable=False)
+    img = db.Column(db.String(200), nullable=True)
+    courses = db.Column(db.PickleType, nullable=False)
+    __mapper_args__ = {'polymorphic_identity': 'teacher'}
+
+class Course(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    domain = db.Column(db.String(100), nullable=False)
+    language = db.Column(db.String(50), nullable=False)
+    payment = db.Column(db.String(50), nullable=False)
+    mode_of_class = db.Column(db.String(50), nullable=False)
+    learner_type = db.Column(db.PickleType, nullable=False)
+    img = db.Column(db.String(200), nullable=True)
+
 
 @login_manager.user_loader
 def load_user(user_id):
