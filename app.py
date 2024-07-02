@@ -1,8 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user
+from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user
 import os
+# from flask_migrate import Migrate # type: ignore
+
+# migrate = Migrate(app, db)
+
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
@@ -19,12 +24,12 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     dob = db.Column(db.Date, nullable=False)
-    phone_number = db.Column(db.String(15), nullable=False)
+    phone = db.Column(db.String(15), nullable=False)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(50), nullable=False)
-    learner_style = db.Column(db.String(50), nullable=False)
+    learning_style = db.Column(db.String(50), nullable=False)
     __mapper_args__ = {'polymorphic_identity': 'user', 'polymorphic_on': 'role'}
 
 class Student(User):
@@ -96,7 +101,7 @@ def signup():
         existing_user = User.query.filter((User.username == username) | (User.email == email)).first()
         if existing_user:
             flash('Username or Email already exists!', 'danger')
-            return redirect(url_for('signup'))
+            # return redirect(url_for('signup'))
 
         hashed_password = generate_password_hash(password)
         new_user = User(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password, role=role)
@@ -207,7 +212,11 @@ def forgot_password():
 
 def user_exists(email):
     # Implement your user existence check logic here
-    return True  # Example return value 
+    if user_exists:
+        pass
+    else:
+        flash('Username or Email does not exist!', 'danger')
+        return True
 
 # Route to handle form submission from learning style test
 @app.route('/submit', methods=['POST'])
@@ -317,6 +326,28 @@ def kcourse():
     else:
         flash('Access Denied! You do not have permission to access this page.', 'danger')
         return redirect(url_for('index'))
+    
+@app.route('/update_email', methods=['POST'])
+@login_required
+def update_email():
+    new_email = request.form['email']
+    user = User.query.get(current_user.id)
+    user.email = new_email
+    db.session.commit()
+    flash('Email updated successfully!', 'success')
+    return redirect(url_for('profile'))
+
+@app.route('/update_password', methods=['POST'])
+@login_required
+def update_password():
+    new_password = request.form['password']
+    user = User.query.get(current_user.id)
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+    flash('Password updated successfully!', 'success')
+    return redirect(url_for('profile'))
+
+
 
 if __name__ == '__main__':
     with app.app_context():
