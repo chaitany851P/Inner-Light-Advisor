@@ -50,29 +50,15 @@
             cursor: pointer;
             width: 10%;
         }
-
-        
     </style>
 </head>
 <body>
-    <header>
-        <h1>My Website</h1>
-        <nav>
-            <ul>
-                <li><a href="{{ url_for('home') }}">Home</a></li>
-                <li><a href="{{ url_for('about') }}">About</a></li>
-                <li><a href="{{ url_for('contact') }}">Contact</a></li>
-                <!-- Add more links as needed -->
-            </ul>
-        </nav>
-    </header>
     <h1 style="font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;">Learning Style Test</h1>
     <p style="font-family:serif;">Read the following story and choose the option that best describes how you would prefer to handle each situation. At the end of the story, your learning style will be revealed based on your selections.</p>
 
     <h2 style="font-family: Georgia, 'Times New Roman', Times, serif;">Story: The Adventure of the Lost Artifact</h2>
 
     <p class="dis"><strong>Part 1: The Discovery</strong><br>
-    
      You are part of an archaeological team that has discovered an ancient artifact buried in a remote jungle. As you approach the artifact, you need to document your findings.</p>
 
     <form id="learningStyleForm" action="{{ url_for('submit') }}" method="post">
@@ -84,9 +70,8 @@
         </div>
 
         <p class="dis"><strong>Part 2: The Puzzle</strong><br>
-            
         You find that the artifact is locked in a chest with a complex puzzle. To open it, you need to solve the puzzle.</p>
-    
+
         <div class="question">
             <p class="test">2. How do you approach solving the puzzle?</p>
             <input type="radio" name="q2" value="A"> Read the instructions carefully and think through the solution<br>
@@ -104,7 +89,7 @@
             <input type="radio" name="q3" value="C"> Use a combination of landmarks and physical exploration to navigate<br>
         </div>
 
-        <p class="dis"></p><strong>Part 4: The Obstacle</strong><br>
+        <p class="dis"><strong>Part 4: The Obstacle</strong><br>
         On your way to the next site, you encounter a river that you need to cross.</p>
 
         <div class="question">
@@ -114,17 +99,17 @@
             <input type="radio" name="q4" value="C"> Build a makeshift raft or use a rope to swing across<br>
         </div>
 
-        <p class="dis"></p><strong>Part 5: The Artifact Room</strong><br>
+        <p class="dis"><strong>Part 5: The Artifact Room</strong><br>
         You finally reach a hidden room filled with artifacts. You need to catalog all the items quickly.</p>
 
         <div class="question">
-            <p class="test" >5. How do you catalog the items?</p>
+            <p class="test">5. How do you catalog the items?</p>
             <input type="radio" name="q5" value="A"> Write detailed descriptions and take photos<br>
             <input type="radio" name="q5" value="B"> Record a video tour of the room, explaining each artifact<br>
             <input type="radio" name="q5" value="C"> Arrange the artifacts in groups based on their type and take measurements<br>
         </div>
 
-        <p class="dis"></p><strong>Part 6: The Excavation</strong><br>
+        <p class="dis"><strong>Part 6: The Excavation</strong><br>
         One of the artifacts is buried deep underground and needs to be excavated carefully.</p>
 
         <div class="question">
@@ -134,7 +119,7 @@
             <input type="radio" name="q6" value="C"> Start digging carefully, feeling your way through the soil and adjusting your technique as needed<br>
         </div>
 
-        <p class="dis"></p><strong>Part 7: The Analysis</strong><br>
+        <p class="dis"><strong>Part 7: The Analysis</strong><br>
         You need to analyze the materials used in the artifacts to determine their origin.</p>
 
         <div class="question">
@@ -144,7 +129,7 @@
             <input type="radio" name="q7" value="C"> Perform hands-on experiments to test the properties of the materials<br>
         </div>
 
-        <p class="dis"></p><strong>Part 8: The Preservation</strong><br>
+        <p class="dis"><strong>Part 8: The Preservation</strong><br>
         The artifacts need to be preserved for transport back to your research facility.</p>
 
         <div class="question">
@@ -154,7 +139,7 @@
             <input type="radio" name="q8" value="C"> Build custom storage boxes to fit each artifact snugly and safely<br>
         </div>
 
-        <p class="dis"></p><strong>Part 9: The Presentation</strong><br>
+        <p class="dis"><strong>Part 9: The Presentation</strong><br>
         You are tasked with presenting your findings to a group of scholars.</p>
 
         <div class="question">
@@ -164,7 +149,7 @@
             <input type="radio" name="q9" value="C"> Bring replicas or models of the artifacts to demonstrate your findings<br>
         </div>
 
-        <p class="dis"></p><strong>Part 10: The Reflection</strong><br>
+        <p class="dis"><strong>Part 10: The Reflection</strong><br>
         After the expedition, you reflect on what you learned and how you can improve.</p>
 
         <div class="question">
@@ -174,61 +159,10 @@
             <input type="radio" name="q10" value="C"> Recreate key moments from the expedition to understand what worked and what didn’t<br>
         </div>
 
-        <button type="button" onclick="calculateResults()">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            Submit..
-        </button>
+        <button type="submit">Submit</button>
     </form>
 
     <div class="results" id="results"></div>
-
-    <script>
-        function calculateResults() {
-            const form = document.getElementById('learningStyleForm');
-            const formData = new FormData(form);
-            let countA = 0;
-            let countB = 0;
-            let countC = 0;
-
-            for (let value of formData.values()) {
-                if (value === 'A') countA++;
-                if (value === 'B') countB++;
-                if (value === 'C') countC++;
-            }
-
-            const total = countA + countB + countC;
-            const percentA = (countA / total) * 100;
-            const percentB = (countB / total) * 100;
-            const percentC = (countC / total) * 100;
-
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = `
-                <h2>Results</h2>
-                
-                <p>Visual Learner: ${percentA.toFixed(2)}%</p>
-                <p>Auditory Learner: ${percentB.toFixed(2)}%</p>
-                <p>Kinesthetic Learner: ${percentC.toFixed(2)}%</p>
-            `;
-
-            // Redirect based on the highest percentage
-            let maxPercentage = Math.max(percentA, percentB, percentC);
-            let redirectUrl = '';
-
-            if (maxPercentage === percentA) {
-                redirectUrl = '{{ url_for("vcoures") }}'; // Visual Learner
-            } else if (maxPercentage === percentB) {
-                redirectUrl = '{{ url_for("acoures") }}'; // Auditory Learner
-            } else if (maxPercentage === percentC) {
-                redirectUrl = '{{ url_for("kcoures") }}'; // Kinesthetic Learner
-            }
-            setTimeout(() => {
-                window.location.href = redirectUrl;
-            }, 3000); // Redirect after 3 seconds
-        }
-    </script>
 </body>
 </html>
 {% endblock %}
