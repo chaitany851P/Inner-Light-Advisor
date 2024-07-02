@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import LoginManager, UserMixin, login_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user
 import os
 
 app = Flask(__name__)
@@ -45,9 +45,9 @@ def login():
         if user and check_password_hash(user.password, password):
             login_user(user)
             if user.role == 'student':
-                return redirect(url_for('student_test'))
+                return redirect(url_for('student_dashboard'))
             elif user.role == 'teacher':
-                return redirect(url_for('teacher_test'))
+                return redirect(url_for('teacher_dashboard'))
             else:
                 flash('Unknown role!', 'danger')
                 return redirect(url_for('index'))
@@ -91,11 +91,25 @@ def signup():
     
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
 # Route to render student test.html
 @app.route('/student/test')
 def student_test():
     if current_user.is_authenticated and current_user.role == 'student':
         return render_template('student/test.html')
+    else:
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
+    
+@app.route('/student/dashboard')
+def student_dashboard():
+    if current_user.is_authenticated and current_user.role == 'student':
+        return render_template('student/dashboard.html')
     else:
         flash('Access Denied! You do not have permission to access this page.', 'danger')
         return redirect(url_for('index'))
@@ -108,15 +122,48 @@ def teacher_test():
     else:
         flash('Access Denied! You do not have permission to access this page.', 'danger')
         return redirect(url_for('index'))
+    
+@app.route('/teacher/dashboard')
+def teacher_dashboard():
+    if current_user.is_authenticated and current_user.role == 'teacher':
+        return render_template('teacher/dashboard.html')
+    else:
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
 
 # Route to render user dashboard (protected route)
 @app.route('/dashboard')
 def dashboard():
-    if current_user.is_authenticated:
-        return render_template('dashboard.html', username=current_user.username)
+    if current_user.role == 'student':
+        return render_template('student/dashboard.html')
+    elif current_user.role == 'teacher':
+        return render_template('teacher/dashboard.html')
     else:
-        flash('Please log in to access this page.', 'danger')
-        return redirect(url_for('login'))
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
+    
+@app.route('/profile')
+def profile():
+    if current_user.role == 'student':
+        return render_template('student/info.html')
+    elif current_user.role == 'teacher':
+        return render_template('teacher/info.html')
+    else:
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
+
+@app.route('/coures')
+def coures():
+    if current_user.learning_style == 'Visual':
+        return render_template('student/vcoures.html')
+    elif current_user.learning_style == 'Auditory':
+        return render_template('student/acoures.html')
+    elif current_user.learning_style == 'Kinesthetic':
+        return render_template('student/kcoures.html')
+    else:
+        flash('Access Denied! You do not have permission to access this page.', 'danger')
+        return redirect(url_for('index'))
+    
 
 # Route to handle forgot password
 @app.route('/forgot_password', methods=['GET', 'POST'])
@@ -125,7 +172,7 @@ def forgot_password():
         email = request.form['email']
         # Add logic to handle the password reset process
         if user_exists(email):  # Replace with actual user existence check
-            send_password_reset_email(email)  # Replace with actual email sending logic
+            # send_password_reset_email(email)  # Replace with actual email sending logic
             message = "A password reset link has been sent to your email address."
             return render_template('forgot_password.html', message=message)
         else:
@@ -141,43 +188,81 @@ def user_exists(email):
 @app.route('/submit', methods=['POST'])
 def submit():
     if request.method == 'POST':
-        form_data = request.form
-        # Assuming you have form_data['q1'] to form_data['q10'] for answers
-        answers = [form_data[f'q{i}'] for i in range(1, 11)]
-        
-        countA = answers.count('A')
-        countB = answers.count('B')
-        countC = answers.count('C')
+     if current_user.role == 'student':
+            form_data = request.form
+            # Assuming you have form_data['q1'] to form_data['q10'] for answers
+            answers = [form_data[f'q{i}'] for i in range(1, 11)]
+            
+            countA = answers.count('A')
+            countB = answers.count('B')
+            countC = answers.count('C')
 
-        total = len(answers)
-        percentA = (countA / total) * 100
-        percentB = (countB / total) * 100
-        percentC = (countC / total) * 100
+            total = len(answers)
+            percentA = (countA / total) * 100
+            percentB = (countB / total) * 100
+            percentC = (countC / total) * 100
 
-        # Determine the learning style based on max percentage
-        if percentA >= percentB and percentA >= percentC:
-            learning_style = 'Visual'
-        elif percentB >= percentA and percentB >= percentC:
-            learning_style = 'Auditory'
-        else:
-            learning_style = 'Kinesthetic'
-
-        # Update the current user's learning style if logged in
-        if current_user.is_authenticated:
-            current_user.learning_style = learning_style
-            db.session.commit()
-
-            # Redirect logic based on the learning style
-            if learning_style == 'Visual':
-                return redirect(url_for('vcourse'))
-            elif learning_style == 'Auditory':
-                return redirect(url_for('acourse'))
-            elif learning_style == 'Kinesthetic':
-                return redirect(url_for('kcourse'))
+            # Determine the learning style based on max percentage
+            if percentA >= percentB and percentA >= percentC:
+                learning_style = 'Visual'
+            elif percentB >= percentA and percentB >= percentC:
+                learning_style = 'Auditory'
             else:
-                flash('Unknown learning style!', 'danger')
-                return redirect(url_for('index'))
-        else:
+                learning_style = 'Kinesthetic'
+
+            # Update the current user's learning style if logged in
+            if current_user.is_authenticated:
+                current_user.learning_style = learning_style
+                db.session.commit()
+
+                # Redirect logic based on the learning style
+                if learning_style == 'Visual':
+                    return redirect(url_for('vcourse'))
+                elif learning_style == 'Auditory':
+                    return redirect(url_for('acourse'))
+                elif learning_style == 'Kinesthetic':
+                    return redirect(url_for('kcourse'))
+                else:
+                    flash('Unknown learning style!', 'danger')
+                    return redirect(url_for('signup'))
+     elif current_user.role == 'teacher':
+            form_data = request.form
+            # Assuming you have form_data['q1'] to form_data['q10'] for answers
+            answers = [form_data[f'q{i}'] for i in range(1, 11)]
+            
+            countA = answers.count('A')
+            countB = answers.count('B')
+            countC = answers.count('C')
+
+            total = len(answers)
+            percentA = (countA / total) * 100
+            percentB = (countB / total) * 100
+            percentC = (countC / total) * 100
+
+            # Determine the learning style based on max percentage
+            if percentA >= percentB and percentA >= percentC:
+                learning_style = 'Visual'
+            elif percentB >= percentA and percentB >= percentC:
+                learning_style = 'Auditory'
+            else:
+                learning_style = 'Kinesthetic'
+
+            # Update the current user's learning style if logged in
+            if current_user.is_authenticated:
+                current_user.learning_style = learning_style
+                db.session.commit()
+
+                # Redirect logic based on the learning style
+                if learning_style == 'Visual':
+                    return redirect(url_for('teacher_dashboard'))
+                elif learning_style == 'Auditory':
+                    return redirect(url_for('teacher_dashboard'))
+                elif learning_style == 'Kinesthetic':
+                    return redirect(url_for('teacher_dashboard'))
+                else:
+                    flash('Unknown learning style!', 'danger')
+                    return redirect(url_for('signup'))
+    else:
             flash('Please log in to access this page.', 'danger')
             return redirect(url_for('login'))
 

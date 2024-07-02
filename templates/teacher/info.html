@@ -110,9 +110,9 @@
         <h1>User Information</h1>
         <a href="{{ url_for('logout') }}" class="logout-button">Logout</a>
         <div class="user-info">
-            <p><strong>Name:</strong> {{ user.name }}</p>
-            <p><strong>Date of Birth:</strong> {{ user.dob }}</p>
-            <p><strong>Learner Type:</strong> {{ user.learner_type }}</p>
+        <p><strong>Name:</strong> {{ current_user.name }}</p>
+            <p><strong>Date of Birth:</strong> {{ current_user.dob }}</p>
+            <p><strong>Learner Type:</strong> {{ current_user.learning_style }}</p>
             <hr>
             <div class="education-list">
                 <h2>Educational Details</h2>
@@ -137,8 +137,8 @@
                 <input type="text" id="university" name="university" required>
                 <label for="year">Year of Completion:</label>
                 <input type="text" id="year" name="year" required><br>
-                <button type="submit">Add Education</button>
-            </form>
+                <button type="submit">Add Education</button> -->
+             </form>
         </div>
     </div>
 </body>
