@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% if current_user.role == 'student' %}
+        {% if current_user.learning_style == 'Visual'%}
+            <title>Visual Learner Courses</title>
+        {% elif current_user.learning_style == 'Auditory'%}
+            <title>Auditory Learner Courses</title>
+        {% elif current_user.learning_style == 'Kinesthetic'%}
+            <title>Kinesthetic Learner Courses</title>
+            {% endif %}
+    {% elif current_user.role == 'teacher'%}
+        <title>Coures List</title>
+    {% endif %}
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #5a627a;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        .course-card {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .course-card img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .course-content {
+            padding: 20px;
+            flex: 1;
+        }
+        .course-title {
+            font-size: 1.5em;
+            margin: 0 0 10px;
+        }
+        .course-description {
+            margin: 0 0 10px;
+        }
+        .course-link {
+            color: #5a627a;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .course-link:hover {
+            text-decoration: underline;
+        }
+        .filters {
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 850px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filters label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .filters select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        .filter-button {
+            padding: 10px 20px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .filter-button:hover {
+            background-color: #444c63;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        {% if current_user.role == 'student' %}
+    {% if current_user.learning_style == 'Visual' %}
+        <h1>Visual Learner Courses</h1>
+    {% elif current_user.learning_style == 'Auditory' %}
+        <h1>Auditory Learner Courses</h1>
+    {% elif current_user.learning_style == 'Kinesthetic' %}
+        <h1>Kinesthetic Learner Courses</h1>
+    {% endif %}
+{% elif current_user.role == 'teacher' %}
+    <h1>Course List</h1>
+{% endif %}
+
+    </div>
+    
+    <div class="filters">
+        <label for="language-filter">Filter by Language:</label>
+        <select id="language-filter">
+            <option value="all">All</option>
+            <option value="english">English</option>
+            <option value="hindi">Hindi</option>
+        </select>
+        <label for="payment-filter">Filter by Payment:</label>
+        <select id="payment-filter">
+            <option value="all">All</option>
+            <option value="free">Free</option>
+            <option value="paid">Paid</option>
+        </select>
+        <label for="domain-filter">Filter by Domain:</label>
+        <select id="domain-filter">
+            <option value="all">All</option>
+            <option value="programming">Programming</option>
+            <option value="design">Design</option>
+        </select>
+        <label for="mode-filter">Filter by Mode:</label>
+        <select id="mode-filter">
+            <option value="all">All</option>
+            <option value="recorded">Recorded</option>
+            <option value="live">Live</option>
+        </select>
+        <button id="apply-filter" class="filter-button">Apply Filters</button>
+    </div>
+    
+    <div class="container" id="course-container">
+        
+        {% for course in courses %}
+            {% if course.learner_type == current_user.learning_style %}
+                <div class="course-card" data-language="{{ course.language }}" data-payment="{{ course.payment }}" data-domain="{{ course.domain }}" data-mode="{{ course.mode }}">
+                    <img src="{{ url_for('static', filename='images/' ~ course.image) }}" alt="{{ course.title }}">
+                    <div class="course-content">
+                        <h2 class="course-title">{{ course.title }}</h2>
+                        <p class="course-description">{{ course.description }}</p>
+                        <a href="{{ url_for('course_info', course_id=course.id) }}" class="course-link">Enroll Now</a>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const applyFilterButton = document.getElementById('apply-filter');
+            const languageFilter = document.getElementById('language-filter');
+            const paymentFilter = document.getElementById('payment-filter');
+            const domainFilter = document.getElementById('domain-filter');
+            const modeFilter = document.getElementById('mode-filter');
+            const courseCards = document.querySelectorAll('.course-card');
+    
+            function applyFilters() {
+                const selectedLanguage = languageFilter.value;
+                const selectedPayment = paymentFilter.value;
+                const selectedDomain = domainFilter.value;
+                const selectedMode = modeFilter.value;
+    
+                courseCards.forEach(card => {
+                    const cardLanguage = card.getAttribute('data-language');
+                    const cardPayment = card.getAttribute('data-payment');
+                    const cardDomain = card.getAttribute('data-domain');
+                    const cardMode = card.getAttribute('data-mode');
+    
+                    const showCard = (selectedLanguage === 'all' || cardLanguage === selectedLanguage) &&
+                                    (selectedPayment === 'all' || cardPayment === selectedPayment) &&
+                                    (selectedDomain === 'all' || cardDomain === selectedDomain) &&
+                                    (selectedMode === 'all' || cardMode === selectedMode);
+    
+                    if (showCard) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+    
+            applyFilterButton.addEventListener('click', applyFilters);
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

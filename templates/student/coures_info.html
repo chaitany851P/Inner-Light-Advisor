@@ -1,0 +1,145 @@
+{% extends 'base.html'%}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #5a627a;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        .course-card {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .course-card img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .course-content {
+            padding: 20px;
+            flex: 1;
+        }
+        .course-title {
+            font-size: 1.5em;
+            margin: 0 0 10px;
+        }
+        .course-description {
+            margin: 0 0 10px;
+        }
+        .course-link {
+            color: #5a627a;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .course-link:hover {
+            text-decoration: underline;
+        }
+        
+
+        .form-login fieldset {
+            transform: translateX(-50%);
+        }
+
+        .form-signup fieldset {
+            transform: translateX(50%);
+        }
+
+        .form-wrapper.is-active fieldset {
+            opacity: 1;
+            transform: translateX(0);
+            transition: opacity .4s ease-in, transform .35s ease-in;
+        }
+
+        .form legend {
+            position: absolute;
+            overflow: hidden;
+            width: 1px;
+            height: 1px;
+            clip: rect(0 0 0 0);
+        }
+
+        .input-block {
+            margin-bottom: 20px;
+        }
+
+        .input-block label {
+            font-size: 14px;
+            color: #020303;
+        }
+
+        .input-block input,
+        .input-block select {
+            display: block;
+            width: 100%;
+            margin-top: 8px;
+            padding-right: 15px;
+            padding-left: 15px;
+            font-size: 16px;
+            line-height: 40px;
+            color: #3b4465;
+            background: #eef9fe;
+            border: 1px solid #cddbef;
+            border-radius: 2px;
+        }
+
+       
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>Course Info</h1>
+    </header>
+    <div class="container">        
+        <div class="course-card">
+            <img src="course-image.jpg" alt="Course Image">
+            <div class="course-content">
+                <h2 class="course-title">Introduction to Python</h2>
+                <p class="course-description">Learn the basics of Python programming...</p>
+                <div class="input-block">
+                    <label for="course-price">Course Price</label>
+                    <input type="text" id="course-price" value="Free" readonly>
+                </div>
+                <a href="{{ url_for('coures_video') }}" class="course-link">Go to Course</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+{% endblock %}

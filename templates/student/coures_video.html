@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #444c5e; /* Background color for the entire page */
+            margin: 0;
+            padding: 0;
+        }
+
+        .container2 {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff; /* Background color for the main content area */
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio (responsive video) */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .video-wrapper iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .notes {
+            margin-bottom: 20px;
+        }
+
+        .notes h2 {
+            color: #333;
+        }
+
+        .notes ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .notes ul li {
+            margin-bottom: 10px;
+        }
+
+        .closed-captions {
+            margin-bottom: 20px;
+        }
+
+        .closed-captions h2 {
+            color: #333;
+        }
+
+        .closed-captions p {
+            margin-bottom: 10px;
+        }
+
+        .lecture-navigation {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .lecture-navigation button {
+            padding: 10px 20px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .lecture-navigation button:hover {
+            background-color: #444c5e;
+        }
+
+        .next-lecture {
+            background-color: #ddd; /* Background color for the next lecture section */
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .next-lecture h2 {
+            color: #333;
+        }
+
+        .next-lecture ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .next-lecture ul li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container2">
+        <h1>Video Title</h1>
+        
+        <!-- Video Section -->
+        <div class="video-wrapper">
+            <iframe src="https://www.youtube.com/embed/VIDEO_ID_HERE" frameborder="0" allowfullscreen></iframe>
+        </div>
+        
+        <!-- Notes Section -->
+        <div class="notes">
+            <h2>Notes</h2>
+            <ul>
+                <li>Note 1: Description or key points.</li>
+                <li>Note 2: Description or key points.</li>
+                <li>Note 3: Description or key points.</li>
+                <!-- Add more notes as needed -->
+            </ul>
+        </div>
+        
+        <!-- Closed Captions Section -->
+        <div class="closed-captions">
+            <h2>Closed Captions</h2>
+            <p>English subtitles are available for this video.</p>
+        </div>
+        
+        <!-- Lecture Navigation -->
+        <div class="lecture-navigation">
+            <button id="prevLectureBtn"> < Previous Lecture</button>
+            <button id="nextLectureBtn">Next Lecture > </button>
+        </div>
+        
+        <!-- Next Lecture List -->
+        
+    </div>
+
+    <script>
+        document.getElementById("prevLectureBtn").addEventListener("click", function() {
+            // Implement logic to navigate to previous lecture
+            alert("Navigate to previous lecture");
+        });
+
+        document.getElementById("nextLectureBtn").addEventListener("click", function() {
+            // Implement logic to navigate to next lecture
+            alert("Navigate to next lecture");
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
