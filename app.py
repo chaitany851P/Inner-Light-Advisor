@@ -286,6 +286,23 @@ def add_education():
 #     response_message = response.choices[0].message['content']
 #     return jsonify(response=response_message)
 
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        message = request.form['message']
+
+        # You can add code here to save the message to a database or send it via email
+
+        flash('Your message has been sent successfully!', 'success')
+        return redirect(url_for('contact'))
+    return render_template('contect.html')
+
 if __name__ == '__main__':
     with app.app_context():
         if not os.path.exists('user.db'):  # Check if the database file doesn't exist
