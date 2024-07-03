@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditory Learner Courses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #5a627a;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        .course-card {
+            display: flex;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .course-card img {
+            width: 200px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .course-content {
+            padding: 20px;
+            flex: 1;
+        }
+        .course-title {
+            font-size: 1.5em;
+            margin: 0 0 10px;
+        }
+        .course-description {
+            margin: 0 0 10px;
+        }
+        .course-link {
+            color: #5a627a;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .course-link:hover {
+            text-decoration: underline;
+        }
+        .filters {
+            margin: 20px auto;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            max-width: 650px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .filters label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        .filters select {
+            padding: 8px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            margin-right: 10px;
+        }
+        .filter-button {
+            padding: 10px 20px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .filter-button:hover {
+            background-color: #444c63;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Auditory Learner Courses</h1>
+    </div>
+    <div class="filters">
+        <label for="language-filter">Filter by Language:</label>
+        <select id="language-filter">
+            <option value="all">All</option>
+            <option value="english">English</option>
+            <option value="hindi">Hindi</option>
+        </select>
+        <label for="payment-filter">Filter by Payment:</label>
+        <select id="payment-filter">
+            <option value="all">All</option>
+            <option value="free">Free</option>
+            <option value="paid">Paid</option>
+        </select>
+        <label for="domain-filter">Filter by Domain:</label>
+        <select id="domain-filter">
+            <option value="all">All</option>
+            <option value="programming">Programming</option>
+            <option value="design">Design</option>
+        </select>
+        <label for="mode-filter">Filter by Mode:</label>
+        <select id="mode-filter">
+            <option value="all">All</option>
+            <option value="recorded">Recorded</option>
+            <option value="live">Live</option>
+        </select>
+        <button id="apply-filter" class="filter-button">Apply Filters</button>
+    </div>
+    <div class="container" id="course-container">
+        <!-- Course cards will be dynamically filtered based on selection -->
+        <div class="course-card" data-language="english" data-payment="free" data-domain="programming" data-mode="recorded">
+            <img src="{{ url_for('static', filename='images/course1.jpg') }}" alt="Course 1">
+            <div class="course-content">
+                <h2 class="course-title">Course Title 1</h2>
+                <p class="course-description">Brief description of the course content. This course will help you learn about various visual learning techniques and strategies.</p>
+                <a href="#" class="course-link">Enroll Now</a>
+            </div>
+        </div>
+        <div class="course-card" data-language="hindi" data-payment="paid" data-domain="design" data-mode="live">
+            <img src="{{ url_for('static', filename='images/course2.jpg') }}" alt="Course 2">
+            <div class="course-content">
+                <h2 class="course-title">Course Title 2</h2>
+                <p class="course-description">Brief description of the course content. This course will help you learn about various visual learning techniques and strategies.</p>
+                <a href="#" class="course-link">Enroll Now</a>
+            </div>
+        </div>
+        <div class="course-card" data-language="english" data-payment="paid" data-domain="programming" data-mode="live">
+            <img src="{{ url_for('static', filename='images/course3.jpg') }}" alt="Course 3">
+            <div class="course-content">
+                <h2 class="course-title">Course Title 3</h2>
+                <p class="course-description">Brief description of the course content. This course will help you learn about various visual learning techniques and strategies.</p>
+                <a href="#" class="course-link">Enroll Now</a>
+            </div>
+        </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const applyFilterButton = document.getElementById('apply-filter');
+            const languageFilter = document.getElementById('language-filter');
+            const paymentFilter = document.getElementById('payment-filter');
+            const domainFilter = document.getElementById('domain-filter');
+            const courseCards = document.querySelectorAll('.course-card');
+
+            function applyFilters() {
+                const selectedLanguage = languageFilter.value;
+                const selectedPayment = paymentFilter.value;
+                const selectedDomain = domainFilter.value;
+
+                courseCards.forEach(card => {
+                    const cardLanguage = card.getAttribute('data-language');
+                    const cardPayment = card.getAttribute('data-payment');
+                    const cardDomain = card.getAttribute('data-domain');
+
+                    const showCard = (selectedLanguage === 'all' || cardLanguage === selectedLanguage) &&
+                                    (selectedPayment === 'all' || cardPayment === selectedPayment) &&
+                                    (selectedDomain === 'all' || cardDomain === selectedDomain);
+
+                    if (showCard) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+
+            applyFilterButton.addEventListener('click', applyFilters);
+        });
+    </script>
+</body>
+</html>
+{% endblock %}
