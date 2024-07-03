@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Integration</title>
+    <!-- Include Crisp chat SDK -->
+    
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 600px;
+        }
+        .header {
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2em;
+            color: #5a627a;
+        }
+        .content {
+            font-size: 1.2em;
+            color: #666;
+        }
+        .chat-section {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f5f5f5;
+        }
+        .chat-section h2 {
+            margin-top: 0;
+            color: #5a627a;
+        }
+        .chat-section p {
+            margin-bottom: 20px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #999;
+        }
+    </style>
+    <script>
+        (function (w, d, s, o, f, js, fjs) {
+                w[o] = w[o] || function () {
+                    (w[o].q = w[o].q || []).push(arguments) };
+                js = d.createElement(s), fjs = d.getElementsByTagName(s)[0];
+                js.id = o; js.src = f; js.async = 1;
+                fjs.parentNode.insertBefore(js, fjs) }
+            (window, document, 'script', 'nw', 'https://chat.norby.io/widget'));
+                nw('init', {
+                    apiKey: '036d3af5-af66-4c3e-ba52-339f44359d35',
+                    serviceBaseUrl: 'https://api.norby.io',
+                    lang: 'en',
+                    languageList: ['EN','RU','EE','IT','FR','DE','UA','ES','FI','SV','DA','NO','PL','PT','TR','ZH','JA','AR'],
+                    mainColor: '#3E247E',
+                    popupBotAvatarColor: '#3E247E',
+                    multichat: true,
+                    botName: 'Bot',
+                    imageTransferEnabled: true,
+                    side: 'right',
+                    marginSideDesktop: 80,
+                    marginBottomDesktop: 48,
+                    marginSideMobile: 16,
+                    marginBottomMobile: 16
+                });
+            </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Our Chatbot</h1>
+        </div>
+        <div class="content">
+            <p>If you have any questions, feel free to ask us through the chat below!</p>
+        </div>
+        <div class="chat-section">
+            <h2>Live Chat</h2>
+            <p>The chat widget for live communication will appear here shortly. Please wait...</p>
+        </div>
+        <div class="footer">
+            <p>Powered by Crisp Chat</p>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}
