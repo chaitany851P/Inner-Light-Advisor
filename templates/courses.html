@@ -76,12 +76,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            max-width: 850px;
+            max-width: 1050px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .filters label {
             margin-right: 10px;
             font-weight: bold;
+            font-size:large;
         }
         .filters select {
             padding: 8px;
@@ -121,29 +122,37 @@
     </div>
     
     <div class="filters">
-        <label for="language-filter">Filter by Language:</label>
+        <label for="language-filter">Language:</label>
         <select id="language-filter">
             <option value="all">All</option>
             <option value="english">English</option>
             <option value="hindi">Hindi</option>
         </select>
-        <label for="payment-filter">Filter by Payment:</label>
+        <label for="payment-filter">Payment:</label>
         <select id="payment-filter">
             <option value="all">All</option>
             <option value="free">Free</option>
             <option value="paid">Paid</option>
         </select>
-        <label for="domain-filter">Filter by Domain:</label>
+        <label for="domain-filter">Domain:</label>
         <select id="domain-filter">
             <option value="all">All</option>
             <option value="programming">Programming</option>
             <option value="design">Design</option>
         </select>
-        <label for="mode-filter">Filter by Mode:</label>
+        <label for="mode-filter">Mode:</label>
         <select id="mode-filter">
             <option value="all">All</option>
             <option value="recorded">Recorded</option>
             <option value="live">Live</option>
+        </select>
+        <label for="mode-filter">Level:</label>
+        <select id="mode-filter">
+            <option value="all">All</option>
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+            
         </select>
         <button id="apply-filter" class="filter-button">Apply Filters</button>
     </div>

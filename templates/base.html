@@ -104,8 +104,12 @@
         <nav class="navbar">
             <a href="{{ url_for ('dashboard')}}">Home</a>
             <a href="{{ url_for ('courses')}}">Courses</a>
-            <a href="">About</a>
-            <a href="">Contact</a>
+            <a href="{{ url_for ('about')}}">About</a>
+            <a href="{{url_for('contact')}}">Contact</a>
+            {% if current_user.role == 'teacher' %}
+            <a href="{{ url_for ('chatbot')}}">Research with AI</a>
+            {% endif %}
+            <a href="{{ url_for('FAQs')}}">FAQs</a>
             <nav class="navbar2">
                 <a href="{{ url_for ('profile')}}">Profile</a>
                 <a href="{{ url_for ('logout')}}" style="background-color: red; border-radius: 10px;">Logout</a>

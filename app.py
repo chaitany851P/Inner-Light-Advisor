@@ -8,7 +8,7 @@ from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.dialects.sqlite import JSON
 
 # Initialize OpenAI API key
-openai.api_key = 'api_key'
+openai.api_key = 'sk-proj-ZmiMDvR0hy8qAULmD9J5T3BlbkFJTCdpG2tlo9MryTGRMl8L'
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
@@ -270,6 +270,11 @@ def add_education():
 #         return jsonify(response=response_message)
 #     except Exception as e:
 #         return jsonify(error=str(e)), 500
+
+@app.route('/chatbot')
+def chatbot():
+    
+    return render_template('chatbot.html')
     
 # @app.route('/chat', methods=['POST'])
 # def chat():
@@ -302,6 +307,10 @@ def contact():
         flash('Your message has been sent successfully!', 'success')
         return redirect(url_for('contact'))
     return render_template('contect.html')
+
+@app.route('/FAQs')
+def FAQs():
+    return render_template('faqs.html')
 
 if __name__ == '__main__':
     with app.app_context():
