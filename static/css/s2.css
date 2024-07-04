@@ -11,7 +11,7 @@
     text-align: center;
 }
 
-.container2 {
+.container3{
     width: 60%;
     margin: 20px auto;
     padding: 20px;
@@ -46,6 +46,7 @@
 .chat-section h2 {
     margin-top: 0;
     color: #5a627a;
+    
 }
 
 .chat-section p {
@@ -101,11 +102,11 @@
 
 .chat-input textarea {
     width: 80%;
+    height: 50px;
     padding: 10px 20px;
     border: 1px solid #ddd;
     border-radius: 5px;
     resize: none;
-
 }
 
 .chat-input button {
