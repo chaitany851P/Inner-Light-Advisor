@@ -1,11 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Chatbot Integration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/s2.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+
 </head>
 <body>
     
+    <div class="container2">
+        <div class="chatBot">
+            <header>
+                <h1>ChatBot</h1>
+                
+            </header>
+            <ul class="chatbox">
+                <li class="chat-incoming chat">
+                    <p>Hey! How can I assist you today?</p>
+                </li>
+            </ul>
+            <div class="chat-input">
+                <textarea rows="0" cols="17" placeholder="Enter a message..."></textarea>
+                <button id="sendBTN">Send</button>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/j.js') }}"></script>
 </body>
 </html>
+{% endblock %}
