@@ -10,7 +10,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color:white;
+            background-color: white;
             margin: 0;
             padding: 0;
         }
@@ -47,6 +47,14 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
+        
+        form input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
         form button {
             padding: 10px 20px;
             background-color: #5a627a;
@@ -76,10 +84,25 @@
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
+            position: relative;
         }
         .user-info p {
             margin: 10px 0;
             font-size: 1.2em;
+        }
+        .edit-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .edit-button:hover {
+            background-color: #444c5e;
         }
         .education-list {
             background-color: #fff;
@@ -90,6 +113,21 @@
         }
         .education-item {
             margin-bottom: 10px;
+            position: relative;
+        }
+        .education-item .edit-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .education-item .edit-button:hover {
+            background-color: #444c5e;
         }
     </style>
 </head>
@@ -101,7 +139,17 @@
             <p><strong>Name:</strong> {{ current_user.name }}</p>
             <p><strong>Date of Birth:</strong> {{ current_user.dob }}</p>
             <p><strong>Learner Type:</strong> {{ current_user.learning_style }}</p>
+            <button class="edit-button" onclick="showEditUserInfoForm()">Edit</button>
         </div>
+
+        <form id="edit-user-info-form" style="display: none;" action="{{ url_for('update_user_info') }}" method="post">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" name="dob" value="{{ current_user.dob }}" required>
+            <button type="submit">Save Changes</button>
+        </form>
+
         <form action="{{ url_for('update_email') }}" method="post">
             <label for="email">Update Email:</label>
             <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
@@ -112,26 +160,50 @@
             <input type="password" id="password" name="password" required>
             <button type="submit">Update Password</button>
         </form>
+
         {% if current_user.role == 'teacher' %}
         <div class="education-list">
             <h2>Educational Details</h2>
-{% if current_user.role == 'teacher' %}
-    {% set teacher = current_user %}
-    {% if teacher.education %}
-        {% for edu in teacher.education %}
-            <div class="education-item">
-                <p><strong>Degree:</strong> {{ edu['degree'] }}</p>
-                <p><strong>University:</strong> {{ edu['university'] }}</p>
-                <p><strong>Year of Completion:</strong> {{ edu['year'] }}</p>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No educational details available.</p>
-    {% endif %}
-    {% endif %}
-        <hr>
-        {% endif %}
-        {% if current_user.role == 'teacher'%}
+            {% if current_user.role == 'teacher' %}
+                {% set teacher = current_user %}
+                {% if teacher.education %}
+                    {% for edu in teacher.education %}
+                        <div class="education-item">
+                            <p><strong>Degree:</strong> {{ edu['degree'] }}</p>
+                            <p><strong>University:</strong> {{ edu['university'] }}</p>
+                            <p><strong>Year of Completion:</strong> {{ edu['year'] }}</p>
+                            <button class="edit-button" onclick="showEditEducationForm({{ loop.index0 }})">Edit</button>
+                            
+                        </div>
+                        <script>
+                            function showEditEducationForm(index) {
+            document.getElementById('edit-education-form').style.display = 'block';
+            document.getElementById('education-index').value = index;
+
+            const education = {{ teacher.education|tojson }};
+            document.getElementById('edit-degree').value = education[index].degree;
+            document.getElementById('edit-university').value = education[index].university;
+            document.getElementById('edit-year').value = education[index].year;
+        }
+                        </script>
+                    {% endfor %}
+                {% else %}
+                    <p>No educational details available.</p>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <form id="edit-education-form" style="display: none;" action="{{ url_for('edit_education') }}" method="post">
+            <input type="hidden" id="education-index" name="index">
+            <label for="degree">Degree:</label>
+            <input type="text" id="edit-degree" name="degree" required>
+            <label for="university">University:</label>
+            <input type="text" id="edit-university" name="university" required>
+            <label for="year">Year of Completion:</label>
+            <input type="text" id="edit-year" name="year" required><br>
+            <button type="submit">Save Changes</button>
+        </form>
+
         <h2>Add Your Education</h2>
         <form action="{{ url_for('add_education') }}" method="post">
             <label for="degree">Degree:</label>
@@ -142,8 +214,16 @@
             <input type="text" id="year" name="year" required><br>
             <button type="submit">Add Education</button>
         </form>
-    {% endif %}
+        {% endif %}
     </div>
+
+    <script>
+        function showEditUserInfoForm() {
+            document.getElementById('edit-user-info-form').style.display = 'block';
+        }
+
+        
+    </script>
 </body>
 </html>
 {% endblock %}
