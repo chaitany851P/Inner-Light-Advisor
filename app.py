@@ -49,12 +49,27 @@ class Teacher(User):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(1000), nullable=False)
+    level = db.Column(db.String(50), nullable=False)
     domain = db.Column(db.String(100), nullable=False)
     language = db.Column(db.String(50), nullable=False)
     payment = db.Column(db.String(50), nullable=False)
     mode_of_class = db.Column(db.String(50), nullable=False)
-    learner_type = db.Column(db.PickleType, nullable=False)
-    img = db.Column(db.String(200), nullable=True)
+    learner_type = db.Column(db.String(50), nullable=False)
+    thumbnail_img = db.Column(db.String(200), nullable=True)
+    temp_video = db.Column(db.String(200), nullable=True)
+    chapter = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+    teacher = db.relationship('Teacher', backref=db.backref('courses', lazy=True))
+
+    def __repr__(self):
+        return f"Course(name={self.name}, level={self.level}, domain={self.domain})"
+
+
+    def __repr__(self):
+        return f"Course(name={self.name}, level={self.level}, domain={self.domain})"
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -276,6 +291,38 @@ def chatbot():
     
     return render_template('chatbot.html')
     
+@app.route('/update_user_info', methods=['POST'])
+@login_required
+def update_user_info():
+    current_user.name = request.form['name']
+    current_user.dob = request.form['dob']
+    db.session.commit()
+    flash('User information updated successfully!', 'success')
+    return redirect(url_for('profile'))
+
+@app.route('/edit_education', methods=['POST'])
+@login_required
+def edit_education():
+    if current_user.role == 'teacher':
+        index = int(request.form['index'])
+        degree = request.form['degree']
+        university = request.form['university']
+        year = request.form['year']
+        
+        current_user.education[index] = {
+            'degree': degree,
+            'university': university,
+            'year': year
+        }
+        
+        db.session.commit()
+        flash('Education details updated successfully!', 'success')
+    else:
+        flash('Only teachers can edit education details.', 'danger')
+    
+    return redirect(url_for('profile'))
+
+
 # @app.route('/chat', methods=['POST'])
 # def chat():
 #     data = request.get_json()
@@ -311,6 +358,57 @@ def contact():
 @app.route('/FAQs')
 def FAQs():
     return render_template('faqs.html')
+
+@app.route('/ac')
+def ac():
+    return render_template('temp.html')
+@app.route('/add_course', methods=['GET', 'POST'])
+@login_required
+def add_course():
+    if request.method == 'POST':
+        # Handle form submission
+        # Existing code...
+
+        # Retrieve chapter data from the form
+        chapter = []
+        chapter_count = int(request.form.get('chapter_count', 0))
+        for i in range(chapter_count):
+            chapter_name = request.form.get(f'chapter_name_{i}')
+            chapter_description = request.form.get(f'chapter_description_{i}')
+            chapter_video = request.form.get(f'chapter_video_{i}')
+            chapter_assignment_file = request.files.get(f'chapter_assignment_{i}')
+            chapter_resource_link = request.form.get(f'chapter_resource_{i}')
+            chapter_notes = request.form.get(f'chapter_notes_{i}')
+
+            # Example of how to handle file uploads (adjust as needed)
+            if chapter_assignment_file:
+                filename = secure_filename(chapter_assignment_file.filename)
+                chapter_assignment_file.save(os.path.join(app.config['templates/teacher/img'], filename))
+                chapter_assignment_filename = filename
+            else:
+                chapter_assignment_filename = None
+
+            chapter.append({
+                'name': chapter_name,
+                'description': chapter_description,
+                'video': chapter_video,
+                'assignment_file': chapter_assignment_filename,
+                'resource_link': chapter_resource_link,
+                'notes': chapter_notes
+            })
+
+        new_course = Course(
+            # Existing fields...
+            chapter=chapter,
+            teacher_id=current_user.id
+        )
+
+        db.session.add(new_course)
+        db.session.commit()
+        flash('Course added successfully!', 'success')
+        return redirect(url_for('courses'))
+
+    return render_template('temp.html')
 
 if __name__ == '__main__':
     with app.app_context():
