@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Course</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: white;
+            margin: 0;
+            padding: 0;
+        }
+        .container2 {
+            width: 50%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: left;
+            color: #333;
+            display: inline-block;
+            margin-right: 50px;
+            margin-bottom: 20px; /* Added margin-bottom for spacing */
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        form label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        form input[type="text"],
+        form input[type="file"],
+        form textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        form button {
+            padding: 10px 20px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #444c5e;
+        }
+        .chapter {
+            display: none; /* Hide by default */
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .chapter label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .chapter textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        .chapter button {
+            padding: 5px 10px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .chapter button:hover {
+            background-color: #444c5e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container2">
+        <h1>Add Course</h1>
+        <form id="courseForm" action="{{ url_for('add_course') }}" method="post" enctype="multipart/form-data">
+            <label for="name">Course Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="description">Course Description:</label>
+            <textarea id="description" name="description" rows="4" required></textarea>
+
+            <label for="level">Level:</label>
+            <section id="">
+
+            </section>
+
+            <label for="domain">Domain:</label>
+            <input type="text" id="domain" name="domain" required>
+
+            <label for="language">Language:</label>
+            <input type="text" id="language" name="language" required>
+
+            <label for="payment">Payment:</label>
+            <input type="text" id="payment" name="payment" required>
+
+            <label for="mode_of_class">Mode of Class:</label>
+            <input type="text" id="mode_of_class" name="mode_of_class" required>
+
+            <label for="learner_type">Learner Type:</label>
+            <input type="text" id="learner_type" name="learner_type" required>
+
+            <label for="thumbnail_img">Thumbnail Image:</label>
+            <input type="file" id="thumbnail_img" name="thumbnail_img">
+
+            <label for="temp_video">Temporary Video:</label>
+            <input type="file" id="temp_video" name="temp_video">
+
+            <label for="chapter_count">Number of Chapters:</label>
+            <input type="number" id="chapter_count" name="chapter_count" min="1" required onchange="showChapters(this.value)">
+
+            <!-- Dynamic chapter fields -->
+            <div id="chapters-container">
+                <!-- Dynamic chapters will be inserted here -->
+            </div>
+
+            <button type="submit" onclick="showChapters()">Add Course</button>
+        </form>
+    </div>
+
+    <script>
+        function showChapters(count) {
+            const container = document.getElementById('chapters-container');
+            container.innerHTML = ''; // Clear previous chapters
+
+            for (let i = 0; i < count; i++) {
+                const chapterIndex = i + 1;
+                const chapterHtml = `
+                    <div class="chapter">
+                        <h3>Chapter ${chapterIndex}</h3>
+                        <label for="chapter_name_${chapterIndex}">Name:</label>
+                        <input type="text" id="chapter_name_${chapterIndex}" name="chapter_name_${chapterIndex}" required>
+
+                        <label for="chapter_description_${chapterIndex}">Description:</label>
+                        <textarea id="chapter_description_${chapterIndex}" name="chapter_description_${chapterIndex}" rows="4" required></textarea>
+
+                        <label for="chapter_video_${chapterIndex}">Video:</label>
+                        <input type="text" id="chapter_video_${chapterIndex}" name="chapter_video_${chapterIndex}" required>
+
+                        <label for="chapter_assignment_${chapterIndex}">Assignment File:</label>
+                        <input type="file" id="chapter_assignment_${chapterIndex}" name="chapter_assignment_${chapterIndex}">
+
+                        <label for="chapter_resource_${chapterIndex}">Resource Link:</label>
+                        <input type="text" id="chapter_resource_${chapterIndex}" name="chapter_resource_${chapterIndex}" required>
+
+                        <label for="chapter_notes_${chapterIndex}">Notes:</label>
+                        <textarea id="chapter_notes_${chapterIndex}" name="chapter_notes_${chapterIndex}" rows="4" required></textarea>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', chapterHtml);
+            }
+        }
+    </script>
+</body>
+</html>
+{% endblock %}
