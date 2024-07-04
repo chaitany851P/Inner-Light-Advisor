@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQs</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container2 {
+            width: 60%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .faq-section {
+            margin-top: 20px;
+        }
+        .faq-question {
+            font-weight: bold;
+            margin-top: 10px;
+            color: #333;
+        }
+        .faq-answer {
+            margin-top: 5px;
+            margin-bottom: 15px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container2">
+        <h1>Frequently Asked Questions (FAQs)</h1>
+        <div class="faq-section">
+            <div class="faq-item">
+                <div class="faq-question">What is a Visual Learner?</div>
+                <ul><li>
+                <div class="faq-answer">A visual learner is someone who learns best by seeing information. They often prefer using images, diagrams, and written directions to understand new concepts.</div>
+                    </li></ul>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">What is an Auditory Learner?</div>
+                <ul>
+                    <li><div class="faq-answer">An auditory learner is someone who learns best by hearing information. They often prefer listening to lectures, discussions, and audio recordings to understand new concepts.</div>
+                    </li>
+                    </ul>
+                </div>
+            <div class="faq-item">
+                <div class="faq-question">What is a Kinesthetic Learner?</div>
+                <ul>
+                    <li>
+                <div class="faq-answer">A kinesthetic learner is someone who learns best by doing. They often prefer hands-on activities, experiments, and physical movement to understand new concepts.</div>
+                </li>
+            </ul>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">How to Identify a Learner's Style?</div>
+                <ul>
+                    <li>
+                <div class="faq-answer">Identifying a learner's style can be done through observation, quizzes, and self-assessments. Look for patterns in how they prefer to receive information and which methods help them retain and understand new concepts best.</div>   
+                </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}
