@@ -71,6 +71,15 @@ class Course(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
     __mapper_args__ = {'polymorphic_identity': 'course'}
 
+class ContactMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+
+    def __repr__(self):
+        return f"<ContactMessage(name={self.name}, email={self.email})>"
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -350,10 +359,15 @@ def contact():
         email = request.form['email']
         message = request.form['message']
 
-        # You can add code here to save the message to a database or send it via email
+        new_contact = ContactMessage(name=name, email=email, message=message)
+        
+        try:
+            db.session.add(new_contact)
+            db.session.commit()
+            return redirect('/contact')  # Redirect to home or success page
+        except:
+            return 'There was an issue adding your contact information.'
 
-        flash('Your message has been sent successfully!', 'success')
-        return redirect(url_for('contact'))
     return render_template('contect.html')
 
 @app.route('/FAQs')
