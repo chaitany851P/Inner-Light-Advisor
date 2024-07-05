@@ -60,11 +60,11 @@ class Course(db.Model):
     thumbnail_img = db.Column(db.String(200), nullable=True)
     temp_video = db.Column(db.String(200), nullable=True)
     chapter = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
-    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
-    teacher = db.relationship('Teacher', backref=db.backref('courses', lazy=True))
+    # teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+    # teacher = db.relationship('Teacher', backref=db.backref('courses', lazy=True))
 
-    def __repr__(self):
-        return f"Course(name={self.name}, level={self.level}, domain={self.domain})"
+    # def __repr__(self):
+    #     return f"Course(name={self.name}, level={self.level}, domain={self.domain})"
 
 
     def __repr__(self):
@@ -382,7 +382,7 @@ def add_course():
 
             # Example of how to handle file uploads (adjust as needed)
             if chapter_assignment_file:
-                filename = secure_filename(chapter_assignment_file.filename)
+                filename = (chapter_assignment_file.filename)
                 chapter_assignment_file.save(os.path.join(app.config['templates/teacher/img'], filename))
                 chapter_assignment_filename = filename
             else:
