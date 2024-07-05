@@ -7,12 +7,18 @@ import openai
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.dialects.sqlite import JSON
 
+from sqlalchemy.ext.mutable import MutableList
+from sqlalchemy.types import JSON
+ 
+
 # Initialize OpenAI API key
-openai.api_key = 'sk-proj-ZmiMDvR0hy8qAULmD9J5T3BlbkFJTCdpG2tlo9MryTGRMl8L'
+openai.api_key = 'sk-proj-I59lHlwYy3Ns6mpMga8aT3BlbkFJYmnAY7QXsjUSueUG7sae'
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')  # Define upload folder
+
 db = SQLAlchemy(app)
 
 # Flask-Login configuration
@@ -35,8 +41,8 @@ class User(UserMixin, db.Model):
 
 class Student(User):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    courses_enrolled = db.Column(db.PickleType, nullable=False)
-    courses_completed = db.Column(db.PickleType, nullable=False)
+    courses_enrolled = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
+    courses_completed = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     img = db.Column(db.String(200), nullable=True)
     __mapper_args__ = {'polymorphic_identity': 'student'}
 
@@ -44,7 +50,7 @@ class Teacher(User):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     education = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     img = db.Column(db.String(200), nullable=True)
-    courses = db.Column(db.PickleType, nullable=False)
+    courses = db.relationship('Course', backref='teacher', lazy=True)
     __mapper_args__ = {'polymorphic_identity': 'teacher'}
 
 class Course(db.Model):
@@ -54,21 +60,16 @@ class Course(db.Model):
     level = db.Column(db.String(50), nullable=False)
     domain = db.Column(db.String(100), nullable=False)
     language = db.Column(db.String(50), nullable=False)
-    payment = db.Column(db.String(50), nullable=False)
+    payment = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     mode_of_class = db.Column(db.String(50), nullable=False)
     learner_type = db.Column(db.String(50), nullable=False)
     thumbnail_img = db.Column(db.String(200), nullable=True)
     temp_video = db.Column(db.String(200), nullable=True)
-    chapter = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
-    # teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
-    # teacher = db.relationship('Teacher', backref=db.backref('courses', lazy=True))
-
-    # def __repr__(self):
-    #     return f"Course(name={self.name}, level={self.level}, domain={self.domain})"
-
-
-    def __repr__(self):
-        return f"Course(name={self.name}, level={self.level}, domain={self.domain})"
+    chapters = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
+    videos = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
+    quizzes = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
+    teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+    __mapper_args__ = {'polymorphic_identity': 'course'}
 
 
 @login_manager.user_loader
@@ -362,56 +363,79 @@ def FAQs():
 @app.route('/ac')
 def ac():
     return render_template('temp.html')
+
 @app.route('/add_course', methods=['GET', 'POST'])
-@login_required
 def add_course():
     if request.method == 'POST':
-        # Handle form submission
-        # Existing code...
+        # Retrieve other form fields
+        name = request.form['name']
+        description = request.form['description']
+        level = request.form['level']
+        domain = request.form['domain']
+        language = request.form['language']
+        payment = request.form['payment']
+        mode_of_class = request.form['mode_of_class']
+        learner_type = request.form['learner_type']
 
-        # Retrieve chapter data from the form
-        chapter = []
-        chapter_count = int(request.form.get('chapter_count', 0))
-        for i in range(chapter_count):
-            chapter_name = request.form.get(f'chapter_name_{i}')
-            chapter_description = request.form.get(f'chapter_description_{i}')
-            chapter_video = request.form.get(f'chapter_video_{i}')
-            chapter_assignment_file = request.files.get(f'chapter_assignment_{i}')
-            chapter_resource_link = request.form.get(f'chapter_resource_{i}')
-            chapter_notes = request.form.get(f'chapter_notes_{i}')
+        # Save uploaded files
+        thumbnail_img = request.files['thumbnail_img']
+        if thumbnail_img.filename != '':
+            thumbnail_img.save(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnails', thumbnail_img.filename))
 
-            # Example of how to handle file uploads (adjust as needed)
-            if chapter_assignment_file:
-                filename = (chapter_assignment_file.filename)
-                chapter_assignment_file.save(os.path.join(app.config['templates/teacher/img'], filename))
-                chapter_assignment_filename = filename
-            else:
-                chapter_assignment_filename = None
+        temp_video = request.files['temp_video']
+        if temp_video.filename != '':
+            temp_video.save(os.path.join(app.config['UPLOAD_FOLDER'], 'videos', temp_video.filename))
 
-            chapter.append({
-                'name': chapter_name,
+        chapters = {}
+        for i in range(1, chapter_count + 1):
+            chapter_title = request.form[f'chapter_{i}_title']
+            chapter_description = request.form[f'chapter_{i}_description']
+            chapter_assignment_file = request.files.get(f'chapter_{i}_assignment_file')
+            chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')  # Retrieve multiple files
+            chapter_note = request.form[f'chapter_{i}_note']
+            chapter_course_file = request.files.get(f'chapter_{i}_course_file')
+
+            # Save assignment file if provided
+            if chapter_assignment_file and chapter_assignment_file.filename != '':
+                chapter_assignment_file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'assignments', secure_filename(chapter_assignment_file.filename)))
+
+            # Save resources files if provided
+            resources_filenames = []
+            for file in chapter_resources_files:
+                if file.filename != '':
+                    filename = secure_filename(file.filename)
+                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'resources', filename)
+                    file.save(file_path)
+                    resources_filenames.append(filename)
+
+            # Save course file if provided
+            if chapter_course_file and chapter_course_file.filename != '':
+                chapter_course_file.save(os.path.join(app.config['UPLOAD_FOLDER'], 'courses', secure_filename(chapter_course_file.filename)))
+
+            chapters[f'chapter_{i}'] = {
+                'title': chapter_title,
                 'description': chapter_description,
-                'video': chapter_video,
-                'assignment_file': chapter_assignment_filename,
-                'resource_link': chapter_resource_link,
-                'notes': chapter_notes
-            })
+                'assignment_file': chapter_assignment_file.filename if chapter_assignment_file else None,
+                'resources_files': resources_filenames,
+                'note': chapter_note,
+                'course_file': chapter_course_file.filename if chapter_course_file else None
+            }
 
-        new_course = Course(
-            # Existing fields...
-            chapter=chapter,
-            teacher_id=current_user.id
-        )
-
+        # Save course details to database
+        new_course = Course(name=name, description=description, level=level, domain=domain, language=language,
+                            payment=payment, mode_of_class=mode_of_class, learner_type=learner_type,
+                            thumbnail_img=thumbnail_img.filename if thumbnail_img else None,
+                            temp_video=temp_video.filename if temp_video else None,
+                            chapters=str(chapters))
+        
         db.session.add(new_course)
         db.session.commit()
-        flash('Course added successfully!', 'success')
-        return redirect(url_for('courses'))
 
+        return "Course added successfully!"
+    
     return render_template('temp.html')
 
 if __name__ == '__main__':
     with app.app_context():
-        if not os.path.exists('user.db'):  # Check if the database file doesn't exist
             db.create_all()  # Create database tables based on the models
     app.run(debug=True)
