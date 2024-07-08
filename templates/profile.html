@@ -139,6 +139,7 @@
             <p><strong>Name:</strong> {{ current_user.name }}</p>
             <p><strong>Date of Birth:</strong> {{ current_user.dob }}</p>
             <p><strong>Learner Type:</strong> {{ current_user.learning_style }}</p>
+            <p><strong>Role:</strong> {{ current_user.role }}</p>
             <button class="edit-button" onclick="showEditUserInfoForm()">Edit</button>
         </div>
 
@@ -175,17 +176,7 @@
                             <button class="edit-button" onclick="showEditEducationForm({{ loop.index0 }})">Edit</button>
                             
                         </div>
-                        <script>
-                            function showEditEducationForm(index) {
-            document.getElementById('edit-education-form').style.display = 'block';
-            document.getElementById('education-index').value = index;
-
-            const education = {{ teacher.education|tojson }};
-            document.getElementById('edit-degree').value = education[index].degree;
-            document.getElementById('edit-university').value = education[index].university;
-            document.getElementById('edit-year').value = education[index].year;
-        }
-                        </script>
+                        
                     {% endfor %}
                 {% else %}
                     <p>No educational details available.</p>
@@ -216,14 +207,30 @@
         </form>
         {% endif %}
     </div>
-
+    
     <script>
         function showEditUserInfoForm() {
             document.getElementById('edit-user-info-form').style.display = 'block';
         }
+    </script>
+    {% if current_user.role == 'teacher'%}
+    <script>
+        
+        
+            function showEditEducationForm(index) {
+            document.getElementById('edit-education-form').style.display = 'block';
+            document.getElementById('education-index').value = index;
+
+            const education = {{ teacher.education|tojson }};
+            document.getElementById('edit-degree').value = education[index].degree;
+            document.getElementById('edit-university').value = education[index].university;
+            document.getElementById('edit-year').value = education[index].year;
+        }
+        
 
         
     </script>
+    {% endif %}
 </body>
 </html>
 {% endblock %}
