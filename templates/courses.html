@@ -6,17 +6,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% if current_user.role == 'student' %}
-        {% if current_user.learning_style == 'Visual'%}
+        {% if current_user.learning_style == 'Visual' %}
             <title>Visual Learner Courses</title>
-        {% elif current_user.learning_style == 'Auditory'%}
+        {% elif current_user.learning_style == 'Auditory' %}
             <title>Auditory Learner Courses</title>
-        {% elif current_user.learning_style == 'Kinesthetic'%}
+        {% elif current_user.learning_style == 'Kinesthetic' %}
             <title>Kinesthetic Learner Courses</title>
-            {% endif %}
-    {% elif current_user.role == 'teacher'%}
-        <title>Coures List</title>
+        {% endif %}
+    {% elif current_user.role == 'teacher' %}
+        <title>Course List</title>
     {% endif %}
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <style>
         body {
@@ -82,7 +81,7 @@
         .filters label {
             margin-right: 10px;
             font-weight: bold;
-            font-size:large;
+            font-size: large;
         }
         .filters select {
             padding: 8px;
@@ -93,7 +92,7 @@
         }
         .filter-button {
             padding: 10px 20px;
-            background-color: #5a627a;
+            background-color:   #5a627a;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -108,17 +107,16 @@
 <body>
     <div class="header">
         {% if current_user.role == 'student' %}
-    {% if current_user.learning_style == 'Visual' %}
-        <h1>Visual Learner Courses</h1>
-    {% elif current_user.learning_style == 'Auditory' %}
-        <h1>Auditory Learner Courses</h1>
-    {% elif current_user.learning_style == 'Kinesthetic' %}
-        <h1>Kinesthetic Learner Courses</h1>
-    {% endif %}
-{% elif current_user.role == 'teacher' %}
-    <h1>Course List</h1>
-{% endif %}
-
+            {% if current_user.learning_style == 'Visual' %}
+                <h1>Visual Learner Courses</h1>
+            {% elif current_user.learning_style == 'Auditory' %}
+                <h1>Auditory Learner Courses</h1>
+            {% elif current_user.learning_style == 'Kinesthetic' %}
+                <h1>Kinesthetic Learner Courses</h1>
+            {% endif %}
+        {% elif current_user.role == 'teacher' %}
+            <h1>Course List</h1>
+        {% endif %}
     </div>
     
     <div class="filters">
@@ -146,47 +144,49 @@
             <option value="recorded">Recorded</option>
             <option value="live">Live</option>
         </select>
-        <label for="mode-filter">Level:</label>
-        <select id="mode-filter">
+        <label for="level-filter">Level:</label>
+        <select id="level-filter">
             <option value="all">All</option>
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-            
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
         </select>
         <button id="apply-filter" class="filter-button">Apply Filters</button>
+        {% if current_user.role == 'teacher' %}
+        <a href="{{ url_for('add_course') }}" class="btn btn-primary">Add Course</a>
+    {% endif %}
     </div>
     
-    <div class="container" id="course-container">
-       {% if current_user.role == 'student'%} 
-        {% for course in courses %}
-            {% if course.learner_type == current_user.learning_style %}
-                <div class="course-card" data-language="{{ course.language }}" data-payment="{{ course.payment }}" data-domain="{{ course.domain }}" data-mode="{{ course.mode }}">
-                    <img src="{{ url_for('static', filename='images/' ~ course.image) }}" alt="{{ course.title }}">
-                    <div class="course-content">
-                        <h2 class="course-title">{{ course.title }}</h2>
-                        <p class="course-description">{{ course.description }}</p>
-                        <a href="{{ url_for('course_info', course_id=course.id) }}" class="course-link">Enroll Now</a>
-                    </div>
-                </div>
-            {% endif %}
-        {% endfor %}
-
-    {% elif current_user.role == 'teacher' %}
     
-        {% for course in courses %}
-            {% if course.teacher_id == current_user.id %}
-                <div class="course-card" data-language="{{ course.language }}" data-payment="{{ course.payment }}" data-domain="{{ course.domain }}" data-mode="{{ course.mode }}">
-                    <img src="{{ url_for('static', filename='images/' ~ course.image) }}" alt="{{ course.title }}">
-                    <div class="course-content">
-                        <h2 class="course-title">{{ course.title }}</h2>
-                        <p class="course-description">{{ course.description }}</p>
-                        <!-- add logic for edit button -->
-                        <a href="{{ url_for('course_info', course_id=course.id) }}" class="course-link">Enroll Now</a>
+    <div class="container" id="course-container">
+        {% if current_user.role == 'student' %} 
+            {% for course in courses %}
+                {% if course.learner_type == current_user.learning_style %}
+                    <div class="course-card" data-language="{{ course.language }}" data-payment="{{ course.payment }}" data-domain="{{ course.domain }}" data-mode="{{ course.mode_of_class }}">
+                        <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="{{ course.name }}">
+                        <div class="course-content">
+                            <h2 class="course-title">{{ course.name }}</h2>
+                            <p class="course-description">{{ course.description }}</p>
+                            <a href="{{ url_for('coures_info', course_id=course.id) }}" class="course-link">Enroll Now</a>
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-        {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {% elif current_user.role == 'teacher' %}
+            {% for course in courses %}
+                {% if course.teacher_id == current_user.id %}
+                    <div class="course-card" data-language="{{ course.language }}" data-payment="{{ course.payment }}" data-domain="{{ course.domain }}" data-mode="{{ course.mode_of_class }}">
+                        <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="{{ course.name }}">
+                        <div class="course-content">
+                            <h2 class="course-title">{{ course.name }}</h2>
+                            <p class="course-description">{{ course.description }}</p>
+                            
+    <a href="{{ url_for('edit_course', course_id=course.id) }}" class="course-link">Edit Course</a>
+
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
         {% endif %}
     </div>
     
@@ -197,6 +197,7 @@
             const paymentFilter = document.getElementById('payment-filter');
             const domainFilter = document.getElementById('domain-filter');
             const modeFilter = document.getElementById('mode-filter');
+            const levelFilter = document.getElementById('level-filter');
             const courseCards = document.querySelectorAll('.course-card');
     
             function applyFilters() {
@@ -204,17 +205,20 @@
                 const selectedPayment = paymentFilter.value;
                 const selectedDomain = domainFilter.value;
                 const selectedMode = modeFilter.value;
+                const selectedLevel = levelFilter.value;
     
                 courseCards.forEach(card => {
                     const cardLanguage = card.getAttribute('data-language');
                     const cardPayment = card.getAttribute('data-payment');
                     const cardDomain = card.getAttribute('data-domain');
                     const cardMode = card.getAttribute('data-mode');
+                    const cardLevel = card.getAttribute('data-level');
     
                     const showCard = (selectedLanguage === 'all' || cardLanguage === selectedLanguage) &&
                                     (selectedPayment === 'all' || cardPayment === selectedPayment) &&
                                     (selectedDomain === 'all' || cardDomain === selectedDomain) &&
-                                    (selectedMode === 'all' || cardMode === selectedMode);
+                                    (selectedMode === 'all' || cardMode === selectedMode) &&
+                                    (selectedLevel === 'all' || cardLevel === selectedLevel);
     
                     if (showCard) {
                         card.style.display = 'flex';
