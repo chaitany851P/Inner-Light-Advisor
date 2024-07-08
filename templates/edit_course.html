@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Course</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* static/css/style.css */
+
+        /* General styling for the container */
+        .container2 {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        /* Styling for form labels */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        /* Styling for text inputs and textareas */
+        input[type="text"],
+        textarea {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensures padding is included in the width */
+            font-size: 14px;
+        }
+
+        /* Styling for file inputs */
+        input[type="file"] {
+            margin-bottom: 12px;
+        }
+
+        /* Styling for the submit button */
+        button[type="submit"] {
+            background-color: #444c5e;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container2">
+    <h1>Edit Course</h1>
+    <form action="{{ url_for('edit_course', course_id=course.id) }}" method="POST" enctype="multipart/form-data">
+        <label for="name">Course Name:</label>
+        <input type="text" id="name" name="name" value="{{ course.name }}" required><br><br>
+
+        <label for="description">Description:</label><br>
+        <textarea id="description" name="description" rows="4" required>{{ course.description }}</textarea><br><br>
+
+        <label for="level">Level:</label>
+        <input type="text" id="level" name="level" value="{{ course.level }}" required><br><br>
+
+        <label for="domain">Domain:</label>
+        <input type="text" id="domain" name="domain" value="{{ course.domain }}" required><br><br>
+
+        <label for="language">Language:</label>
+        <input type="text" id="language" name="language" value="{{ course.language }}" required><br><br>
+
+        <label for="payment">Payment:</label>
+        <input type="text" id="payment" name="payment" value="{{ course.payment }}" required><br><br>
+
+        <label for="mode_of_class">Mode:</label>
+        <input type="text" id="mode_of_class" name="mode_of_class" value="{{ course.mode_of_class }}" required><br><br>
+
+        <label for="learner_type">Learner Type:</label>
+        <input type="text" id="learner_type" name="learner_type" value="{{ course.learner_type }}" required><br><br>
+
+        <label for="thumbnail_img">Thumbnail Image:</label>
+        <input type="file" id="thumbnail_img" name="thumbnail_img"><br><br>
+
+        <label for="temp_video">Sample Video:</label>
+        <input type="file" id="temp_video" name="temp_video"><br><br>
+        
+        <h3>Chapters:</h3>
+        <!-- Add fields for existing chapters with pre-filled data -->
+        <div>
+        {% for chapter in course.chapters %}
+            <label for="chapter_{{ loop.index }}_title">Chapter {{ loop.index }} Title:</label>
+            <input type="text" id="chapter_{{ loop.index }}_title" name="chapter_{{ loop.index }}_title" value="{{ chapter.title }}"><br><br>
+
+            <label for="chapter_{{ loop.index }}_description">Chapter {{ loop.index }} Description:</label><br>
+            <textarea id="chapter_{{ loop.index }}_description" name="chapter_{{ loop.index }}_description" rows="4">{{ chapter.description }}</textarea><br><br>
+
+            <label for="chapter_{{ loop.index }}_assignment_file">Assignment File:</label>
+            <input type="file" id="chapter_{{ loop.index }}_assignment_file" name="chapter_{{ loop.index }}_assignment_file"><br><br>
+        {% endfor %}
+        </div>
+
+        <button type="submit">Update Course</button>
+    </form>
+</div>
+</body>
+</html>
+{% endblock %}
