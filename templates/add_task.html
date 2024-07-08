@@ -1,0 +1,71 @@
+<!-- add_task.html -->
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <style>
+     
+.task-form {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.task-input,
+.task-textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.task-textarea {
+    resize: vertical;
+}
+
+.btn {
+    background-color:#5a627a;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.btn:hover {
+    background-color: #4b5264;
+}
+
+h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    
+
+   
+    <div class="container">
+       
+        <form method="POST" class="task-form">
+            <h2>Add Task</h2>
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title" class="task-input" required><br><br>
+
+            <label for="description">Description:</label><br>
+            <textarea id="description" name="description" class="task-textarea" rows="4" required></textarea><br><br>
+
+            <button type="submit" class="btn btn-primary">Add Task</button>
+        </form>
+    </div>
+
+</body>
+    {% endblock %}

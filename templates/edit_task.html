@@ -1,0 +1,84 @@
+<!-- edit_task.html -->
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container2">
+        <h2>Edit Task</h2>
+        <form method="POST">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title" value="{{ task.title }}" required><br><br>
+
+            <label for="description">Description:</label><br>
+            <textarea id="description" name="description" rows="4" required>{{ task.description }}</textarea><br><br>
+
+            <label for="status">Status:</label><br>
+            <select id="status" name="status">
+                <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+                <!-- Add more options as needed -->
+            </select><br><br>
+
+            <button type="submit" class="btn btn-primary">Update Task</button>
+        </form>
+    </div>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container2 {
+            width: 50%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        button[type="submit"] {
+            background-color:#5a627a;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #4c5365;
+        }
+    </style>
+{% endblock %}
