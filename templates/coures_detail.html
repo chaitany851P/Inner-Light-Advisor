@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.name }}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        .course-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .course-container h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .course-container img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .course-container p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .course-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .course-container ul li {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .course-container h2 {
+            font-size: 1.5em;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+
+        .chapter-content {
+            display: none;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .chapter-content iframe {
+            width: 100%;
+            height: 315px;
+            margin-bottom: 10px;
+        }
+
+        .chapter-content p {
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+
+        .video-wrapper {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio (responsive video) */
+            height: 0;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .video-wrapper video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .course-container {
+                padding: 10px;
+            }
+            .course-container h1 {
+                font-size: 1.8em;
+            }
+            /* Adjust other styles as needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="course-container">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1>{{ course.name }}</h1>
+                        {% if course.thumbnail_img %}
+                            <img src="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}" alt="Course Image" class="img-thumbnail" style="width: 150px;">
+                        {% endif %}
+                    </div>
+                    <p>{{ course.description }}</p>
+                    <div class="video-wrapper">
+                        <video src="{{ url_for('static', filename='uploads/sample_video/' + course.temp_video) }}" controls></video>
+                    </div>
+                    <ul>
+                        <li><strong>Level:</strong> {{ course.level }}</li>
+                        <li><strong>Domain:</strong> {{ course.domain }}</li>
+                        <li><strong>Language:</strong> {{ course.language }}</li>
+                        <li><strong>Payment:</strong> {{ course.payment }}</li>
+                        <li><strong>Mode of Class:</strong> {{ course.mode_of_class }}</li>
+                        <li><strong>Learner Type:</strong> {{ course.learner_type }}</li>
+                        <li><strong>Teacher:</strong> {{ course.teacher.name }}</li>
+                        <li><strong>Teacher Email:</strong> {{ course.teacher.email }}</li>
+                        <li><strong>Teacher Phone:</strong> {{ course.teacher.phone }}</li>
+                    </ul>
+                    
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a class="nav-item nav-link active" id="nav-content-tab" data-toggle="tab" href="#nav-content" role="tab" aria-controls="nav-content" aria-selected="true">Content</a>
+                            <a class="nav-item nav-link" id="nav-assessments-tab" data-toggle="tab" href="#nav-assessments" role="tab" aria-controls="nav-assessments" aria-selected="true">Assessments</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade show active" id="nav-content" role="tabpanel" aria-labelledby="nav-content-tab">
+                            <h2>Chapters</h2>
+                            <ol style="list-style-type: upper-roman;">
+                                {% for chapter in course.chapters %}
+                                    <li>
+                                        <p>{{ chapter.title }}</p>
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                        </div>
+                        <div class="tab-pane fade" id="nav-assessments" role="tabpanel" aria-labelledby="nav-assessments-tab">
+                            {% for chapter in course.chapters %}
+                            {% if chapter.assignment_file %}
+                                                <a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a>
+                                            
+                                            {% endif %}
+                                            {% endfor %}
+                        </div>
+                        <br><br>
+                        <form action="{{ url_for('enroll', course_id=course.id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary mb-3">Enroll</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </body>
+    </html>
+    {% endblock %}
