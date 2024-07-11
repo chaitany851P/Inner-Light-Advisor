@@ -1,3 +1,4 @@
+from multiprocessing import reduction
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,7 +8,7 @@ import openai
 from werkzeug.utils import secure_filename
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.dialects.sqlite import JSON
-
+from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
  
@@ -45,8 +46,30 @@ class Student(User):
     courses_enrolled = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     courses_completed = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     img = db.Column(db.String(200), nullable=True)
+
     __mapper_args__ = {'polymorphic_identity': 'student'}
 
+    # Relationships
+    # Assuming a relationship with courses table
+    enrolled_courses = relationship('Course', secondary='student_courses_enrolled')
+    completed_courses = relationship('Course', secondary='student_courses_completed')
+
+    def __init__(self, username, email, password, img=None):
+        super().__init__(username, email, password)
+        self.img = img
+
+# Define association tables for many-to-many relationships
+student_courses_enrolled = db.Table(
+    'student_courses_enrolled',
+    db.Column('student_id', db.Integer, db.ForeignKey('student.id'), primary_key=True),
+    db.Column('course_id', db.Integer, db.ForeignKey('course.id'), primary_key=True)
+)
+
+student_courses_completed = db.Table(
+    'student_courses_completed',
+    db.Column('student_id', db.Integer, db.ForeignKey('student.id'), primary_key=True),
+    db.Column('course_id', db.Integer, db.ForeignKey('course.id'), primary_key=True)
+)
 class Teacher(User):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     education = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
@@ -78,7 +101,7 @@ class Course(db.Model):
     thumbnail_img = db.Column(db.String(200), nullable=True)
     temp_video = db.Column(db.String(200), nullable=True)
     chapters = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
-    videos = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
+    
     quizzes = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
     __mapper_args__ = {'polymorphic_identity': 'course'}
@@ -173,8 +196,8 @@ def logout():
 @login_required
 def dashboard():
     if current_user.role == 'student':
-        enrolled_courses = []  # Query enrolled courses for the current_user
-        completed_courses = []  # Query completed courses for the current_user
+        enrolled_courses = current_user.enrolled_courses  # Assuming Student model has enrolled_courses relationship
+        completed_courses = current_user.completed_courses  # Query completed courses for the current_user
         live_classes = []  # Query live classes for the current_user
         return render_template('dashboard.html', enrolled_courses=enrolled_courses, completed_courses=completed_courses, live_classes=live_classes)
     elif current_user.role == 'teacher':
@@ -217,10 +240,41 @@ def delete_task(task_id):
 
     return render_template('delete_task.html', task=task)
 
-@app.route('/profile')
+@app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html')
+    if request.method == 'POST':
+        # Handle profile image upload
+        if 'profile_image' in request.files:
+            file = request.files['profile_image']
+            if file.filename != '':
+                filepath = save_profile_image(file)
+                
+                if current_user.role == 'student':
+                    # Update profile image for student
+                    student = Student.query.filter_by(username=current_user.username).first()
+                    student.img = filepath
+                    db.session.commit()
+                elif current_user.role == 'teacher':
+                    # Update profile image for teacher
+                    teacher = Teacher.query.filter_by(username=current_user.username).first()
+                    teacher.img = filepath
+                    db.session.commit()
+
+                flash('Profile image updated successfully')
+                return redirect(url_for('profile'))  # Redirect to avoid re-posting on refresh
+
+    # Fetch the user's profile image path
+    if current_user.role == 'student':
+        user = Student.query.filter_by(username=current_user.username).first()
+        profile_image = user.img if user else None
+    elif current_user.role == 'teacher':
+        user = Teacher.query.filter_by(username=current_user.username).first()
+        profile_image = user.img if user else None
+    else:
+        profile_image = None
+
+    return render_template('profile.html', profile_image=profile_image)
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -288,84 +342,157 @@ def update_password():
     flash('Password updated successfully!', 'success')
     return redirect(url_for('profile'))
 
-@app.route('/coures_info')
-def coures_info():
-    return render_template('student/coures_info.html')
+@app.route('/course/<int:course_id>')
+def course_detail(course_id):
+    course = Course.query.get(course_id)
+    return render_template('coures_detail.html', course=course)
+
 
 @app.route('/coures_video')
 def coures_video():
     return render_template('student/coures_video.html')
 
 @app.route('/courses')
-@login_required
 def courses():
-    filters = {
-        'language': request.args.get('language', 'all'),
-        'payment': request.args.get('payment', 'all'),
-        'domain': request.args.get('domain', 'all'),
-        'mode': request.args.get('mode', 'all'),
-        'level': request.args.get('level', 'all'),
-    }
+    language = request.args.get('language', 'all')
+    payment = request.args.get('payment', 'all')
+    domain = request.args.get('domain', 'all')
+    mode = request.args.get('mode', 'all')
+    level = request.args.get('level', 'all')
 
-    query = Course.query
+    courses_query = Course.query
 
-    if current_user.role == 'student':
-        query = query.filter_by(learner_type=current_user.learning_style)
+    if language != 'all':
+        courses_query = courses_query.filter_by(language=language)
+    if payment != 'all':
+        courses_query = courses_query.filter_by(payment=payment)
+    if domain != 'all':
+        courses_query = courses_query.filter_by(domain=domain)
+    if mode != 'all':
+        courses_query = courses_query.filter_by(mode_of_class=mode)
+    if level != 'all':
+        courses_query = courses_query.filter_by(level=level)
 
-    if filters['language'] != 'all':
-        query = query.filter_by(language=filters['language'])
+    courses = courses_query.all()
 
-    if filters['payment'] != 'all':
-        query = query.filter_by(payment=filters['payment'])
+    return render_template('courses.html', courses=courses)    
 
-    if filters['domain'] != 'all':
-        query = query.filter_by(domain=filters['domain'])
+@app.route('/courses', methods=['POST'])
+def course_list():
+    language = request.args.get('language', 'all')
+    payment = request.args.get('payment', 'all')
+    domain = request.args.get('domain', 'all')
+    mode = request.args.get('mode', 'all')
+    level = request.args.get('level', 'all')
 
-    if filters['mode'] != 'all':
-        query = query.filter_by(mode_of_class=filters['mode'])
+    filters = []
+    if language != 'all':
+        filters.append(Course.language == language)
+    if payment != 'all':
+        filters.append(Course.payment == payment)
+    if domain != 'all':
+        filters.append(Course.domain == domain)
+    if mode != 'all':
+        filters.append(Course.mode_of_class == mode)
+    if level != 'all':
+        filters.append(Course.level == level)
 
-    if filters['level'] != 'all':
-        query = query.filter_by(level=filters['level'])
-
-    courses = query.all()
+    if filters:
+        courses = Course.query.filter(*filters).all()
+    else:
+        courses = Course.query.all()
 
     return render_template('courses.html', courses=courses)
-    
+
+
+
+@app.route('/edit_education', methods=['POST'])
+def edit_education():
+    if request.method == 'POST':
+        try:
+            
+            degree = request.form['degree']
+            university = request.form['university']
+            year = int(request.form['year'])
+            user_id = int(request.form['user_id'])
+
+            # Retrieve current user based on user_id
+            current_user = User.query.get(user_id)
+            if not current_user:
+                return "User not found", 404
+
+            # Update education details if index is valid
+            if current_user.education and index < len(current_user.education):
+                current_user.education[index].degree = degree
+                current_user.education[index].university = university
+                current_user.education[index].year = year
+                db.session.commit()
+                return redirect(url_for('profile', user_id=user_id))
+            else:
+                return "Invalid index or education details", 400
+
+        except Exception as e:
+            return f"Error: {str(e)}", 500
+
+    return redirect(url_for('profile')) 
+
 
 @app.route('/add_education', methods=['POST'])
 @login_required
 def add_education():
-    if current_user.role == 'teacher':
-        degree = request.form['degree']
-        university = request.form['university']
-        year = request.form['year']
-        
-        # Retrieve the Teacher instance for the current user
+    degree = request.form.get('degree')
+    university = request.form.get('university')
+    year = request.form.get('year')
+
+    # Assuming current_user is a Teacher model with education as a list
+    current_user.education.append({
+        'degree': degree,
+        'university': university,
+        'year': year
+    })
+    db.session.commit()
+    flash('Education added successfully.', 'success')
+    return redirect(url_for('profile'))  # Redirect to user info page
+
+@app.route('/delete_education/<int:index>', methods=['POST'])
+@login_required
+def delete_education(index):
+    try:
+        # Retrieve the current user's teacher instance
         teacher = Teacher.query.get(current_user.id)
+        
+        if not teacher:
+            return jsonify({'message': 'Teacher not found.'}), 404
+        
+        # Ensure index is valid (1-based index in HTML form)
+        if index <= 0 or index > len(teacher.education):
+            raise ValueError("Invalid index provided")
 
-        # Create a new education dictionary
-        new_education = {
-            'degree': degree,
-            'university': university,
-            'year': year
-        }
-
-        # Append new education to the teacher's education list
-        if teacher.education:
-            teacher.education.append(new_education)
-        else:
-            teacher.education = [new_education]
-
-        # Commit the changes to the database
+        # Delete the education entry from the list
+        del teacher.education[index - 1]  # Adjust index for zero-based list
+        
+        # Commit the updated teacher object to the database
         db.session.commit()
         
-        flash('Education added successfully!', 'success')
-    else:
-        flash('Only teachers can add education details.', 'danger')
+        return redirect(url_for('profile'))
     
-    return redirect(url_for('profile'))
+    except Exception as e:
+        return jsonify({'message': f'Failed to delete education: {str(e)}'}), 500
 
-# @app.route('/chatbot')
+def save_profile_image(file):
+    # Ensure the folder exists
+    if not os.path.exists('static/uploads/Profile'):
+        os.makedirs('static/uploads/Profile')
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join('static/uploads/Profile', filename)
+    file.save(filepath)
+    return filepath
+
+
+    
+
+    # @app.route('/chatbot')
 # def chatbot():
 #     data = request.get_json()
 #     user_message = data.get('message')
@@ -416,28 +543,6 @@ def update_user_info():
     flash('User information updated successfully!', 'success')
     return redirect(url_for('profile'))
 
-@app.route('/edit_education', methods=['POST'])
-@login_required
-def edit_education():
-    if current_user.role == 'teacher':
-        index = int(request.form['index'])
-        degree = request.form['degree']
-        university = request.form['university']
-        year = request.form['year']
-        
-        current_user.education[index] = {
-            'degree': degree,
-            'university': university,
-            'year': year
-        }
-        
-        db.session.commit()
-        flash('Education details updated successfully!', 'success')
-    else:
-        flash('Only teachers can edit education details.', 'danger')
-    
-    return redirect(url_for('profile'))
-
 
 # @app.route('/chat', methods=['POST'])
 # def chat():
@@ -480,9 +585,7 @@ def contact():
 def FAQs():
     return render_template('faqs.html')
 
-@app.route('/ac')
-def ac():
-    return render_template('temp.html')
+
 
 @app.route('/add_course', methods=['GET', 'POST'])
 @login_required
@@ -585,7 +688,7 @@ def add_course():
     
 @app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
 def edit_course(course_id):
-    course = Course.query.get_or_404(course_id)
+    course = Course.query.get(course_id)
 
     if request.method == 'POST':
         # Update course details
@@ -666,6 +769,84 @@ def edit_course(course_id):
 
     # Render the edit course form with current course details
     return render_template('edit_course.html', course=course)
+
+@app.route('/delete_course/<int:course_id>', methods=['POST'])
+@login_required
+def delete_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    
+    # Ensure the current user is the teacher who created the course
+    if course.teacher_id != current_user.id:
+        return jsonify({'message': 'You do not have permission to delete this course.'}), 403
+    
+    # Delete course files from the server
+    try:
+        if course.thumbnail_img:
+            thumbnail_path = os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', course.thumbnail_img)
+            if os.path.exists(thumbnail_path):
+                os.remove(thumbnail_path)
+        
+        # Delete sample video if exists
+        if course.temp_video:
+            video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', course.temp_video)
+            if os.path.exists(video_path):
+                os.remove(video_path)
+        
+        # Delete chapter assignment files
+        for chapter in course.chapters:
+            if chapter.assignment_file:
+                assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', chapter.assignment_file)
+                if os.path.exists(assignment_path):
+                    os.remove(assignment_path)
+            
+            # Delete resources files
+            for resource in chapter.resources_files:
+                resource_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', chapter.resources_files)
+                if os.path.exists(resource_path):
+                    os.remove(resource_path)
+            
+            # Delete course file
+            if chapter.course_file:
+                course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', chapter.course_file)
+                if os.path.exists(course_file_path):
+                    os.remove(course_file_path)
+
+    except Exception as e:
+        return jsonify({'message': f'Failed to delete course files: {str(e)}'}), 500
+    
+    # Delete the course from the database
+    try:
+        db.session.delete(course)
+        db.session.commit()
+        return redirect(url_for('courses'))
+    except Exception as e:
+        return jsonify({'message': f'Failed to delete course from database: {str(e)}'}), 500
+    
+    
+@app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
+@app.route('/view_chapter/<int:course_id>/<int:chapter_index>')
+@login_required
+def view_chapter(course_id, chapter_index):
+    course = Course.query.get_or_404(course_id)
+    if chapter_index < 0 or chapter_index >= len(course.chapters):
+        return jsonify({'message': 'Invalid chapter index'}), 400
+    
+    chapter = course.chapters[chapter_index]
+    return render_template('view_chapter.html', course=course, chapter=chapter, chapter_index=chapter_index)
+
+@app.route('/enroll/<int:course_id>', methods=['POST'])
+@login_required
+def enroll(course_id):
+    course = Course.query.get_or_404(course_id)
+    student = Student.query.get_or_404(current_user.id)
+
+    # Check if the student is already enrolled in the course
+    
+    student.enrolled_courses.append(course)
+    db.session.commit()
+
+    return redirect(url_for('view_chapter', course_id=course.id))  # Redirect to a relevant page
+    
 
 if __name__ == '__main__':
     with app.app_context():
