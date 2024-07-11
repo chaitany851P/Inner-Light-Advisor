@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ course.name }}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         .course-container {
@@ -132,6 +132,7 @@
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="nav-content-tab" data-toggle="tab" href="#nav-content" role="tab" aria-controls="nav-content" aria-selected="true">Content</a>
                             <a class="nav-item nav-link" id="nav-assessments-tab" data-toggle="tab" href="#nav-assessments" role="tab" aria-controls="nav-assessments" aria-selected="true">Assessments</a>
+                            <a class="nav-item nav-link" id="nav-quiz-tab" data-toggle="tab" href="#nav-resource" role="tab" aria-controls="nav-resource" aria-selected="true">Resource</a>
                         </div>
                     </nav>
                     <div class="tab-content" id="nav-tabContent">
@@ -146,22 +147,43 @@
                             </ol>
                         </div>
                         <div class="tab-pane fade" id="nav-assessments" role="tabpanel" aria-labelledby="nav-assessments-tab">
+                            <ol style="list-style-type: upper-roman;">
                             {% for chapter in course.chapters %}
                             {% if chapter.assignment_file %}
-                                                <a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a>
-                                            
-                                            {% endif %}
-                                            {% endfor %}
+                            <li>
+                                <p>{{ chapter.assignment_file }}</p>
+                               
+                            </li> 
+                            {% endif %}
+                                    
+                            {% endfor %}
+                            </ol>
+                        </div>
+                        <div class="tab-pane fade" id="nav-resource" role="tabpanel" aria-labelledby="nav-resource-tab">
+                            {% for chapter in course.chapters %}
+                            <ol style="list-style-type: upper-roman;">
+                                
+                                {% if chapter.resources_files %}
+                                <li>
+                                    <p>{{ chapter.resources_files }}</p>
+                                   
+                                </li> 
+                                {% endif %}
+                                        
+                                {% endfor %}
+                                </ol>
+
                         </div>
                         <br><br>
                         <form action="{{ url_for('enroll', course_id=course.id) }}" method="POST">
-                            <button type="submit" class="btn btn-primary mb-3">Enroll</button>
+                            <button type="submit" class="btn btn-secondary">Enroll</button>
                         </form>
+
                     </div>
                 </div>
             </div>
         </div>
-        
+        <br>
     </body>
     </html>
     {% endblock %}
