@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course.name }} - {{ chapter.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container2 {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .course-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .video-wrapper {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .lecture-navigation {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .lecture-navigation button {
+            padding: 10px 20px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .lecture-navigation button:hover {
+            background-color: #444c5e;
+        }
+
+        .notes {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container2">
+        <h1>{{ course.name }}</h1>
+        <h2>Chapter: {{ chapter.title }}</h2>
+        {% if chapter.course_file %}
+            <div class="video-wrapper">
+                <video src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="80%" controls></video>
+            </div>      
+            
+            {% endif %}
+        <hr>
+        <h3>Description:</h3>
+        <p>{{ chapter.description }}</p>
+        {% if chapter.assignment_file %}
+            <h3>Assignment:</h3>
+            <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
+        {% endif %}
+        <div class="notes">
+            <h3>Notes:</h3>
+            <p>{{ chapter.note if chapter.note else 'No notes available for this chapter.' }}</p>
+        </div>
+        <!-- Navigation Buttons -->
+        <div class="lecture-navigation">
+            {% if chapter_index > 0 %}
+                <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index - 1) }}">
+                    <button id="prevLectureBtn">&lt; Previous Lecture</button>
+                </a>
+            {% endif %}
+            {% if chapter_index < course.chapters|length - 1 %}
+                <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index + 1) }}">
+                    <button id="nextLectureBtn">Next Lecture &gt;</button>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}
