@@ -1,26 +1,12 @@
 <!-- edit_task.html -->
 {% extends 'base.html' %}
 {% block content %}
-    <div class="container2">
-        <h2>Edit Task</h2>
-        <form method="POST">
-            <label for="title">Title:</label><br>
-            <input type="text" id="title" name="title" value="{{ task.title }}" required><br><br>
-
-            <label for="description">Description:</label><br>
-            <textarea id="description" name="description" rows="4" required>{{ task.description }}</textarea><br><br>
-
-            <label for="status">Status:</label><br>
-            <select id="status" name="status">
-                <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
-                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
-                <!-- Add more options as needed -->
-            </select><br><br>
-
-            <button type="submit" class="btn btn-primary">Update Task</button>
-        </form>
-    </div>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Task</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,11 +16,14 @@
         }
 
         .container2 {
-            width: 50%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            width: 40%;
             margin: 20px auto;
             padding: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
@@ -81,4 +70,30 @@
             background-color: #4c5365;
         }
     </style>
+</head>
+<body>
+    <div class="container2">
+        <h2>Edit Task</h2>
+        <form method="POST">
+            <label for="title">Title:</label><br>
+            <input type="text" id="title" name="title" value="{{ task.title }}" required><br><br>
+
+            <label for="description">Description:</label><br>
+            <textarea id="description" name="description" rows="4" required>{{ task.description }}</textarea><br><br>
+
+            <label for="status">Status:</label><br>
+            <select id="status" name="status">
+                <option value="Pending" {% if task.status == 'Pending' %}selected{% endif %}>Pending</option>
+                <option value="Completed" {% if task.status == 'Completed' %}selected{% endif %}>Completed</option>
+                <!-- Add more options as needed -->
+            </select><br><br>
+
+            <button type="submit" class="btn btn-primary">Update Task</button>
+        </form>
+    </div>
+
+</body>
+</html>
+    
+    
 {% endblock %}
