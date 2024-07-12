@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
     
     <style>
         .navbar {
@@ -26,78 +28,169 @@
         * {
   font-family: Open Sans;
 }
-        @import url('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css');
-        section {
-            padding: 60px 0;
-        }
-        section .section-title {
-            text-align: center;
-            color:#333;
-            margin-bottom: 50px;
-            text-transform: uppercase;
-        }
-        #footer {
-            background: #333 !important;
-        }
-        #footer h5 {
-            padding-left: 10px;
-            border-left: 3px solid #eeeeee;
-            padding-bottom: 6px;
-            margin-bottom: 20px;
-            color:#ffffff;
-        }
-        #footer a {
-            color: #ffffff;
-            text-decoration: none !important;
-            background-color: transparent;
-            -webkit-text-decoration-skip: objects;
-        }
-        #footer ul.social li {
-            padding: 3px 0;
-        }
-        #footer ul.social li a i {
-            margin-right: 5px;
-            font-size: 25px;
-            -webkit-transition: .5s all ease;
-            -moz-transition: .5s all ease;
-            transition: .5s all ease;
-        }
-        #footer ul.social li:hover a i {
-            font-size: 30px;
-            margin-top: -10px;
-        }
-        #footer ul.social li a,
-        #footer ul.quick-links li a {
-            color: #ffffff;
-        }
-        #footer ul.social li a:hover {
-            color: #eeeeee;
-        }
-        #footer ul.quick-links li {
-            padding: 3px 0;
-            -webkit-transition: .5s all ease;
-            -moz-transition: .5s all ease;
-            transition: .5s all ease;
-        }
-        #footer ul.quick-links li:hover {
-            padding: 3px 0;
-            margin-left: 5px;
-            font-weight: 700;
-        }
-        #footer ul.quick-links li a i {
-            margin-right: 5px;
-        }
-        #footer ul.quick-links li:hover a i {
-            font-weight: 700;
-        }
-        @media (max-width: 767px) {
-            #footer h5 {
-                padding-left: 0;
-                border-left: transparent;
-                padding-bottom: 0px;
-                margin-bottom: 10px;
-            }
-        }
+.site-footer
+{
+  background-color:#26272b;
+  padding:45px 0 20px;
+  font-size:15px;
+  line-height:24px;
+  color:#737373;
+}
+.site-footer hr
+{
+  border-top-color:#bbb;
+  opacity:0.5
+}
+.site-footer hr.small
+{
+  margin:20px 0
+}
+.site-footer h6
+{
+  color:#fff;
+  font-size:16px;
+  text-transform:uppercase;
+  margin-top:5px;
+  letter-spacing:2px
+}
+.site-footer a
+{
+  color:#737373;
+}
+.site-footer a:hover
+{
+  color:#3366cc;
+  text-decoration:none;
+}
+.footer-links
+{
+  padding-left:0;
+  list-style:none
+}
+.footer-links li
+{
+  display:block
+}
+.footer-links a
+{
+  color:#737373
+}
+.footer-links a:active,.footer-links a:focus,.footer-links a:hover
+{
+  color:#3366cc;
+  text-decoration:none;
+}
+.footer-links.inline li
+{
+  display:inline-block
+}
+.site-footer .social-icons
+{
+  text-align:right
+}
+.site-footer .social-icons a
+{
+  width:40px;
+  height:40px;
+  line-height:40px;
+  margin-left:6px;
+  margin-right:0;
+  border-radius:100%;
+  background-color:#33353d
+}
+.copyright-text
+{
+  margin:0
+}
+@media (max-width:991px)
+{
+  .site-footer [class^=col-]
+  {
+    margin-bottom:30px
+  }
+}
+@media (max-width:767px)
+{
+  .site-footer
+  {
+    padding-bottom:0
+  }
+  .site-footer .copyright-text,.site-footer .social-icons
+  {
+    text-align:center
+  }
+}
+.social-icons
+{
+  padding-left:0;
+  margin-bottom:0;
+  list-style:none
+}
+.social-icons li
+{
+  display:inline-block;
+  margin-bottom:4px
+}
+.social-icons li.title
+{
+  margin-right:15px;
+  text-transform:uppercase;
+  color:#96a2b2;
+  font-weight:700;
+  font-size:13px
+}
+.social-icons a{
+  background-color:#eceeef;
+  color:#818a91;
+  font-size:16px;
+  display:inline-block;
+  line-height:44px;
+  width:44px;
+  height:44px;
+  text-align:center;
+  margin-right:8px;
+  border-radius:100%;
+  -webkit-transition:all .2s linear;
+  -o-transition:all .2s linear;
+  transition:all .2s linear
+}
+.social-icons a:active,.social-icons a:focus,.social-icons a:hover
+{
+  color:#fff;
+  background-color:#29aafe
+}
+.social-icons.size-sm a
+{
+  line-height:34px;
+  height:34px;
+  width:34px;
+  font-size:14px
+}
+.social-icons a.facebook:hover
+{
+  background-color:#3b5998
+}
+.social-icons a.twitter:hover
+{
+  background-color:#00aced
+}
+.social-icons a.linkedin:hover
+{
+  background-color:#007bb6
+}
+.social-icons a.dribbble:hover
+{
+  background-color:#ea4c89
+}
+@media (max-width:767px)
+{
+  .social-icons li.title
+  {
+    display:block;
+    margin-right:0;
+    font-weight:600
+  }
+}
     </style>
     
 </head>
@@ -124,64 +217,54 @@
         
         {% endblock %}
     </main>
-    <section id="footer">
-        <div class="container ">
-            <div class="row text-center text-xs-center text-sm-left text-md-left">
-                <div class="col-xs-12 col-sm-4 col-md-4">
-                    <h5>Quick links</h5>
-                    <ul class="list-unstyled quick-links">
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Home</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>About</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>FAQ</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Get Started</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Videos</a></li>
-                    </ul>
-                </div>
-                <div class="col-xs-12 col-sm-4 col-md-4">
-                    <h5>Quick links</h5>
-                    <ul class="list-unstyled quick-links">
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Home</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>About</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>FAQ</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Get Started</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Videos</a></li>
-                    </ul>
-                </div>
-                <div class="col-xs-12 col-sm-4 col-md-4">
-                    <h5>Quick links</h5>
-                    <ul class="list-unstyled quick-links">
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Home</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>About</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>FAQ</a></li>
-                        <li><a href="javascript:void();"><i class="fa fa-angle-double-right"></i>Get Started</a></li>
-                        <li><a href="https://www.sunlimetech.com" title="Design and developed by"><i class="fa fa-angle-double-right"></i>Imprint</a></li>
-                    </ul>
-                </div>
+    <footer class="site-footer">
+        <div class="container">
+          <div class="row">
+            <div class="col-sm-12 col-md-6">
+              <h6>About</h6>
+              <p class="text-justify">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatem sunt unde dolorum deleniti libero aliquam iste eos consequatur blanditiis! Omnis sequi totam impedit voluptate voluptatem doloribus, magnam saepe accusamus quasi consequatur sit, iure nulla natus earum alias modi non nemo debitis nostrum dolorum repellendus culpa, dolore et molestias. Facilis, pariatur?</p>
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 mt-2 mt-sm-5">
-                    <ul class="list-unstyled list-inline social text-center">
-                        <li class="list-inline-item"><a href="javascript:void();"><i class="fa fa-facebook"></i>FB</a></li>
-                        <li class="list-inline-item"><a href="javascript:void();"><i class="fa fa-twitter"></i></a></li>
-                        <li class="list-inline-item"><a href="javascript:void();"><i class="fa fa-instagram"></i></a></li>
-                        <li class="list-inline-item"><a href="javascript:void();"><i class="fa fa-google-plus"></i></a></li>
-                        <li class="list-inline-item"><a href="javascript:void();" target="_blank"><i class="fa fa-envelope"></i></a></li>
-                    </ul>
-                </div>
-                <hr>
+  
+            <div class="col-xs-6 col-md-3">
+              
             </div>
-            <div class="row">
-                <div class="col-xs-12 col-sm-12 col-md-12 mt-2 mt-sm-2 text-center text-white">
-                    <p><u><a href="https://www.nationaltransaction.com/">National Transaction Corporation</a></u> is a Registered MSP/ISO of Elavon, Inc. Georgia [a wholly owned subsidiary of U.S. Bancorp, Minneapolis, MN]</p>
-                    <p class="h6">&copy; All rights reserved. <a class="text-green ml-2" href="https://www.sunlimetech.com" target="_blank">Sunlimetech</a></p>
-                </div>
-                <hr>
+  
+            <div class="col-xs-6 col-md-3">
+              <h6>Quick Links</h6>
+              <ul class="footer-links">
+                <li><a href="{{ url_for ('about')}}">About Us</a></li>
+                <li><a href="{{url_for('contact')}}">Contact Us</a></li>
+                <li><a href="{{ url_for('FAQs')}}">FAQs</a></li>
+                <!-- <li><a href="http://scanfcode.com/privacy-policy/">Privacy Policy</a></li>
+                <li><a href="http://scanfcode.com/sitemap/">Sitemap</a></li> -->
+              </ul>
             </div>
+          </div>
+          <hr>
         </div>
-    </section>
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-8 col-sm-6 col-xs-12">
+              <p class="copyright-text">Copyright &copy; 2017 All Rights Reserved by 
+           <a href="#">Scanfcode</a>.
+              </p>
+            </div>
+  
+            <div class="col-md-4 col-sm-6 col-xs-12">
+                <ul class="social-icons">
+                    <li><a class="instagram" href="#" ><i class="bi bi-instagram"></i></a></li>
+                    <li><a class="twitter" href="#" ><i class="bi bi-twitter-x"></i></a></li>
+                    <li><a class="github"   href="#"><i class="bi bi-github"></i></a></li>
+                    <li><a class="linkedin" href="#"><i class="bi bi-linkedin"></i></a></li>
+                </ul>
+                
+            </div>
+          </div>
+        </div>
+  </footer>
+    <!-- <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script> -->
 </body>
 
 </html>
