@@ -7,56 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Course</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        /* static/css/style.css */
-
-        /* General styling for the container */
-        .container2 {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            background-color: #f9f9f9;
-        }
-
-        /* Styling for form labels */
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        /* Styling for text inputs and textareas */
-        input[type="text"],
-        textarea {
-            width: calc(100% - 20px);
-            padding: 8px;
-            margin-bottom: 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; /* Ensures padding is included in the width */
-            font-size: 14px;
-        }
-
-        /* Styling for file inputs */
-        input[type="file"] {
-            margin-bottom: 12px;
-        }
-
-        /* Styling for the submit button */
-        button[type="submit"] {
-            background-color: #444c5e;
-            color: white;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-    </style>
 </head>
 <body>
-
 <div class="container2">
     <h1>Edit Course</h1>
     <form action="{{ url_for('edit_course', course_id=course.id) }}" method="POST" enctype="multipart/form-data">
@@ -84,26 +36,67 @@
         <label for="learner_type">Learner Type:</label>
         <input type="text" id="learner_type" name="learner_type" value="{{ course.learner_type }}" required><br><br>
 
-        <label for="thumbnail_img">Thumbnail Image:</label>
+        <label for="thumbnail_img">Thumbnail Image:</label><br>
+        {% if course.thumbnail_img %}
+            <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="Thumbnail Image"><br><br>
+        {% else %}
+            <p>No current thumbnail image</p><br><br>
+        {% endif %}
         <input type="file" id="thumbnail_img" name="thumbnail_img"><br><br>
 
-        <label for="temp_video">Sample Video:</label>
+        <label for="temp_video">Sample Video:</label><br>
+        {% if course.temp_video %}
+            <video width="320" height="240" controls>
+                <source src="{{ url_for('static', filename='uploads/sample_video/' ~ course.temp_video) }}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video><br><br>
+        {% else %}
+            <p>No current sample video</p><br><br>
+        {% endif %}
         <input type="file" id="temp_video" name="temp_video"><br><br>
         
         <h3>Chapters:</h3>
-        <!-- Add fields for existing chapters with pre-filled data -->
-        <div>
+        <input type="hidden" id="chapter_count" name="chapter_count" value="{{ course.chapters|length }}">
+        {% set index = 0 %}
         {% for chapter in course.chapters %}
-            <label for="chapter_{{ loop.index }}_title">Chapter {{ loop.index }} Title:</label>
-            <input type="text" id="chapter_{{ loop.index }}_title" name="chapter_{{ loop.index }}_title" value="{{ chapter.title }}"><br><br>
+        
+            <label for="chapter_{{ index + 1 }}_title">Chapter {{ index + 1 }} Title:</label>
+            <input type="text" id="chapter_{{ index + 1 }}_title" name="chapter_{{ index + 1 }}_title" value="{{ chapter.title }}"><br><br>
 
-            <label for="chapter_{{ loop.index }}_description">Chapter {{ loop.index }} Description:</label><br>
-            <textarea id="chapter_{{ loop.index }}_description" name="chapter_{{ loop.index }}_description" rows="4">{{ chapter.description }}</textarea><br><br>
+            <label for="chapter_{{ index + 1 }}_description">Chapter {{ index + 1 }} Description:</label><br>
+            <textarea id="chapter_{{ index + 1 }}_description" name="chapter_{{ index + 1 }}_description" rows="4">{{ chapter.description }}</textarea><br><br>
 
-            <label for="chapter_{{ loop.index }}_assignment_file">Assignment File:</label>
-            <input type="file" id="chapter_{{ loop.index }}_assignment_file" name="chapter_{{ loop.index }}_assignment_file"><br><br>
+            <label for="chapter_{{ index + 1 }}_assignment_file">Assignment File:</label><br>
+            {% if chapter.assignment_file %}
+                <p>Current File: {{ chapter.assignment_file }}</p><br>
+            {% else %}
+                <p>No current assignment file</p><br>
+            {% endif %}
+            <input type="file" id="chapter_{{ index + 1 }}_assignment_file" name="chapter_{{ index + 1 }}_assignment_file"><br><br>
+
+            <label for="chapter_{{ index + 1 }}_course_file">Course File:</label><br>
+            {% if chapter.course_file %}
+                <p>Current File: {{ chapter.course_file }}</p><br>
+            {% else %}
+                <p>No current course file</p><br>
+            {% endif %}
+            <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file"><br><br>
+
+            <label for="chapter_{{ index + 1 }}_note">Chapter {{ index + 1 }} Note:</label>
+            <input type="text" id="chapter_{{ index + 1 }}_note" name="chapter_{{ index + 1 }}_note" value="{{ chapter.note }}"><br><br>
+
+            <label for="chapter_{{ index + 1 }}_resources">Resources Files:</label><br>
+            {% if chapter.resources_files %}
+                <p>Current Files:<br> {% for file in chapter.resources_files %}
+                    <p>{{ file }}</p><br>
+                {% endfor %}</p><br>
+            {% else %}
+                <p>No current resource files</p><br>
+            {% endif %}
+            <input type="file" id="chapter_{{ index + 1 }}_resources" name="chapter_{{ index + 1 }}_resources" multiple><br><br>
+            
+            {% set index = index + 1 %}
         {% endfor %}
-        </div>
 
         <button type="submit">Update Course</button>
     </form>
