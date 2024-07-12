@@ -120,6 +120,10 @@ class ContactMessage(db.Model):
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.route('/base')
+def base():
+    return render_template('base.html')
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -261,7 +265,7 @@ def profile():
                     teacher.img = filepath
                     db.session.commit()
 
-                flash('Profile image updated successfully')
+                flash('Profile image updated successfully', 'success')
                 return redirect(url_for('profile'))  # Redirect to avoid re-posting on refresh
 
     # Fetch the user's profile image path
@@ -274,7 +278,7 @@ def profile():
     else:
         profile_image = None
 
-    return render_template('profile.html', profile_image=profile_image)
+    return render_template('profile.html', img=profile_image)
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -410,10 +414,10 @@ def course_list():
 def edit_education():
     if request.method == 'POST':
         try:
-            
+            index = int(request.form['index'])
             degree = request.form['degree']
             university = request.form['university']
-            year = int(request.form['year'])
+            year = request.form['year']
             user_id = int(request.form['user_id'])
 
             # Retrieve current user based on user_id
@@ -423,9 +427,9 @@ def edit_education():
 
             # Update education details if index is valid
             if current_user.education and index < len(current_user.education):
-                current_user.education[index].degree = degree
-                current_user.education[index].university = university
-                current_user.education[index].year = year
+                current_user.education[index]['degree'] = degree
+                current_user.education[index]['university'] = university
+                current_user.education[index]['year'] = year
                 db.session.commit()
                 return redirect(url_for('profile', user_id=user_id))
             else:
@@ -454,40 +458,42 @@ def add_education():
     flash('Education added successfully.', 'success')
     return redirect(url_for('profile'))  # Redirect to user info page
 
-@app.route('/delete_education/<int:index>', methods=['POST'])
+@app.route('/delete_education', methods=['POST'])
 @login_required
-def delete_education(index):
+def delete_education():
     try:
-        # Retrieve the current user's teacher instance
-        teacher = Teacher.query.get(current_user.id)
-        
-        if not teacher:
-            return jsonify({'message': 'Teacher not found.'}), 404
-        
-        # Ensure index is valid (1-based index in HTML form)
-        if index <= 0 or index > len(teacher.education):
-            raise ValueError("Invalid index provided")
+        index = int(request.form['index']) - 1
+        user_id = int(request.form['user_id'])
 
-        # Delete the education entry from the list
-        del teacher.education[index - 1]  # Adjust index for zero-based list
-        
-        # Commit the updated teacher object to the database
-        db.session.commit()
-        
-        return redirect(url_for('profile'))
-    
+        # Retrieve current user based on user_id
+        current_user = Teacher.query.get(user_id)
+        if not current_user:
+            return "User not found", 404
+
+        # Remove education details if index is valid
+        if current_user.education and 0 <= index < len(current_user.education):
+            current_user.education.pop(index)
+            db.session.commit()
+            return redirect(url_for('profile'))
+        else:
+            return "Invalid index or education details", 400
+
     except Exception as e:
-        return jsonify({'message': f'Failed to delete education: {str(e)}'}), 500
+        return f"Error: {str(e)}", 500
+    
 
 def save_profile_image(file):
     # Ensure the folder exists
-    if not os.path.exists('static/uploads/Profile'):
-        os.makedirs('static/uploads/Profile')
+    upload_folder = 'static/uploads/Profile'
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
 
     filename = secure_filename(file.filename)
-    filepath = os.path.join('static/uploads/Profile', filename)
+    filepath = os.path.join(upload_folder, filename)  # Filesystem path
     file.save(filepath)
-    return filepath
+    
+    # Return the URL path with forward slashes
+    return f'uploads/Profile/{filename}'
 
 
     
@@ -687,11 +693,18 @@ def add_course():
     return render_template('add_course.html')
     
 @app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
+@login_required
 def edit_course(course_id):
-    course = Course.query.get(course_id)
+    # Retrieve the course from the database
+    course = Course.query.get_or_404(course_id)
+
+    # Check if the current user is the teacher of the course
+    if current_user.role != 'teacher' or current_user.id != course.teacher_id:
+        flash('Unauthorized to edit this course.', 'danger')
+        return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        # Update course details
+        # Retrieve form fields
         course.name = request.form['name']
         course.description = request.form['description']
         course.level = request.form['level']
@@ -701,41 +714,49 @@ def edit_course(course_id):
         course.mode_of_class = request.form['mode_of_class']
         course.learner_type = request.form['learner_type']
 
-        # Handle thumbnail image update if provided
-        thumbnail_img = request.files.get('thumbnail_img')
+        # Handle thumbnail image update
+        thumbnail_img = request.files['thumbnail_img']
         if thumbnail_img and thumbnail_img.filename != '':
-            filename = secure_filename(thumbnail_img.filename)
-            thumbnail_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Thumbnail', filename)
-            thumbnail_img.save(thumbnail_path)
-            course.thumbnail_img = filename
+            thumbnail_img_filename = secure_filename(thumbnail_img.filename)
+            thumbnail_img.save(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', thumbnail_img_filename))
+            course.thumbnail_img = thumbnail_img_filename
 
-        # Handle sample video update if provided
-        temp_video = request.files.get('temp_video')
+        # Handle sample video update
+        temp_video = request.files['temp_video']
         if temp_video and temp_video.filename != '':
-            filename = secure_filename(temp_video.filename)
-            video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Video', filename)
-            temp_video.save(video_path)
-            course.temp_video = filename
+            temp_video_filename = secure_filename(temp_video.filename)
+            temp_video.save(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', temp_video_filename))
+            course.temp_video = temp_video_filename
 
-        # Update chapters
+        # Handle chapters update
         chapters = []
         chapter_count = int(request.form.get('chapter_count', 0))
         for i in range(1, chapter_count + 1):
-            chapter_title = request.form.get(f'chapter_{i}_title', '')
-            chapter_description = request.form.get(f'chapter_{i}_description', '')
+            chapter_title = request.form[f'chapter_{i}_title']
+            chapter_description = request.form[f'chapter_{i}_description']
             chapter_assignment_file = request.files.get(f'chapter_{i}_assignment_file')
             chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')
-            chapter_note = request.form.get(f'chapter_{i}_note', '')
+            chapter_note = request.form[f'chapter_{i}_note']
             chapter_course_file = request.files.get(f'chapter_{i}_course_file')
 
-            # Save assignment file if provided
-            assignment_filename = None
+            # Retrieve existing chapter or create a new one
+            if i <= len(course.chapters):
+                chapter = course.chapters[i - 1]
+            else:
+                chapter = chapter()  # Ensure Chapter is correctly defined in your models
+
+            chapter.title = chapter_title
+            chapter.description = chapter_description
+            chapter.note = chapter_note
+
+            # Update assignment file if provided
             if chapter_assignment_file and chapter_assignment_file.filename != '':
                 assignment_filename = secure_filename(chapter_assignment_file.filename)
                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', assignment_filename)
                 chapter_assignment_file.save(assignment_path)
+                chapter.assignment_file = assignment_filename
 
-            # Save resources files if provided
+            # Update resources files if provided
             resources_filenames = []
             for file in chapter_resources_files:
                 if file and file.filename != '':
@@ -743,28 +764,23 @@ def edit_course(course_id):
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', filename)
                     file.save(file_path)
                     resources_filenames.append(filename)
+            chapter.resources_files = resources_filenames
 
-            # Save course file if provided
-            course_filename = None
+            # Update course file if provided
             if chapter_course_file and chapter_course_file.filename != '':
                 course_filename = secure_filename(chapter_course_file.filename)
                 course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', course_filename)
                 chapter_course_file.save(course_path)
+                chapter.course_file = course_filename
 
-            chapters.append({
-                'title': chapter_title,
-                'description': chapter_description,
-                'assignment_file': assignment_filename,
-                'resources_files': resources_filenames,
-                'note': chapter_note,
-                'course_file': course_filename
-            })
+            chapters.append(chapter)
 
         course.chapters = chapters
 
         # Commit changes to the database
         db.session.commit()
 
+        flash('Course updated successfully!', 'success')
         return redirect(url_for('courses'))
 
     # Render the edit course form with current course details
@@ -794,23 +810,22 @@ def delete_course(course_id):
         
         # Delete chapter assignment files
         for chapter in course.chapters:
-            if chapter.assignment_file:
-                assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', chapter.assignment_file)
-                if os.path.exists(assignment_path):
-                    os.remove(assignment_path)
-            
-            # Delete resources files
-            for resource in chapter.resources_files:
-                resource_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', chapter.resources_files)
-                if os.path.exists(resource_path):
-                    os.remove(resource_path)
+            if 'resources_files' in chapter:
+                for resource in chapter['resources_files']:
+                    resource_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', resource)
+                    if os.path.exists(resource_path):
+                        os.remove(resource_path)
             
             # Delete course file
-            if chapter.course_file:
-                course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', chapter.course_file)
+            if 'course_file' in chapter:
+                course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', chapter['course_file'])
                 if os.path.exists(course_file_path):
                     os.remove(course_file_path)
 
+            if 'assignment_file' in chapter:
+                assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', chapter['assignment_file'])
+                if os.path.exists(assignment_path):
+                    os.remove(assignment_path)
     except Exception as e:
         return jsonify({'message': f'Failed to delete course files: {str(e)}'}), 500
     
