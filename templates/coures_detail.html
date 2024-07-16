@@ -6,8 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ course.name }}</title>
-    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"> -->
     <style>
         .course-container {
             max-width: 800px;
@@ -131,8 +131,9 @@
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="nav-content-tab" data-toggle="tab" href="#nav-content" role="tab" aria-controls="nav-content" aria-selected="true">Content</a>
-                            <a class="nav-item nav-link" id="nav-assessments-tab" data-toggle="tab" href="#nav-assessments" role="tab" aria-controls="nav-assessments" aria-selected="true">Assessments</a>
-                            <a class="nav-item nav-link" id="nav-quiz-tab" data-toggle="tab" href="#nav-resource" role="tab" aria-controls="nav-resource" aria-selected="true">Resource</a>
+                            <a class="nav-item nav-link" id="nav-assessments-tab" data-toggle="tab" href="#nav-assessments" role="tab" aria-controls="nav-assessments" aria-selected="false">Assessments</a>
+                            <a class="nav-item nav-link" id="nav-resource-tab" data-toggle="tab" href="#nav-resource" role="tab" aria-controls="nav-resource" aria-selected="false">Resource</a>
+                            <a class="nav-item nav-link" id="nav-quiz-tab" data-toggle="tab" href="#nav-quiz" role="tab" aria-atomic="nav-quzi" aria-selected="false">Quiz</a>
                         </div>
                     </nav>
                     <div class="tab-content" id="nav-tabContent">
@@ -148,42 +149,46 @@
                         </div>
                         <div class="tab-pane fade" id="nav-assessments" role="tabpanel" aria-labelledby="nav-assessments-tab">
                             <ol style="list-style-type: upper-roman;">
-                            {% for chapter in course.chapters %}
-                            {% if chapter.assignment_file %}
-                            <li>
-                                <p>{{ chapter.assignment_file }}</p>
-                               
-                            </li> 
-                            {% endif %}
-                                    
-                            {% endfor %}
+                                {% for chapter in course.chapters %}
+                                    {% if chapter.assignment_file %}
+                                        <li>
+                                            <p>{{ chapter.assignment_file }}</p>
+                                        </li> 
+                                    {% endif %}
+                                {% endfor %}
                             </ol>
                         </div>
                         <div class="tab-pane fade" id="nav-resource" role="tabpanel" aria-labelledby="nav-resource-tab">
-                            {% for chapter in course.chapters %}
                             <ol style="list-style-type: upper-roman;">
-                                
-                                {% if chapter.resources_files %}
-                                <li>
-                                    <p>{{ chapter.resources_files }}</p>
-                                   
-                                </li> 
-                                {% endif %}
+                                {% for chapter in course.chapters %}
+                                    {% if chapter.resources_files %}
+                                    <li>{% for resource in chapter.resources_files %}
+                                        <p>{{ resource }}</p></li>
                                         
+                                        {% endfor %}
+                                    {% endif %}
                                 {% endfor %}
-                                </ol>
-
+                            </ol>
                         </div>
-                        <br><br>
-                        <form action="{{ url_for('enroll', course_id=course.id) }}" method="POST">
-                            <button type="submit" class="btn btn-secondary">Enroll</button>
-                        </form>
-
+                        <div class="tab-pane fade" id="nav-quiz" role="tabpanel" aria-labelledby="nav-quiz-tab">
+                            <ol style="list-style-type: upper-roman;">
+                                <li>ok</li>
+                            </ol>
+                        </div>
                     </div>
+
+                    <br><br>
+                    <form action="{{ url_for('enroll', course_id=course.id) }}" method="POST">
+                        <button type="submit" class="btn btn-secondary">Enroll</button>
+                    </form>
                 </div>
             </div>
         </div>
-        <br>
-    </body>
-    </html>
-    {% endblock %}
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+{% endblock %}
