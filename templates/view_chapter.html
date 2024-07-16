@@ -77,17 +77,25 @@
         <h2>Chapter: {{ chapter.title }}</h2>
         {% if chapter.course_file %}
             <div class="video-wrapper">
-                <video src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="80%" controls></video>
-            </div>      
-            
-            {% endif %}
+                <video src="{{ url_for('static', filename='uploads/Course/' + chapter.course_file) }}" width="80%" controls></video>
+                <audio src=""></audio>
+            </div>
+        {% endif %}
         <hr>
         <h3>Description:</h3>
         <p>{{ chapter.description }}</p>
         {% if chapter.assignment_file %}
             <h3>Assignment:</h3>
+            <p>{{ chapter.assignment_file }}</p>
             <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
         {% endif %}
+        
+        <h3>Resources:</h3>
+        {% for resource in chapter.resources_files %}
+            <p>{{ resource }}</p>
+            <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download</a></p>
+        {% endfor %}
+        
         <div class="notes">
             <h3>Notes:</h3>
             <p>{{ chapter.note if chapter.note else 'No notes available for this chapter.' }}</p>
@@ -102,6 +110,10 @@
             {% if chapter_index < course.chapters|length - 1 %}
                 <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index + 1) }}">
                     <button id="nextLectureBtn">Next Lecture &gt;</button>
+                </a>
+            {% else %}
+                <a href="{{ url_for('quiz', course_id=course.id) }}">
+                    <button id="quizBtn">Go to Quiz</button>
                 </a>
             {% endif %}
         </div>
