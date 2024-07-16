@@ -222,19 +222,25 @@
           <div class="row">
             <div class="col-sm-12 col-md-6">
               <h6>About</h6>
-              <p class="text-justify">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Voluptatem sunt unde dolorum deleniti libero aliquam iste eos consequatur blanditiis! Omnis sequi totam impedit voluptate voluptatem doloribus, magnam saepe accusamus quasi consequatur sit, iure nulla natus earum alias modi non nemo debitis nostrum dolorum repellendus culpa, dolore et molestias. Facilis, pariatur?</p>
+              <p class="text-justify">Welcome to our learning platform! We are dedicated to providing high-quality educational resources to help students and teachers achieve their goals. Our platform offers a variety of courses and live classes tailored to different learning styles.</p>
+              <p class="text-justify">Our team is made up of experienced educators and developers who are passionate about making education accessible and engaging. We believe in the power of technology to transform the learning experience, and we strive to create tools that support both students and teachers in their educational journey.</p>
+
             </div>
   
             <div class="col-xs-6 col-md-3">
-              
+              <p></p>
             </div>
   
             <div class="col-xs-6 col-md-3">
               <h6>Quick Links</h6>
               <ul class="footer-links">
+                <a href="{{ url_for ('dashboard')}}">Home</a>
                 <li><a href="{{ url_for ('about')}}">About Us</a></li>
                 <li><a href="{{url_for('contact')}}">Contact Us</a></li>
                 <li><a href="{{ url_for('FAQs')}}">FAQs</a></li>
+                {% if current_user.role == 'teacher' %}
+                <li><a href="{{ url_for ('chatbot')}}">Research with AI</a></li>
+                {% endif %}
                 <!-- <li><a href="http://scanfcode.com/privacy-policy/">Privacy Policy</a></li>
                 <li><a href="http://scanfcode.com/sitemap/">Sitemap</a></li> -->
               </ul>
@@ -245,8 +251,8 @@
         <div class="container">
           <div class="row">
             <div class="col-md-8 col-sm-6 col-xs-12">
-              <p class="copyright-text">Copyright &copy; 2017 All Rights Reserved by 
-           <a href="#">Scanfcode</a>.
+              <p class="copyright-text">Copyright &copy; 2017 All Rights Reserved  
+           
               </p>
             </div>
   
@@ -259,6 +265,7 @@
                 </ul>
                 
             </div>
+            
           </div>
         </div>
   </footer>
