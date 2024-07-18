@@ -7,6 +7,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Course</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* static/css/style.css */
+
+        /* General styling for the container */
+        .container2 {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+        }
+
+        /* Styling for form labels */
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        /* Styling for text inputs and textareas */
+        input[type="text"],
+        textarea {
+            width: calc(100% - 20px);
+            padding: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* Ensures padding is included in the width */
+            font-size: 14px;
+        }
+
+        /* Styling for file inputs */
+        input[type="file"] {
+            margin-bottom: 12px;
+        }
+
+        /* Styling for the submit button */
+        button[type="submit"] {
+            background-color: #444c5e;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
 </head>
 <body>
 <div class="container2">
@@ -69,6 +116,7 @@
             <label for="chapter_{{ index + 1 }}_assignment_file">Assignment File:</label><br>
             {% if chapter.assignment_file %}
                 <p>Current File: {{ chapter.assignment_file }}</p><br>
+                <a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a><br>
             {% else %}
                 <p>No current assignment file</p><br>
             {% endif %}
@@ -76,7 +124,9 @@
 
             <label for="chapter_{{ index + 1 }}_course_file">Course File:</label><br>
             {% if chapter.course_file %}
-                <p>Current File: {{ chapter.course_file }}</p><br>
+            <div class="video-wrapper">
+                <video src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="80%" controls></video>
+            </div>
             {% else %}
                 <p>No current course file</p><br>
             {% endif %}

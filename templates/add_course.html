@@ -1,86 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 <head>
-    <title>Add coures</title>
+    <title>Add Course</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        /* static/css/style.css */
-
-/* General styling for the form container */
-.container2 {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    background-color: #f9f9f9;
-    width: 50%;
-            margin: 20px auto;
-            padding: 20px;
-           
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-
-}
-
-/* Styling for form labels */
-label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
-}
-
-/* Styling for text inputs and textareas */
-input[type="text"],
-input[type="number"],
-textarea {
-    width: calc(100% - 20px);
-    padding: 8px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding is included in the width */
-    font-size: 14px;
-}
-
-/* Styling for select inputs */
-select {
-    width: calc(100% - 20px);
-    padding: 8px;
-    margin-bottom: 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding is included in the width */
-    font-size: 14px;
-}
-
-/* Styling for file inputs */
-input[type="file"] {
-    margin-bottom: 12px;
-}
-
-/* Styling for the add chapter button */
-button[type="submit"] {
-    background-color: #444c5e;
-    color: white;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-/* Optional: Styling for dynamically added chapters */
-#chapters {
-    margin-top: 20px;
-}
-
-/* Optional: Styling for chapter headers */
-h3 {
-    margin-top: 20px;
-}
-
-    </style>
-    
 </head>
 <div class="container2">
     <h1>Add Course</h1>
@@ -134,7 +56,7 @@ h3 {
         </div>
         
         <label for="learner_type">Learner Type:</label>
-        <select id="learner_type" name="learner_type" required>
+        <select id="learner_type" name="learner_type" required onchange="toggleChapterFields()">
             <option></option>
             <option value="Visual">Visual</option>
             <option value="Auditory">Auditory</option>
@@ -145,7 +67,7 @@ h3 {
         <input type="file" id="thumbnail_img" name="thumbnail_img" accept="image/*">
         
         <label for="temp_video">Sample Video:</label>
-        <input type="file" id="temp_video" name="temp_video" accept="video/*">
+        <input type="file" id="temp_video" name="temp_video" accept="video/*"> 
         
         <div id="chaptersContainer">
             <label for="chapter_count">Number of Chapters:</label>
@@ -154,33 +76,92 @@ h3 {
             <div id="chapters">
                 <!-- JavaScript will dynamically generate chapter fields here -->
             </div>
-            
-            <button type="submit">Add Course</button>
-        </form>
+        </div>
+        <label for="quiz_count">Number of Quizzes:</label>
+        <input type="number" id="quiz_count" name="quiz_count" min="1" max="30" required>
         
-        <script>
-            document.getElementById('chapter_count').addEventListener('input', function() {
-                const chapterCount = parseInt(this.value);
-                const chaptersContainer = document.getElementById('chapters');
-                chaptersContainer.innerHTML = ''; // Clear previous chapters
-                for (let i = 1; i <= chapterCount; i++) {
-                    const chapterHTML = `
-                        <h3>Chapter ${i}</h3>
-                        <label for="chapter_${i}_title">Title:</label>
-                        <input type="text" id="chapter_${i}_title" name="chapter_${i}_title" required>
-                        <label for="chapter_${i}_description">Description:</label>
-                        <textarea id="chapter_${i}_description" name="chapter_${i}_description" required></textarea>
-                        <label for="chapter_${i}_assignment_file">Assignment File:</label>
-                        <input type="file" id="chapter_${i}_assignment_file" name="chapter_${i}_assignment_file">
-                        <label for="chapter_${i}_resources">Resource Files:</label>
-                        <input type="file" id="chapter_${i}_resources" name="chapter_${i}_resources" multiple>
-                        <label for="chapter_${i}_note">Note:</label>
-                        <textarea id="chapter_${i}_note" name="chapter_${i}_note" required></textarea>
+        <div id="quizzesContainer">
+            <!-- JavaScript will dynamically generate quiz fields here -->
+        </div>
+            
+        <button type="submit">Add Course</button>
+    </form>
+    
+    <script>
+        document.getElementById('quiz_count').addEventListener('input', function() {
+            const quizCount = parseInt(this.value);
+            const quizzesContainer = document.getElementById('quizzesContainer');
+            quizzesContainer.innerHTML = ''; // Clear previous quizzes
+            for (let i = 1; i <= quizCount; i++) {
+                const quizHTML = `
+                    <h3>Quiz ${i}</h3>
+                    <label for="quiz_${i}_question">Question:</label>
+                    <input type="text" id="quiz_${i}_question" name="quiz_${i}_question" required>
+                    <label for="quiz_${i}_option_1">Option 1:</label>
+                    <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" required>
+                    <label for="quiz_${i}_option_2">Option 2:</label>
+                    <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" required>
+                    <label for="quiz_${i}_option_3">Option 3:</label>
+                    <input type="text" id="quiz_${i}_option_3" name="quiz_${i}_option_3" required>
+                    <label for="quiz_${i}_option_4">Option 4:</label>
+                    <input type="text" id="quiz_${i}_option_4" name="quiz_${i}_option_4" required>
+                    <label for="quiz_${i}_correct_answer">Correct Answer (1-4):</label>
+                    <input type="number" id="quiz_${i}_correct_answer" name="quiz_${i}_correct_answer" min="1" max="4" required>
+                `;
+                quizzesContainer.insertAdjacentHTML('beforeend', quizHTML);
+            }
+        });
+
+        document.getElementById('chapter_count').addEventListener('input', function() {
+            const chapterCount = parseInt(this.value);
+            const chaptersContainer = document.getElementById('chapters');
+            chaptersContainer.innerHTML = ''; // Clear previous chapters
+            const learnerType = document.getElementById('learner_type').value;
+            for (let i = 1; i <= chapterCount; i++) {
+                let mediaFieldHTML = '';
+                if (learnerType === 'Visual') {
+                    mediaFieldHTML = `
                         <label for="chapter_${i}_course_file">Course File:</label>
-                        <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file">
+                        <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="video/*" required>
                     `;
-                    chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
+                } else if (learnerType === 'Auditory') {
+                    mediaFieldHTML = `
+                        <label for="chapter_${i}_course_file">Course File:</label>
+                        <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="audio/*" required>
+                    `;
                 }
-            });
-        </script>
+                const chapterHTML = `
+                    <h3>Chapter ${i}</h3>
+                    <label for="chapter_${i}_title">Title:</label>
+                    <input type="text" id="chapter_${i}_title" name="chapter_${i}_title" required>
+                    <label for="chapter_${i}_description">Description:</label>
+                    <textarea id="chapter_${i}_description" name="chapter_${i}_description" required></textarea>
+                    ${mediaFieldHTML}
+                    <label for="chapter_${i}_assignment_file">Assignment File:</label>
+                    <input type="file" id="chapter_${i}_assignment_file" name="chapter_${i}_assignment_file">
+                    <label for="chapter_${i}_resources">Resource Files:</label>
+                    
+                    <input type="file" id="chapter_${i}_resources" name="chapter_${i}_resources" multiple>
+                    <label for="chapter_${i}_note">Note:</label>
+                    <textarea id="chapter_${i}_note" name="chapter_${i}_note" required></textarea>
+                    <label for="chapter_${i}_resource_link">Resource Link:</label>
+                    <input type="text" id="chapter_${i}_resource_link" name="chapter_${i}_resource_link">
+                    
+                `;
+                chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
+            }
+        });
+
+        function toggleChapterFields() {
+            const chapterCount = parseInt(document.getElementById('chapter_count').value);
+            const learnerType = document.getElementById('learner_type').value;
+            const chaptersContainer = document.getElementById('chapters');
+            chaptersContainer.innerHTML = ''; // Clear previous chapters
+            for (let i = 1; i <= chapterCount; i++) {
+                let mediaFieldHTML = '';
+                
+                chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
+            }
+        }
+    </script>
 {% endblock %}
