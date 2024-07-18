@@ -1,5 +1,3 @@
-{% extends 'base.html' %}
-{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,17 +16,17 @@
         <form id="quizForm">
             {% for quiz in course.quizzes %}
             <div class="quiz-question">
-                <h3>Question {{ loop.index + 1 }}:</h3>
+                <h3>Question {{ loop.index  }}:</h3>
                 <p>{{ quiz.question }}</p>
                 
-                <input type="radio" id="quiz_{{ loop.index }}_option_0" name="question{{ loop.index }}" value="0" required>
-                <label for="quiz_{{ loop.index }}_option_0">{{ quiz.options[0] }}</label><br>
-                <input type="radio" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="1" required>
-                <label for="quiz_{{ loop.index }}_option_1">{{ quiz.options[1] }}</label><br>
-                <input type="radio" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="2" required>
-                <label for="quiz_{{ loop.index }}_option_2">{{ quiz.options[2] }}</label><br>
-                <input type="radio" id="quiz_{{ loop.index }}_option_3" name="question{{ loop.index }}" value="3" required>
-                <label for="quiz_{{ loop.index }}_option_3">{{ quiz.options[3] }}</label><br>
+                <input type="radio" id="quiz_{{ loop.index }}_option_0" name="question{{ loop.index }}" value="1" required>
+                <label for="quiz_{{ loop.index }}_option_1">{{ quiz.options[0] }}</label><br>
+                <input type="radio" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="2" required>
+                <label for="quiz_{{ loop.index }}_option_2">{{ quiz.options[1] }}</label><br>
+                <input type="radio" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="3" required>
+                <label for="quiz_{{ loop.index }}_option_3">{{ quiz.options[2] }}</label><br>
+                <input type="radio" id="quiz_{{ loop.index }}_option_3" name="question{{ loop.index }}" value="4" required>
+                <label for="quiz_{{ loop.index }}_option_4">{{ quiz.options[3] }}</label><br>
             </div>
             {% endfor %}
             
@@ -61,4 +59,3 @@
     </script>
 </body>
 </html>
-{% endblock %}

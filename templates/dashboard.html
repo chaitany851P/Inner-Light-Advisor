@@ -139,7 +139,7 @@
                 <div class="course-content">
                     <h3 class="course-title">{{ course.title }}</h3>
                     <p class="course-description">{{ course.description }}</p>
-                    <a href="{{ url_for('course_detail', course_id=course.id) }}" class="course-link">Go to Course</a>
+                    <a href="{{ url_for('view_chapter', course_id=course.id) }}" class="course-link">Go to Course</a>
                 </div>
             </div>
             {% endfor %}
@@ -149,12 +149,11 @@
         <div class="course-list">
             {% for course in completed_courses %}
             <div class="course-card">
-                <img src="{{ url_for('static', filename='images/' ~ course.image) }}" alt="{{ course.title }}">
+                <img src="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}" alt="Course Image" class="img-thumbnail" style="width: 150px;">
                 <div class="course-content">
                     <h3 class="course-title">{{ course.title }}</h3>
                     <p class="course-description">{{ course.description }}</p>
-                    <a href="{{ url_for('course_info', course_id=course.id) }}" class="course-link">View Course Details</a>
-                </div>
+                                    </div>
             </div>
             {% endfor %}
         </div>

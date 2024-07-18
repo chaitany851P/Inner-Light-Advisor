@@ -101,10 +101,8 @@
                         <ol>
                             {% for chapter in course.chapters %}
                             {% if chapter.assignment_file %}       
-                                        <li>
-                                             <h5><i class="bi bi-journal"></i>{{ chapter.assignment_file }}</h5>
-                                        </li> 
-                                    
+                                        
+                                 <h5><i class="bi bi-journal"></i>{{ chapter.assignment_file }}</h5>                                    
                             
                             {% endif %}
                             
@@ -134,7 +132,7 @@
                  
 
                     {% if current_user.learning_style == 'Visual' %}
-                     <video width="1000px" controls poster="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}">
+                     <video  controls >
                         <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="video/mp4" >
                         Your browser does not support the video tag.
                         </video>
@@ -143,7 +141,7 @@
                     
                      {% if current_user.learning_style == 'Auditory' %}
 
-                     <audio controls>
+                     <audio  controls poster="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}">
                         <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/mp4">
                         Your browser does not support the audio tag.
                      </audio>
