@@ -1,20 +1,28 @@
 from multiprocessing import reduction
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash
+from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
+
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user 
 import os 
-import openai
+from openai import OpenAI,ChatCompletion
+import json
 from werkzeug.utils import secure_filename
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
- 
+from sqlalchemy import Engine, text, update
+from sqlalchemy.engine import result
+
+from datetime import datetime
+# from env import load_dotenv
 
 # Initialize OpenAI API key
-openai.api_key = 'sk-proj-I59lHlwYy3Ns6mpMga8aT3BlbkFJYmnAY7QXsjUSueUG7sae'
+# load_dotenv()
+api_key = os.getenv('sk-proj-I59lHlwYy3Ns6mpMga8aT3BlbkFJYmnAY7QXsjUSueUG7sae') 
+client = OpenAI(api_key='sk-proj-I59lHlwYy3Ns6mpMga8aT3BlbkFJYmnAY7QXsjUSueUG7sae')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
@@ -46,19 +54,15 @@ class Student(User):
     courses_enrolled = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     courses_completed = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     img = db.Column(db.String(200), nullable=True)
-
     __mapper_args__ = {'polymorphic_identity': 'student'}
 
-    # Relationships
-    # Assuming a relationship with courses table
-    enrolled_courses = relationship('Course', secondary='student_courses_enrolled')
-    completed_courses = relationship('Course', secondary='student_courses_completed')
+    enrolled_courses = db.relationship('Course', secondary='student_courses_enrolled')
+    completed_courses = db.relationship('Course', secondary='student_courses_completed')
 
-    def __init__(self, username, email, password, img=None):
-        super().__init__(username, email, password)
+    def __init__(self, name, dob, phone, username, email, password, learning_style, img=None):
+        super().__init__(name=name, dob=dob, phone=phone, username=username, email=email, password=password, role='student', learning_style=learning_style)
         self.img = img
 
-# Define association tables for many-to-many relationships
 student_courses_enrolled = db.Table(
     'student_courses_enrolled',
     db.Column('student_id', db.Integer, db.ForeignKey('student.id'), primary_key=True),
@@ -70,6 +74,7 @@ student_courses_completed = db.Table(
     db.Column('student_id', db.Integer, db.ForeignKey('student.id'), primary_key=True),
     db.Column('course_id', db.Integer, db.ForeignKey('course.id'), primary_key=True)
 )
+
 class Teacher(User):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     education = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
@@ -77,6 +82,11 @@ class Teacher(User):
     courses = db.relationship('Course', backref='teacher', lazy=True)
     tasks = db.relationship('Task', backref='assigned_teacher', lazy=True)
     __mapper_args__ = {'polymorphic_identity': 'teacher'}
+
+    def __init__(self, name, dob, phone, username, email, password, learning_style, education, img=None):
+        super().__init__(name=name, dob=dob, phone=phone, username=username, email=email, password=password, role='teacher', learning_style=learning_style)
+        self.education = education
+        self.img = img
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -101,7 +111,6 @@ class Course(db.Model):
     thumbnail_img = db.Column(db.String(200), nullable=True)
     temp_video = db.Column(db.String(200), nullable=True)
     chapters = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
-    
     quizzes = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
     __mapper_args__ = {'polymorphic_identity': 'course'}
@@ -165,9 +174,9 @@ def signup():
 
         # Create a new user instance based on the selected role
         if role == 'student':
-            new_user = Student(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password, role=role, courses_enrolled=[], courses_completed=[], learning_style='Unassigned')
+            new_user = Student(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password,   learning_style='Unassigned')
         elif role == 'teacher':
-            new_user = Teacher(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password, role=role, education=[], courses=[], learning_style='Unassigned')
+            new_user = Teacher(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password,   learning_style='Unassigned',  education=[])
         else:
             flash('Invalid role selected!', 'danger')
             return redirect(url_for('signup'))
@@ -212,6 +221,26 @@ def dashboard():
     else:
         return redirect(url_for('login'))
     
+@app.route('/add_task', methods=['GET', 'POST'])
+def add_task():
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        teacher_id = current_user.id  # Assuming current_user is authenticated and has an id attribute
+
+        new_task = Task(title=title, description=description, teacher_id=teacher_id)
+
+        try:
+            db.session.add(new_task)
+            db.session.commit()
+            return redirect(url_for('dashboard'))  # Redirect to dashboard or wherever appropriate
+        except Exception as e:
+            db.session.rollback()
+            print(f"Error adding task: {e}")
+            # Handle error, possibly redirect to an error page or show an error message
+
+    return render_template('add_task.html')
+
 @app.route('/edit_task/<int:task_id>', methods=['GET', 'POST'])
 def edit_task(task_id):
     task = Task.query.get(task_id)
@@ -408,37 +437,56 @@ def course_list():
 
     return render_template('courses.html', courses=courses)
 
+@app.route('/quiz/<int:course_id>')
+@login_required
+def quiz(course_id):
+    course = Course.query.get_or_404(course_id)
+
+    return render_template('quiz.html', course=course)
+
+@app.route('/submit_quiz/<int:course_id>', methods=['POST'])
+@login_required
+def submit_quiz(course_id):
+    course = Course.query.get_or_404(course_id)
+    total_questions = len(course.quizzes)
+    correct_answers = 0
+
+    print("Submitting quiz for course:", course_id)  # Debug statement
+    print("Form data received:", request.form)  # Debug statement
+
+    for index, quiz in enumerate(course.quizzes):
+        user_answer = request.form.get(f'question{index + 1}')
+        correct_answer = quiz['correct_answer']
+        print(f"Question {index}: User answer: {user_answer}, Correct answer: {correct_answer}")  # Debug statement
+        if user_answer and int(user_answer) == correct_answer:
+            correct_answers += 1
+
+    percentage_score = (correct_answers / total_questions) * 100
+    passed = percentage_score >= 60
+
+    if passed:
+        if course.id not in current_user.completed_courses:
+            current_user.completed_courses.append(course)
+            db.session.commit()
+        return jsonify(success=True, message='Congratulations! You passed the quiz and completed the course.', passed=True, course_id=course.id)
+    else:
+        return jsonify(success=True, message='Sorry, you did not pass the quiz. Please try again.', passed=False, course_id=course.id)
 
 
-@app.route('/edit_education', methods=['POST'])
-def edit_education():
-    if request.method == 'POST':
-        try:
-            index = int(request.form['index'])
-            degree = request.form['degree']
-            university = request.form['university']
-            year = request.form['year']
-            user_id = int(request.form['user_id'])
+@app.route('/certificate/<int:course_id>')
+@login_required
+def certificate(course_id):
+    course = Course.query.get_or_404(course_id)
+    if course.id not in current_user.completed_courses:
+        pass
+        flash('You have not completed this course yet.', 'danger')
+        return redirect(url_for('view_chapter', course_id=course.id))
 
-            # Retrieve current user based on user_id
-            current_user = User.query.get(user_id)
-            if not current_user:
-                return "User not found", 404
+    return render_template('certificate.html', course=course, user=current_user)
 
-            # Update education details if index is valid
-            if current_user.education and index < len(current_user.education):
-                current_user.education[index]['degree'] = degree
-                current_user.education[index]['university'] = university
-                current_user.education[index]['year'] = year
-                db.session.commit()
-                return redirect(url_for('profile', user_id=user_id))
-            else:
-                return "Invalid index or education details", 400
 
-        except Exception as e:
-            return f"Error: {str(e)}", 500
 
-    return redirect(url_for('profile')) 
+
 
 
 @app.route('/add_education', methods=['POST'])
@@ -498,47 +546,18 @@ def save_profile_image(file):
 
     
 
-    # @app.route('/chatbot')
+# @app.route('/chatbot')
 # def chatbot():
-#     data = request.get_json()
-#     user_message = data.get('message')
-
-#     try:
-#         response = openai.ChatCompletion.create(
-#             model="gpt-3.5-turbo",
-#             messages=[
-#                 {"role": "user", "content": user_message}
-#             ]
-#         )
-#         response_message = response.choices[0].message['content']
-#         return jsonify(response=response_message)
-#     except Exception as e:
-#         return jsonify(error=str(e)), 500
+    
+    
+    
 
 @app.route('/chatbot')
 def chatbot():
     
     return render_template('chatbot.html')
     
-@app.route('/add_task', methods=['GET', 'POST'])
-def add_task():
-    if request.method == 'POST':
-        title = request.form['title']
-        description = request.form['description']
-        teacher_id = current_user.id  # Assuming current_user is authenticated and has an id attribute
 
-        new_task = Task(title=title, description=description, teacher_id=teacher_id)
-
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect(url_for('dashboard'))  # Redirect to dashboard or wherever appropriate
-        except Exception as e:
-            db.session.rollback()
-            print(f"Error adding task: {e}")
-            # Handle error, possibly redirect to an error page or show an error message
-
-    return render_template('add_task.html')
 
 @app.route('/update_user_info', methods=['POST'])
 @login_required
@@ -552,18 +571,19 @@ def update_user_info():
 
 # @app.route('/chat', methods=['POST'])
 # def chat():
-#     data = request.get_json()
-#     user_message = data.get('message')
-
-#     response = openai.ChatCompletion.create(
-#         model="gpt-3.5-turbo",
-#         messages=[
-#             {"role": "user", "content": user_message}
-#         ]
-#     )
-
-#     response_message = response.choices[0].message['content']
-#     return jsonify(response=response_message)
+#     if request.method == 'POST':
+#         prompt = request.form['prompt']
+#         response = client.chat.completions.create(
+#             model="gpt-3.5-turbo",
+#             messages=[
+#                 {"role": "system", "content": "You are a poetic assistant, skilled in explaining complex programming concepts with creative flair."},
+#                 {"role": "user", "content": prompt}
+#             ]
+#         )
+#         return render_template('chatbot.html', prompt=prompt, response=response.choices[0].message.content)
+#     else:
+#         return render_template('chatbot.html')
+#     # return render_template('')
 
 @app.route('/about')
 def about():
@@ -602,39 +622,41 @@ def add_course():
             return redirect(url_for('dashboard'))
 
         # Retrieve form fields
-        name = request.form['name']
-        description = request.form['description']
-        level = request.form['level']
-        domain = request.form['domain']
-        language = request.form['language']
-        payment = request.form['payment']
-        mode_of_class = request.form['mode_of_class']
-        learner_type = request.form['learner_type']
+        name = request.form.get('name')
+        description = request.form.get('description')
+        level = request.form.get('level')
+        domain = request.form.get('domain')
+        language = request.form.get('language')
+        payment = request.form.get('payment')
+        mode_of_class = request.form.get('mode_of_class')
+        learner_type = request.form.get('learner_type')
 
         # Save uploaded files
-        thumbnail_img = request.files['thumbnail_img']
+        thumbnail_img = request.files.get('thumbnail_img')
         if thumbnail_img and thumbnail_img.filename != '':
             thumbnail_img_filename = secure_filename(thumbnail_img.filename)
             thumbnail_img.save(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', thumbnail_img_filename))
         else:
             thumbnail_img_filename = None
 
-        temp_video = request.files['temp_video']
+        temp_video = request.files.get('temp_video')
         if temp_video and temp_video.filename != '':
             temp_video_filename = secure_filename(temp_video.filename)
             temp_video.save(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', temp_video_filename))
         else:
             temp_video_filename = None
 
+        # Handle chapters
         chapters = []
         chapter_count = int(request.form.get('chapter_count', 0))
         for i in range(1, chapter_count + 1):
-            chapter_title = request.form[f'chapter_{i}_title']
-            chapter_description = request.form[f'chapter_{i}_description']
+            chapter_title = request.form.get(f'chapter_{i}_title')
+            chapter_description = request.form.get(f'chapter_{i}_description')
             chapter_assignment_file = request.files.get(f'chapter_{i}_assignment_file')
             chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')
-            chapter_note = request.form[f'chapter_{i}_note']
+            chapter_note = request.form.get(f'chapter_{i}_note')
             chapter_course_file = request.files.get(f'chapter_{i}_course_file')
+            chapter_resource_link = request.form.get(f'chapter_{i}_resource_link')
 
             # Save assignment file if provided
             assignment_filename = None
@@ -665,7 +687,31 @@ def add_course():
                 'assignment_file': assignment_filename,
                 'resources_files': resources_filenames,
                 'note': chapter_note,
-                'course_file': course_filename
+                'course_file': course_filename,
+                'resource_link': chapter_resource_link
+            })
+
+        # Handle quizzes
+        quizzes = []
+        quiz_count = int(request.form.get('quiz_count', 0))
+        for i in range(1, quiz_count + 1):
+            quiz_question = request.form.get(f'quiz_{i}_question')
+            quiz_options = [
+                request.form.get(f'quiz_{i}_option_1'),
+                request.form.get(f'quiz_{i}_option_2'),
+                request.form.get(f'quiz_{i}_option_3'),
+                request.form.get(f'quiz_{i}_option_4')
+            ]
+            quiz_correct_answer = request.form.get(f'quiz_{i}_correct_answer')
+            if quiz_correct_answer is not None:
+                quiz_correct_answer = int(quiz_correct_answer)
+            else:
+                quiz_correct_answer = -1  # Assign a default value to handle missing correct answer
+
+            quizzes.append({
+                'question': quiz_question,
+                'options': quiz_options,
+                'correct_answer': quiz_correct_answer
             })
 
         # Save course details to the database
@@ -681,6 +727,7 @@ def add_course():
             thumbnail_img=thumbnail_img_filename,
             temp_video=temp_video_filename,
             chapters=chapters,
+            quizzes=quizzes,
             teacher_id=current_user.id  # Set the teacher_id to the current user's id
         )
         
@@ -691,6 +738,7 @@ def add_course():
         return redirect(url_for('courses'))
     
     return render_template('add_course.html')
+
     
 @app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
@@ -743,11 +791,11 @@ def edit_course(course_id):
             if i <= len(course.chapters):
                 chapter = course.chapters[i - 1]
             else:
-                chapter = chapter()  # Ensure Chapter is correctly defined in your models
+                chapter = chapter(title='', description='', assignment_file='', resources_files=[], course_file='', note='')
 
-            chapter.title = chapter_title
-            chapter.description = chapter_description
-            chapter.note = chapter_note
+            chapter['title'] = chapter_title
+            chapter['description'] = chapter_description
+            chapter['note'] = chapter_note
 
             # Update assignment file if provided
             if chapter_assignment_file and chapter_assignment_file.filename != '':
@@ -764,14 +812,18 @@ def edit_course(course_id):
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', filename)
                     file.save(file_path)
                     resources_filenames.append(filename)
-            chapter.resources_files = resources_filenames
+            chapter['resources_files'] = resources_filenames
 
             # Update course file if provided
             if chapter_course_file and chapter_course_file.filename != '':
                 course_filename = secure_filename(chapter_course_file.filename)
-                course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', course_filename)
-                chapter_course_file.save(course_path)
-                chapter.course_file = course_filename
+                course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', course_filename)
+                try:
+                    chapter_course_file.save(course_path)
+                    chapter.course_file = course_filename  # Update chapter with the course file name
+                except FileNotFoundError as e:
+                    flash('Error saving course file: {}'.format(e), 'danger')
+                    return redirect(url_for('edit_course', course_id=course_id))  # Redirect in case of error
 
             chapters.append(chapter)
 
@@ -790,7 +842,7 @@ def edit_course(course_id):
 @login_required
 def delete_course(course_id):
     course = Course.query.get_or_404(course_id)
-    
+
     # Ensure the current user is the teacher who created the course
     if course.teacher_id != current_user.id:
         return jsonify({'message': 'You do not have permission to delete this course.'}), 403
@@ -802,13 +854,11 @@ def delete_course(course_id):
             if os.path.exists(thumbnail_path):
                 os.remove(thumbnail_path)
         
-        # Delete sample video if exists
         if course.temp_video:
             video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', course.temp_video)
             if os.path.exists(video_path):
                 os.remove(video_path)
         
-        # Delete chapter assignment files
         for chapter in course.chapters:
             if 'resources_files' in chapter:
                 for resource in chapter['resources_files']:
@@ -816,12 +866,11 @@ def delete_course(course_id):
                     if os.path.exists(resource_path):
                         os.remove(resource_path)
             
-            # Delete course file
             if 'course_file' in chapter:
                 course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', chapter['course_file'])
                 if os.path.exists(course_file_path):
                     os.remove(course_file_path)
-
+            
             if 'assignment_file' in chapter:
                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', chapter['assignment_file'])
                 if os.path.exists(assignment_path):
@@ -833,10 +882,10 @@ def delete_course(course_id):
     try:
         db.session.delete(course)
         db.session.commit()
-        return redirect(url_for('courses'))
+        return jsonify({'message': 'Course deleted successfully'}), 200
     except Exception as e:
         return jsonify({'message': f'Failed to delete course from database: {str(e)}'}), 500
-    
+
     
 @app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
 @app.route('/view_chapter/<int:course_id>/<int:chapter_index>')
