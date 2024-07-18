@@ -16,30 +16,49 @@
             padding: 0;
         }
 
-        .container2 {
-            width: 80%;
-            margin: 20px auto;
+        .main-container {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 20%;
+            background-color: #f4f4f4;
             padding: 20px;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid #ddd;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 10px 0;
+        }
+
+        .sidebar ul li a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .sidebar ul li a:hover {
+            text-decoration: underline;
+        }
+
+        .content {
+            width: 80%;
+            padding: 20px;
         }
 
         h1, h2 {
             text-align: center;
             color: #333;
-        }
-
-        .course-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: Arial, sans-serif;
-            background-color: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-top: 20px;
-            margin-bottom: 20px;
         }
 
         .video-wrapper {
@@ -72,50 +91,106 @@
     </style>
 </head>
 <body>
-    <div class="container2">
-        <h1>{{ course.name }}</h1>
-        <h2>Chapter: {{ chapter.title }}</h2>
-        {% if chapter.course_file %}
-            <div class="video-wrapper">
-                <video src="{{ url_for('static', filename='uploads/Course/' + chapter.course_file) }}" width="80%" controls></video>
-                <audio src=""></audio>
-            </div>
-        {% endif %}
-        <hr>
-        <h3>Description:</h3>
-        <p>{{ chapter.description }}</p>
-        {% if chapter.assignment_file %}
-            <h3>Assignment:</h3>
-            <p>{{ chapter.assignment_file }}</p>
-            <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
-        {% endif %}
-        
-        <h3>Resources:</h3>
-        {% for resource in chapter.resources_files %}
-            <p>{{ resource }}</p>
-            <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download</a></p>
-        {% endfor %}
-        
-        <div class="notes">
-            <h3>Notes:</h3>
-            <p>{{ chapter.note if chapter.note else 'No notes available for this chapter.' }}</p>
+    <div class="main-container">
+        <div class="sidebar">
+            <h1>{{ course.name }}</h1>
+            <ul>
+                {% for chap in course.chapters %}
+                
+                <li><h4><i class="bi bi-play-circle"></i>  <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=loop.index0) }}">{{ chap.title }}</a></h4>
+                        <ol>
+                            {% for chapter in course.chapters %}
+                            {% if chapter.assignment_file %}       
+                                        <li>
+                                             <h5><i class="bi bi-journal"></i>{{ chapter.assignment_file }}</h5>
+                                        </li> 
+                                    
+                            
+                            {% endif %}
+                            
+                            {% endfor %}  
+                            
+                            
+                            {% for chapter in course.chapters %}
+                            {% if chapter.resources_files %}
+                            {% for resource in chapter.resources_files %}
+                                <h5> <i class="bi bi-code-slash"></i> {{ resource }}</h5>
+                                
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                             
+                        </ol>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-        <!-- Navigation Buttons -->
-        <div class="lecture-navigation">
-            {% if chapter_index > 0 %}
-                <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index - 1) }}">
-                    <button id="prevLectureBtn">&lt; Previous Lecture</button>
-                </a>
+        <div class="content">
+            <h1>{{ course.name }}</h1>
+            <h2>Chapter: {{ chapter.title }}</h2>
+            <hr>
+            {% if chapter.course_file %}
+                <div class="video-wrapper">
+                 
+
+                    {% if current_user.learning_style == 'Visual' %}
+                     <video width="1000px" controls poster="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}">
+                        <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="video/mp4" >
+                        Your browser does not support the video tag.
+                        </video>
+                     </video>
+                     {% endif %}
+                    
+                     {% if current_user.learning_style == 'Auditory' %}
+
+                     <audio controls>
+                        <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/mp4">
+                        Your browser does not support the audio tag.
+                     </audio>
+                     {% endif %}
+
+                </div>
             {% endif %}
-            {% if chapter_index < course.chapters|length - 1 %}
-                <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index + 1) }}">
-                    <button id="nextLectureBtn">Next Lecture &gt;</button>
-                </a>
-            {% else %}
-                <a href="{{ url_for('quiz', course_id=course.id) }}">
-                    <button id="quizBtn">Go to Quiz</button>
-                </a>
+            <hr>
+            <h3>Description:</h3>
+            <p>{{ chapter.description }}</p>
+            {% if chapter.assignment_file %}
+                <h3>Assignment:</h3>
+                <p>{{ chapter.assignment_file }}</p>
+                <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
             {% endif %}
+            
+            {% if chapter.resource_file %}
+
+            <h3>Resources:</h3>
+            {% for resource in chapter.resources_files %}
+                <p>{{ resource }}</p>
+                <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download</a></p>
+                
+            {% endfor %}
+            {% endif %}
+            
+            <div class="notes">
+                <h3>Notes:</h3>
+                <p>{{ chapter.note if chapter.note else 'No notes available for this chapter.' }}</p>
+            </div>
+            <!-- Navigation Buttons -->
+            <div class="lecture-navigation">
+                {% if chapter_index > 0 %}
+                    <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index - 1) }}">
+                        <button id="prevLectureBtn">&lt; Previous Lecture</button>
+                    </a>
+                {% endif %}
+                {% if chapter_index < course.chapters|length - 1 %}
+                    <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index + 1) }}">
+                        <button id="nextLectureBtn">Next Lecture &gt;</button>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('quiz', course_id=course.id) }}">
+                        <button id="quizBtn">Go to Quiz</button>
+                    </a>
+                {% endif %}
+            </div>
         </div>
     </div>
 </body>
