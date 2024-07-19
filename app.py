@@ -13,10 +13,6 @@ from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
-from sqlalchemy import Engine, text, update
-from sqlalchemy.engine import result
-
-from datetime import datetime
 # from env import load_dotenv
 
 # Initialize OpenAI API key
@@ -81,12 +77,15 @@ class Teacher(User):
     img = db.Column(db.String(200), nullable=True)
     courses = db.relationship('Course', backref='teacher', lazy=True)
     tasks = db.relationship('Task', backref='assigned_teacher', lazy=True)
+    signature = db.Column(db.String(255), nullable=False) 
     __mapper_args__ = {'polymorphic_identity': 'teacher'}
 
-    def __init__(self, name, dob, phone, username, email, password, learning_style, education, img=None):
+    def __init__(self, name, dob, phone, username, email, password, learning_style, education, img=None, signature=None):
         super().__init__(name=name, dob=dob, phone=phone, username=username, email=email, password=password, role='teacher', learning_style=learning_style)
         self.education = education
         self.img = img
+        self.signature = signature
+
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
@@ -272,7 +271,6 @@ def delete_task(task_id):
             return redirect(url_for('dashboard'))  # Redirect to dashboard with error message
 
     return render_template('delete_task.html', task=task)
-
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -282,20 +280,36 @@ def profile():
             file = request.files['profile_image']
             if file.filename != '':
                 filepath = save_profile_image(file)
-                
                 if current_user.role == 'student':
-                    # Update profile image for student
                     student = Student.query.filter_by(username=current_user.username).first()
-                    student.img = filepath
-                    db.session.commit()
+                    if student:
+                        student.img = filepath
+                        db.session.commit()
                 elif current_user.role == 'teacher':
-                    # Update profile image for teacher
                     teacher = Teacher.query.filter_by(username=current_user.username).first()
-                    teacher.img = filepath
-                    db.session.commit()
+                    if teacher:
+                        teacher.img = filepath
+                        db.session.commit()
 
                 flash('Profile image updated successfully', 'success')
-                return redirect(url_for('profile'))  # Redirect to avoid re-posting on refresh
+                return redirect(url_for('profile'))
+            
+        # Handle signature image upload
+        if 'signature_image' in request.files:
+            file = request.files['signature_image']
+            if file.filename != '':
+                filepath = save_signature_image(file)
+                print(f'Signature image path: {filepath}')  # Debug print
+
+                if current_user.role == 'teacher':
+                    teacher = Teacher.query.filter_by(username=current_user.username).first()
+                    if teacher:
+                        teacher.signature = filepath
+                        db.session.commit()
+                        print(f'Saved signature for teacher {teacher.username}')  # Debug print
+
+                    flash('Signature updated successfully', 'success')
+                    return redirect(url_for('profile'))
 
     # Fetch the user's profile image path
     if current_user.role == 'student':
@@ -307,7 +321,37 @@ def profile():
     else:
         profile_image = None
 
-    return render_template('profile.html', img=profile_image)
+    # Fetch signature for teacher
+    if current_user.role == 'teacher':
+        user = Teacher.query.filter_by(username=current_user.username).first()
+        signature_image = user.signature if user else None
+    else:
+        signature_image = None
+
+    return render_template('profile.html', img=profile_image, signature=signature_image)
+
+def save_profile_image(file):
+    upload_folder = 'static/uploads/Profile'
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(upload_folder, filename)
+    file.save(filepath)
+    
+    return f'uploads/Profile/{filename}'
+
+def save_signature_image(file):
+    upload_folder = 'static/uploads/teacher'
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(upload_folder, filename)
+    file.save(filepath)
+
+    return f'uploads/teacher/{filename}'
+
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -363,7 +407,7 @@ def update_email():
     new_email = request.form['email']
     current_user.email = new_email
     db.session.commit()
-    flash('Email updated successfully!', 'success')
+    jsonify('Email updated successfully!', 'success')
     return redirect(url_for('profile'))
 
 @app.route('/update_password', methods=['POST'])
@@ -467,10 +511,12 @@ def submit_quiz(course_id):
     if passed:
         if course.id not in current_user.completed_courses:
             current_user.completed_courses.append(course)
+            current_user.enrolled_courses.remove(course)
             db.session.commit()
         return jsonify(success=True, message='Congratulations! You passed the quiz and completed the course.', passed=True, course_id=course.id)
     else:
         return jsonify(success=True, message='Sorry, you did not pass the quiz. Please try again.', passed=False, course_id=course.id)
+
 
 
 @app.route('/certificate/<int:course_id>')
@@ -529,20 +575,6 @@ def delete_education():
     except Exception as e:
         return f"Error: {str(e)}", 500
     
-
-def save_profile_image(file):
-    # Ensure the folder exists
-    upload_folder = 'static/uploads/Profile'
-    if not os.path.exists(upload_folder):
-        os.makedirs(upload_folder)
-
-    filename = secure_filename(file.filename)
-    filepath = os.path.join(upload_folder, filename)  # Filesystem path
-    file.save(filepath)
-    
-    # Return the URL path with forward slashes
-    return f'uploads/Profile/{filename}'
-
 
     
 
@@ -894,6 +926,7 @@ def view_chapter(course_id, chapter_index):
     course = Course.query.get_or_404(course_id)
     if chapter_index < 0 or chapter_index >= len(course.chapters):
         return jsonify({'message': 'Invalid chapter index'}), 400
+    # save last view chapter and redirect ti that
     
     chapter = course.chapters[chapter_index]
     return render_template('view_chapter.html', course=course, chapter=chapter, chapter_index=chapter_index)
@@ -908,6 +941,7 @@ def enroll(course_id):
     
     student.enrolled_courses.append(course)
     db.session.commit()
+    
 
     return redirect(url_for('view_chapter', course_id=course.id))  # Redirect to a relevant page
     
