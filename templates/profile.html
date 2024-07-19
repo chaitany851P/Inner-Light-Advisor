@@ -42,6 +42,7 @@
         form input[type="password"],
         form input[type="text"],
         form input[type="date"],
+        form input[type="number"],
         form input[type="file"] { /* Added file input type */
             width: 100%;
             padding: 10px;
@@ -49,7 +50,7 @@
             border: 1px solid #ccc;
             border-radius: 4px;
         }
-        form button {
+        button {
             padding: 10px 20px;
             background-color: #5a627a;
             color: #fff;
@@ -123,45 +124,20 @@
         .education-item .edit-button:hover {
             background-color: #444c5e;
         }
-        /* Styling for edit form */
-        .edit-education-form {
-            display: none;
-            margin-top: 10px;
-            padding: 10px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .edit-education-form label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
-        }
-        .edit-education-form input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        .edit-education-form button {
-            padding: 8px 16px;
-            background-color: #5a627a;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .edit-education-form button:hover {
-            background-color: #444c5e;
-        }
+        
         img {
             width: 100px;
-            /* aspect-ratio: auto 32 / 32; */
+            aspect-ratio: auto 32 / 32;
             height: 100px;
             border-radius: 50%;
         }
+        .img img{
+            width: 180px;
+            aspect-ratio: auto 32 / 32;
+            height: 70px;
+            border-radius: 0%;
+        }
+        
     </style>
 </head>
 <body>
@@ -170,54 +146,67 @@
         <h1>{{ current_user.username }}'s Information</h1>
         
         <div class="user-info">
-            {% if current_user.role == 'student' %}
-                {% if current_user.img %}
+        
                     <img src="{{ url_for('static', filename=current_user.img) }}" alt="Profile Image">
-                {% else %}
-                    <p>No profile image found.</p>
-                {% endif %}
-            {% endif %}
+               
             {% if current_user.role == 'teacher' %}
-                {% if current_user.img %}
-                    <img src="{{ url_for('static', filename=current_user.img) }}" alt="Profile Image">
-                {% else %}
-                    <p>No profile image found.</p>
-                {% endif %}
+                 {% if current_user.signature %}
+                    <div class="img">
+                        <br>
+                        <strong> Signature: </strong> <img src="{{ url_for('static', filename=current_user.signature) }}" alt="Signature Image">
+                    </div>
+                    {% else %}
+                 <p>No signature image found.</p>
+                 {% endif %}
+
             {% endif %}
+            
             <p><strong>Name:</strong> {{ current_user.name }}</p>
             <p><strong>Date of Birth:</strong> {{ current_user.dob }}</p>
             <p><strong>Learner Type:</strong> {{ current_user.learning_style }}</p>
             <p><strong>Role:</strong> {{ current_user.role }}</p>
-            <form action="{{ url_for('profile') }}" method="post" enctype="multipart/form-data">
-                <label for="profile_image">Change Profile Photo:</label>
-                <input type="file" id="profile_image" name="profile_image" accept="image/*">
-                <button type="submit">Upload</button>
-            </form> 
+            <p><strong>Email:</strong> {{ current_user.email }}</p>
+
+            
+            <form id="edit-user-info-form" style="display: none;" action="{{ url_for('update_user_info') }}" method="post">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="dob" value="{{ current_user.dob }}" required>
+                <button type="submit">Save Changes</button>
+            </form>
+
             <button class="edit-button" onclick="showEditUserInfoForm()">Edit</button>
         </div>
 
         <!-- Form for editing user information -->
-        <form id="edit-user-info-form" style="display: none;" action="{{ url_for('update_user_info') }}" method="post">
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
-            <label for="dob">Date of Birth:</label>
-            <input type="date" id="dob" name="dob" value="{{ current_user.dob }}" required>
-            <button type="submit">Save Changes</button>
-        </form>
 
+        <div class="user-info">
+        <form method="POST" enctype="multipart/form-data">
+            <label for="profile_image">Profile Image</label>
+            <input type="file" id="profile_image" name="profile_image">
+            <!-- if user is teacher -->
+            {% if current_user.role == 'teacher' %}
+                <label for="signature">Signature</label>
+                <input type="file" id="signature_image" name="signature_image">
+            {% endif %}
+        
+            <button type="submit">Upload</button>
+        </form>
+    </div>
         <!-- Form for updating email -->
         <form action="{{ url_for('update_email') }}" method="post">
             <label for="email">Update Email:</label>
-            <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
+            <input type="email" id="email" name="email" required>
             <button type="submit">Update Email</button>
         </form>
 
         <!-- Form for updating password -->
-        <form action="{{ url_for('update_password') }}" method="post">
+        <!-- <form action="{{ url_for('update_password') }}" method="post">
             <label for="password">Update Password:</label>
             <input type="password" id="password" name="password" required>
             <button type="submit">Update Password</button>
-        </form>
+        </form> -->
 
         <!-- Education details section -->
         {% if current_user.role == 'teacher' %}
@@ -231,10 +220,6 @@
                     <p><strong>University:</strong> {{ edu['university'] }}</p>
                     <p><strong>Year of Completion:</strong> {{ edu['year'] }}</p>
                 
-                        <!-- Edit button -->
-
-                        <button class="edit-button" type="button" onclick="showEditEducationForm('{{ loop.index0 }}')">Edit</button>
-                        <!-- Delete button -->
                         <form action="{{ url_for('delete_education') }}" method="post">
                             <input type="hidden" name="index" value="{{ loop.index }}">
                             <input type="hidden" name="user_id" value="{{ current_user.id }}">
@@ -242,45 +227,42 @@
                         </form>
                     </div>
 
-                    <!-- Edit education form -->
-                    <form id="edit-education-form-{{ loop.index0 }}" class="edit-education-form" action="{{ url_for('edit_education') }}" method="post" style="display: none;">
-                        <input type="hidden" name="index" value="{{ loop.index0 }}">
-                        <input type="hidden" name="user_id" value="{{ current_user.id }}">
-                        <label for="edit-degree-{{ loop.index0 }}">Degree:</label>
-                        <input type="text" id="edit-degree-{{ loop.index0 }}" name="degree" value="{{ edu['degree'] }}" required>
-                        <label for="edit-university-{{ loop.index0 }}">University:</label>
-                        <input type="text" id="edit-university-{{ loop.index0 }}" name="university" value="{{ edu['university'] }}" required>
-                        <label for="edit-year-{{ loop.index0 }}">Year of Completion:</label>
-                        <input type="text" id="edit-year-{{ loop.index0 }}" name="year" value="{{ edu['year'] }}" required>
-                        <button type="submit">Save Changes</button>
-                    </form>  
+                    
                               
                 {% endfor %}
                 {% else %}
                 <strong>No education details add yet</strong>
                 {% endif %}
             </div>
-
+            <!-- Add education hide and revile on click -->
+             
+            <button class="add-education-button" type="button" onclick="showAddEducationForm()">Add Education</button>
+            <form id="add-education-form" class="add-education-form" action="{{ url_for('add_education') }}" method="post" style="display: none;">
             <!-- Form for adding new education -->
+             <br>
             <h2>Add Your Education</h2>
-            <form action="{{ url_for('add_education') }}" method="post">
+            
                 <label for="degree">Degree:</label>
                 <input type="text" id="degree" name="degree" required>
                 <label for="university">University:</label>
                 <input type="text" id="university" name="university" required>
                 <label for="year">Year of Completion:</label>
-                <input type="text" id="year" name="year" required><br>
+                <input type="number" id="year" name="year" required><br>
                 <button type="submit">Add Education</button>
             </form>
         {% endif %}
     </div>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
+        function showAddEducationForm() {
+            document.getElementById("add-education-form").style.display = "block";
+            }
+            
         // JavaScript functions for showing/hiding edit forms
         function showEditUserInfoForm() {
             document.getElementById('edit-user-info-form').style.display = 'block';
         }
-
+        
         // JavaScript function for showing/hiding edit forms
         function showEditEducationForm(index) {
     // Hide all edit forms
@@ -295,6 +277,7 @@
         editForm.style.display = 'block';
     }
 }
+    
 
     </script>
 </body>

@@ -3,12 +3,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta  charset="UTF-8">
+    <meta  name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ course.name }} - {{ chapter.title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
         body {
+            position: relative;
             font-family: Arial, sans-serif;
             color: #333;
             background-color: #fff;
@@ -88,12 +89,54 @@
         .notes {
             margin-top: 20px;
         }
+        ol h5 a:hover{
+            text-decoration: none !important;
+
+        }
+        .sidebar {
+  /* position: fixed; */
+  top: 0;
+  left: 0;
+  width: 290px;
+  height: 100vh;
+  background-color: #f0f0f0;
+  padding: 20px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.sidebar.hidden {
+  transform: translateX(-270px);
+}
+
+.toggle-sidebar {
+  position: absolute;
+  top: 20px;
+  left: 270px;
+  height: 40px;
+  background-color: #fff;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  
+}
+
+.toggle-sidebar:hover {
+  background-color: #eee;
+}
+
+#sidebar-icon {
+  font-size: 24px;
+}  
     </style>
 </head>
 <body>
     <div class="main-container">
         <div class="sidebar">
+            
+
+
             <h1>{{ course.name }}</h1>
+            
             <ul>
                 {% for chap in course.chapters %}
                 
@@ -102,7 +145,7 @@
                             {% for chapter in course.chapters %}
                             {% if chapter.assignment_file %}       
                                         
-                                 <h5><i class="bi bi-journal"></i>{{ chapter.assignment_file }}</h5>                                    
+                                 <h5><a><i class="bi bi-journal"></i>{{ chapter.assignment_file }}</a></h5>                                    
                             
                             {% endif %}
                             
@@ -112,7 +155,7 @@
                             {% for chapter in course.chapters %}
                             {% if chapter.resources_files %}
                             {% for resource in chapter.resources_files %}
-                                <h5> <i class="bi bi-code-slash"></i> {{ resource }}</h5>
+                                <h5><a> <i class="bi bi-code-slash"></i> {{ resource }}</a></h5>
                                 
                                 {% endfor %}
                             {% endif %}
@@ -123,6 +166,10 @@
                 {% endfor %}
             </ul>
         </div>
+        <button class="toggle-sidebar" aria-label="Toggle sidebar">
+            <i class="bi-code-slash"></i>
+          </button>
+          
         <div class="content">
             <h1>{{ course.name }}</h1>
             <h2>Chapter: {{ chapter.title }}</h2>
@@ -191,6 +238,22 @@
             </div>
         </div>
     </div>
+    <script>
+        const sidebar = document.querySelector('.sidebar');
+const toggleButton = document.querySelector('.toggle-sidebar');
+const sidebarIcon = document.querySelector('#sidebar-icon');
+
+toggleButton.addEventListener('click', () => {
+  sidebar.classList.toggle('hidden');
+  if (sidebar.classList.contains('hidden')) {
+    sidebarIcon.classList.remove('fa-angle-double-left');
+    sidebarIcon.classList.add('fa-angle-double-right');
+  } else {
+    sidebarIcon.classList.remove('fa-angle-double-right');
+    sidebarIcon.classList.add('fa-angle-double-left');
+  }
+});
+    </script>
 </body>
 </html>
 {% endblock %}

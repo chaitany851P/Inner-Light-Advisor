@@ -10,7 +10,7 @@
     
     <style>
         .certificate-bg {
-            background-image: url('{{ url_for('static', filename='img/ila.jpeg') }}');
+            background-image: url(../static/img/ila.jpeg);
             background-size: cover;
             background-position: center;
             height: 100vh;
@@ -18,6 +18,7 @@
         }
         .text-shadow {
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            background-image: url();
         }
         img {
             width: 180px;
@@ -29,7 +30,7 @@
 </head>
 <body>
 
-<div class="flex items-center justify-center h-screen bg-gray-100" style="background-image: url('{{ url_for('static', filename='img/ila.jpeg') }}'); background-repeat: no-repeat; background-position: center center; background-size: cover;">
+<div class="flex items-center justify-center h-screen bg-gray-100" style="background-image: url(../static/img/ila.jpeg); background-repeat: no-repeat; background-position: center center; background-size: cover;">
     <div class="certificate-bg relative flex items-center justify-center" id="certificate">
         <div class="flex flex-col items-center justify-center text-center text-white">
             <div class="text-lg font-bold text-shadow">CERTIFICATE OF COMPLETION</div>
@@ -39,10 +40,7 @@
             <div class="mt-2 text-3xl font-bold text-shadow"> {{ course.name }} </div>
             <div class="flex justify-around w-full mt-16">
                 <div class="mx-40 flex flex-col items-center justify-center">
-                    <!-- get signacher from teacher table  -->
-                     
-                     
-                     <img src="{{ url_for('static', filename='img/teacher/' + course.teacher.signature ) }}" alt="Instructor Signature"> 
+                    <img src="{{ url_for('static', filename='uploads/teacher/' + course.teacher.signature ) }}" alt="Instructor Signature"> 
                     <div class="mt-2 border-t-2 border-white w-48 mx-auto">{{ course.teacher.name }}</div>
                     <div class="mt-2 text-lg">Instructor</div>
                 </div>
