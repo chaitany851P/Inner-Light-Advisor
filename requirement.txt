@@ -1,5 +1,8 @@
-Flask
-Openai
-Flask_SQLAlchemy
-Flask_login
-Flask-WTF
+# Requirements
+
+* Flask==2.0.1
+* Openai==0.25.0
+* Flask-SQLAlchemy==2.5.1
+* Flask-Login==0.6.2
+* Flask-WTF==1.0.1
+* Werkzeug==2.2.2
