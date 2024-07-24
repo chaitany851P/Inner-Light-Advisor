@@ -1,0 +1,5 @@
+Flask
+Openai
+Flask_SQLAlchemy
+Flask_login
+Flask-WTF

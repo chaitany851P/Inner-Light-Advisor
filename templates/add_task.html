@@ -24,7 +24,8 @@
         }
         
         .task-input,
-        .task-textarea {
+        .task-textarea,
+        .task-due_date {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -70,6 +71,11 @@
 
             <label for="description">Description:</label><br>
             <textarea id="description" name="description" class="task-textarea" rows="4" required></textarea><br><br>
+
+            <!-- due date -->
+             <label for="due_date">Due Date:</label><br>
+             <input type="date" id="due_date" name="due_date" class="task-due_date" required><br><br>
+
 
             <button type="submit" class="btn btn-primary">Add Task</button>
         </form>

@@ -92,6 +92,7 @@ class Task(db.Model):
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), default='Pending')  # Example status field
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
+    due_date = db.Column(db.String(20), default=[])
 
     def __repr__(self):
         return f"<Task(title='{self.title}', status='{self.status}')>"
@@ -226,8 +227,9 @@ def add_task():
         title = request.form['title']
         description = request.form['description']
         teacher_id = current_user.id  # Assuming current_user is authenticated and has an id attribute
+        due_date = request.form['due_date']
 
-        new_task = Task(title=title, description=description, teacher_id=teacher_id)
+        new_task = Task(title=title, description=description, teacher_id=teacher_id, due_date=due_date)
 
         try:
             db.session.add(new_task)
@@ -249,6 +251,12 @@ def edit_task(task_id):
         task.title = request.form['title']
         task.description = request.form['description']
         task.status = request.form['status']
+        task.due_date = request.form['due_date']
+        # if satus == Completed then delete task
+        if task.status == 'Completed':
+            db.session.delete(task)
+            db.session.commit()
+            return redirect(url_for('dashboard'))  # Redirect to dashboard or wherever appropriate
         db.session.commit()
         return redirect(url_for('dashboard'))  # Redirect to dashboard or wherever appropriate
 
@@ -401,14 +409,7 @@ def submit():
             flash('An error occurred while saving your learning style.', 'danger')
             return redirect(url_for('index'))
 
-@app.route('/update_email', methods=['POST'])
-@login_required
-def update_email():
-    new_email = request.form['email']
-    current_user.email = new_email
-    db.session.commit()
-    jsonify('Email updated successfully!', 'success')
-    return redirect(url_for('profile'))
+
 
 @app.route('/update_password', methods=['POST'])
 @login_required
@@ -485,7 +486,6 @@ def course_list():
 @login_required
 def quiz(course_id):
     course = Course.query.get_or_404(course_id)
-
     return render_template('quiz.html', course=course)
 
 @app.route('/submit_quiz/<int:course_id>', methods=['POST'])
@@ -501,21 +501,28 @@ def submit_quiz(course_id):
     for index, quiz in enumerate(course.quizzes):
         user_answer = request.form.get(f'question{index + 1}')
         correct_answer = quiz['correct_answer']
-        print(f"Question {index}: User answer: {user_answer}, Correct answer: {correct_answer}")  # Debug statement
+        print(f"Question {index + 1}: User answer: {user_answer}, Correct answer: {correct_answer}")  # Debug statement
         if user_answer and int(user_answer) == correct_answer:
             correct_answers += 1
 
     percentage_score = (correct_answers / total_questions) * 100
     passed = percentage_score >= 60
 
+    print(f"Total Questions: {total_questions}, Correct Answers: {correct_answers}, Percentage Score: {percentage_score}, Passed: {passed}")  # Debug statement
+
     if passed:
-        if course.id not in current_user.completed_courses:
+        if course not in current_user.completed_courses:
             current_user.completed_courses.append(course)
-            current_user.enrolled_courses.remove(course)
+            if course in current_user.enrolled_courses:
+                current_user.enrolled_courses.remove(course)
             db.session.commit()
-        return jsonify(success=True, message='Congratulations! You passed the quiz and completed the course.', passed=True, course_id=course.id)
+            return jsonify(success=True, message='Congratulations! You passed the quiz and completed the course.', passed=True, course_id=course.id)
+        else:
+            return jsonify(success=True, message='You already completed this course.', passed=True, course_id=course.id)
     else:
         return jsonify(success=True, message='Sorry, you did not pass the quiz. Please try again.', passed=False, course_id=course.id)
+
+    
 
 
 
@@ -523,12 +530,14 @@ def submit_quiz(course_id):
 @login_required
 def certificate(course_id):
     course = Course.query.get_or_404(course_id)
-    if course.id not in current_user.completed_courses:
-        pass
+    if course.id in current_user.enrolled_courses:
         flash('You have not completed this course yet.', 'danger')
         return redirect(url_for('view_chapter', course_id=course.id))
+    
+    # return redirect('profile')
 
-    return render_template('certificate.html', course=course, user=current_user)
+    return render_template('certificate.html', course=course, user=current_user )
+    # return render_template('certificate.html', course=course, user=current_user)
 
 
 
@@ -596,6 +605,7 @@ def chatbot():
 def update_user_info():
     current_user.name = request.form['name']
     current_user.dob = request.form['dob']
+    current_user.email = request.form['email']
     db.session.commit()
     flash('User information updated successfully!', 'success')
     return redirect(url_for('profile'))
@@ -689,6 +699,9 @@ def add_course():
             chapter_note = request.form.get(f'chapter_{i}_note')
             chapter_course_file = request.files.get(f'chapter_{i}_course_file')
             chapter_resource_link = request.form.get(f'chapter_{i}_resource_link')
+            chapter_meeting_link = request.form.get(f'chapter_{i}_meeting_link')
+            chapter_course_link = request.form.get(f'chapter_{i}_course_link')
+            
 
             # Save assignment file if provided
             assignment_filename = None
@@ -707,11 +720,22 @@ def add_course():
                     resources_filenames.append(filename)
 
             # Save course file if provided
-            course_filename = None
+            course_filename = []
             if chapter_course_file and chapter_course_file.filename != '':
                 course_filename = secure_filename(chapter_course_file.filename)
                 course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', course_filename)
                 chapter_course_file.save(course_path)
+
+            # get meeting link
+            meeting_link = None
+            if chapter_meeting_link and chapter_meeting_link != '':
+                meeting_link = chapter_meeting_link
+
+            # get coures link
+            course_link = None
+            if chapter_course_link and chapter_course_link != '':
+                course_link = chapter_course_link
+
 
             chapters.append({
                 'title': chapter_title,
@@ -720,7 +744,9 @@ def add_course():
                 'resources_files': resources_filenames,
                 'note': chapter_note,
                 'course_file': course_filename,
-                'resource_link': chapter_resource_link
+                'course_link': chapter_course_link,
+                'resource_link': chapter_resource_link,
+                'meeting_link': meeting_link
             })
 
         # Handle quizzes
@@ -771,6 +797,70 @@ def add_course():
     
     return render_template('add_course.html')
 
+
+@app.route("/meeting")
+def meeting():
+    return render_template("meeting.html", username=current_user.username)
+
+
+@app.route("/join", methods=["GET", "POST"])
+@login_required
+def join():
+    if request.method == "POST":
+        if current_user.role == 'student':    
+            room_id = request.form.get("roomID")
+            return redirect(f"/meeting?roomID={room_id}&role=Audience")
+        if current_user.role == 'teacher':
+            room_id = request.form.get("roomID")
+            return redirect(f"/meeting?roomID={room_id}")
+            
+        
+    return render_template("join.html")
+
+@app.route('/delete_course/<int:course_id>', methods=['POST'])
+@login_required
+def delete_course(course_id):
+    course = Course.query.get_or_404(course_id)
+
+    # Ensure the current user is the teacher who created the course
+    if course.teacher_id != current_user.id:
+        return jsonify({'message': 'You do not have permission to delete this course.'}), 403
+
+    # Delete course files from the server
+    def delete_file(file_path):
+        if file_path and os.path.exists(file_path):
+            os.remove(file_path)
+    
+    if course.thumbnail_img:
+        thumbnail_path = os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', course.thumbnail_img)
+        delete_file(thumbnail_path)
+    
+    if course.temp_video:
+        video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', course.temp_video)
+        delete_file(video_path)
+    
+    for chapter in course.chapters:
+        if 'resources_files' in chapter and chapter['resources_files']:
+            for resource in chapter['resources_files']:
+                resource_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', resource)
+                delete_file(resource_path)
+        
+        if 'assignment_file' in chapter and chapter['assignment_file']:
+            assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', chapter['assignment_file'])
+            delete_file(assignment_path)
+                
+        if 'course_file' in chapter and chapter['course_file']:
+            course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', chapter['course_file'])
+            delete_file(course_file_path)
+
+    # Delete the course from the database
+    try:
+        db.session.delete(course)
+        db.session.commit()
+    except Exception as e:
+        return jsonify({'message': f'Failed to delete course from database: {str(e)}'}), 500
+    
+    return redirect(url_for('courses'))
     
 @app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
@@ -809,7 +899,7 @@ def edit_course(course_id):
             course.temp_video = temp_video_filename
 
         # Handle chapters update
-        chapters = []
+        updated_chapters = []
         chapter_count = int(request.form.get('chapter_count', 0))
         for i in range(1, chapter_count + 1):
             chapter_title = request.form[f'chapter_{i}_title']
@@ -818,23 +908,36 @@ def edit_course(course_id):
             chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')
             chapter_note = request.form[f'chapter_{i}_note']
             chapter_course_file = request.files.get(f'chapter_{i}_course_file')
+            chapter_meeting_link = request.form.get(f'chapter_{i}_meeting_link')
+            chapter_course_link = request.form.get(f'chapter_{i}_course_link')
 
             # Retrieve existing chapter or create a new one
             if i <= len(course.chapters):
                 chapter = course.chapters[i - 1]
             else:
-                chapter = chapter(title='', description='', assignment_file='', resources_files=[], course_file='', note='')
+                chapter = {
+                    'title': '',
+                    'description': '',
+                    'assignment_file': '',
+                    'resources_files': [],
+                    'course_file': '',
+                    'note': '',
+                    'meeting_link': '',
+                    'course_link': ''
+                }
 
             chapter['title'] = chapter_title
             chapter['description'] = chapter_description
             chapter['note'] = chapter_note
+            chapter['meeting_link'] = chapter_meeting_link
+            chapter['course_link'] = chapter_course_link
 
             # Update assignment file if provided
             if chapter_assignment_file and chapter_assignment_file.filename != '':
                 assignment_filename = secure_filename(chapter_assignment_file.filename)
                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', assignment_filename)
                 chapter_assignment_file.save(assignment_path)
-                chapter.assignment_file = assignment_filename
+                chapter['assignment_file'] = assignment_filename
 
             # Update resources files if provided
             resources_filenames = []
@@ -849,17 +952,17 @@ def edit_course(course_id):
             # Update course file if provided
             if chapter_course_file and chapter_course_file.filename != '':
                 course_filename = secure_filename(chapter_course_file.filename)
-                course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', course_filename)
+                course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', course_filename)
                 try:
                     chapter_course_file.save(course_path)
-                    chapter.course_file = course_filename  # Update chapter with the course file name
+                    chapter['course_file'] = course_filename  # Update chapter with the course file name
                 except FileNotFoundError as e:
                     flash('Error saving course file: {}'.format(e), 'danger')
                     return redirect(url_for('edit_course', course_id=course_id))  # Redirect in case of error
 
-            chapters.append(chapter)
+            updated_chapters.append(chapter)
 
-        course.chapters = chapters
+        course.chapters = updated_chapters  # Update course chapters
 
         # Commit changes to the database
         db.session.commit()
@@ -869,55 +972,6 @@ def edit_course(course_id):
 
     # Render the edit course form with current course details
     return render_template('edit_course.html', course=course)
-
-@app.route('/delete_course/<int:course_id>', methods=['POST'])
-@login_required
-def delete_course(course_id):
-    course = Course.query.get_or_404(course_id)
-
-    # Ensure the current user is the teacher who created the course
-    if course.teacher_id != current_user.id:
-        return jsonify({'message': 'You do not have permission to delete this course.'}), 403
-    
-    # Delete course files from the server
-    try:
-        if course.thumbnail_img:
-            thumbnail_path = os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', course.thumbnail_img)
-            if os.path.exists(thumbnail_path):
-                os.remove(thumbnail_path)
-        
-        if course.temp_video:
-            video_path = os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', course.temp_video)
-            if os.path.exists(video_path):
-                os.remove(video_path)
-        
-        for chapter in course.chapters:
-            if 'resources_files' in chapter:
-                for resource in chapter['resources_files']:
-                    resource_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', resource)
-                    if os.path.exists(resource_path):
-                        os.remove(resource_path)
-            
-            if 'course_file' in chapter:
-                course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', chapter['course_file'])
-                if os.path.exists(course_file_path):
-                    os.remove(course_file_path)
-            
-            if 'assignment_file' in chapter:
-                assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', chapter['assignment_file'])
-                if os.path.exists(assignment_path):
-                    os.remove(assignment_path)
-    except Exception as e:
-        return jsonify({'message': f'Failed to delete course files: {str(e)}'}), 500
-    
-    # Delete the course from the database
-    try:
-        db.session.delete(course)
-        db.session.commit()
-        return jsonify({'message': 'Course deleted successfully'}), 200
-    except Exception as e:
-        return jsonify({'message': f'Failed to delete course from database: {str(e)}'}), 500
-
     
 @app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
 @app.route('/view_chapter/<int:course_id>/<int:chapter_index>')

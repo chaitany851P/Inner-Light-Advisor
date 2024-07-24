@@ -8,7 +8,7 @@ const chatbox = document.querySelector(".chatbox");
 
 let userMessage;
 const API_KEY = 
-	"sk-proj-ZmiMDvR0hy8qAULmD9J5T3BlbkFJTCdpG2tlo9MryTGRMl8L";
+	"sk-proj-I59lHlwYy3Ns6mpMga8aT3BlbkFJYmnAY7QXsjUSueUG7sae";
 
 //OpenAI Free APIKey
 
@@ -22,7 +22,7 @@ const createChatLi = (message, className) => {
 }
 
 const generateResponse = (incomingChatLi) => {
-	const API_URL = "url";
+	const API_URL = "https://api.openai.com/v1/chat/completions";
 	const messageElement = incomingChatLi
 	.querySelector("p");
 	const requestOptions = {

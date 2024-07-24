@@ -153,6 +153,8 @@
                 <div class="course-content">
                     <h3 class="course-title">{{ course.title }}</h3>
                     <p class="course-description">{{ course.description }}</p>
+                    <a href="{{ url_for('certificate', course_id=course.id) }}" class="course-link">Get Certificate</a>
+
                                     </div>
             </div>
             {% endfor %}
@@ -179,7 +181,7 @@
                 <div class="task-item">
                         <div class="task-title"><h4>{{ task.title }}</h4></div>
                         <div class="task-details"><p>Description: {{ task.description }}</p></div>
-                        
+                        <div class="task-details"><p>Due Date: {{ task.due_date }}</p></div>
                         <div class="task-details"><p>Status: {{ task.status }}</p></div>
 
                         <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-outline-warning" ><i class="bi bi-pencil-square"></i></a> 
@@ -203,6 +205,7 @@
             </div>
             
             <hr>
+            <a class="btn btn-primary" href="{{ url_for('meeting') }}">Create Meeting</a>
             <!-- Live Class Reminder Section -->
             <div class="live-class-section">
                 <h4>Live Class Reminder</h4>

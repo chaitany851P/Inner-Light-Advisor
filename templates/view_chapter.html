@@ -89,16 +89,17 @@
         .notes {
             margin-top: 20px;
         }
-        ol h5 a:hover{
+        ol h6 a:hover{
             text-decoration: none !important;
 
         }
+        
         .sidebar {
   /* position: fixed; */
   top: 0;
   left: 0;
   width: 290px;
-  height: 100vh;
+  height: auto;
   background-color: #f0f0f0;
   padding: 20px;
   transition: transform 0.3s ease-in-out;
@@ -110,8 +111,8 @@
 
 .toggle-sidebar {
   position: absolute;
-  top: 20px;
-  left: 270px;
+  top: 70px;
+  left: 250px;
   height: 40px;
   background-color: #fff;
   border: none;
@@ -144,9 +145,10 @@
                         <ol>
                             {% for chapter in course.chapters %}
                             {% if chapter.assignment_file %}       
+                                
+                                <h6><i class="bi bi-journal"></i>Assignment</h6>                                    
                                         
-                                 <h5><a><i class="bi bi-journal"></i>{{ chapter.assignment_file }}</a></h5>                                    
-                            
+                                                             
                             {% endif %}
                             
                             {% endfor %}  
@@ -155,7 +157,7 @@
                             {% for chapter in course.chapters %}
                             {% if chapter.resources_files %}
                             {% for resource in chapter.resources_files %}
-                                <h5><a> <i class="bi bi-code-slash"></i> {{ resource }}</a></h5>
+                                <h6><i class="bi bi-code-slash"></i>Resource</h6>
                                 
                                 {% endfor %}
                             {% endif %}
@@ -174,6 +176,33 @@
             <h1>{{ course.name }}</h1>
             <h2>Chapter: {{ chapter.title }}</h2>
             <hr>
+            {% if chapter.meeting_link%}
+            <h2>Meeting</h2>
+            <div class="video-wrapper">
+                <!-- meeting link panel -->
+                 <!-- <iframe width="70%" height="450" src="{{ chapter.meeting_link }}" frameborder="0" allow="accelerometer;
+                 autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                 <iframe src="https://us05web.zoom.us/j/85186699767?pwd=qWonnqm2a0LePl2f2YjbOaeFoQ0Eyc.1" height="800" width="800"  allow="camera;microphone">></iframe>
+                  -->
+                  <div class="container">
+                    <h1 class="text-center mt-5">Join Meeting</h1>
+                    <form method="POST" action="{{ url_for('join') }}" class="mt-4">
+                        <!-- <form method="POST" action="{{ url_for('join') }}" class="mt-4"></form> -->
+                        <div class="form-group">
+                            <input type="text" placeholder="Room ID:" class="form-control" id="roomID" name="roomID" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg">Join</button>
+                    </form>
+
+                    <div id="root">
+        
+                    </div>
+                  </div>
+            </div>
+            <!-- <a href="https://www.youtube.com/embed/bm0OyhwFDuY?si=drnNnPyRWdEi2rMe">https://www.youtube.com/embed/bm0OyhwFDuY?si=drnNnPyRWdEi2rMe</a> -->
+            
+            {% endif %}
+
             {% if chapter.course_file %}
                 <div class="video-wrapper">
                  
@@ -196,6 +225,10 @@
 
                 </div>
             {% endif %}
+            {% if chapter.course_link %}
+            <iframe width="70%" height="450" src="{{ chapter.course_link }}" frameborder="0" allow="accelerometer;
+            autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            {% endif %}
             <hr>
             <h3>Description:</h3>
             <p>{{ chapter.description }}</p>
@@ -213,7 +246,14 @@
                 <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download</a></p>
                 
             {% endfor %}
+
             {% endif %}
+            <!-- resource link -->
+             {% if chapter.resource_link %}
+             <h3>Resources:</h3>
+             <a href="{{chapter.resource_link}}">{{ chapter.resource_link }}</a>
+             {% endif %}
+             
             
             <div class="notes">
                 <h3>Notes:</h3>
@@ -254,6 +294,7 @@ toggleButton.addEventListener('click', () => {
   }
 });
     </script>
+    
 </body>
 </html>
 {% endblock %}

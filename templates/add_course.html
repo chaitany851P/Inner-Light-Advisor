@@ -3,6 +3,10 @@
 <head>
     <title>Add Course</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- css for page -->
+     <style>
+
+     </style>
 </head>
 <div class="container2">
     <h1>Add Course</h1>
@@ -72,7 +76,16 @@
         <div id="chaptersContainer">
             <label for="chapter_count">Number of Chapters:</label>
             <input type="number" id="chapter_count" name="chapter_count" min="1" required>
-            
+            <!-- select user will upload coures file or coures link js work on radio button -->
+             <label for="course_file">Course File:</label>
+             <input type="radio" id="course_file" name="course_file" value="course
+             file" required>
+            <label for="course_link">Course Link:</label>
+            <input type="radio" id="course_link" name="course_file" value="course
+            link" required>
+            <!-- js for coures link or file  -->
+
+             
             <div id="chapters">
                 <!-- JavaScript will dynamically generate chapter fields here -->
             </div>
@@ -88,6 +101,7 @@
     </form>
     
     <script>
+                        
         document.getElementById('quiz_count').addEventListener('input', function() {
             const quizCount = parseInt(this.value);
             const quizzesContainer = document.getElementById('quizzesContainer');
@@ -117,19 +131,64 @@
             const chaptersContainer = document.getElementById('chapters');
             chaptersContainer.innerHTML = ''; // Clear previous chapters
             const learnerType = document.getElementById('learner_type').value;
+            const mode_of_class = document.getElementById('mode_of_class').value;
             for (let i = 1; i <= chapterCount; i++) {
                 let mediaFieldHTML = '';
+                
                 if (learnerType === 'Visual') {
+                    if (mode_of_class == 'Live'){
                     mediaFieldHTML = `
-                        <label for="chapter_${i}_course_file">Course File:</label>
-                        <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="video/*" required>
+                        <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
+                        <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
                     `;
+                    }
+                    else {
+                        
+                    mediaFieldHTML = `
+                    
+                        <label for="chapter_${i}_course_file">CourseFile:</label>
+                        <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="video/*" required>
+                        
+                        <label for="chapter_${i}_course_file">Course Link:[youtube secrate video link]</label>
+                        <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link"  required>
+
+                    `;}
                 } else if (learnerType === 'Auditory') {
+                    if (mode_of_class == 'Live'){
+                    mediaFieldHTML = `
+                        <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
+                        <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
+                    `;
+                    }
+                    else {
                     mediaFieldHTML = `
                         <label for="chapter_${i}_course_file">Course File:</label>
                         <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="audio/*" required>
+                        
+                        <label for="chapter_${i}_course_file">Course Link:[youtube secrate music link]</label>
+                        <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link" required>
+
+                    `;}
+                } 
+                else if (learnerType === 'Kinesthetic') {
+                    if (mode_of_class == 'Live'){
+                    mediaFieldHTML = `
+                        <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
+                        <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
                     `;
-                }
+                    }else {
+                            mediaFieldHTML = `
+                            <label for="chapter_${i}_course_file">Course File:</label>
+                            <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="application/*" required>
+                            
+                            <label for="chapter_${i}_course_file">Course Link:[youtube secrate music link]</label>
+                            <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link" required>
+
+                            `;
+                            }
+                        }
+
+                
                 const chapterHTML = `
                     <h3>Chapter ${i}</h3>
                     <label for="chapter_${i}_title">Title:</label>
@@ -140,7 +199,7 @@
                     <label for="chapter_${i}_assignment_file">Assignment File:</label>
                     <input type="file" id="chapter_${i}_assignment_file" name="chapter_${i}_assignment_file">
                     <label for="chapter_${i}_resources">Resource Files:</label>
-                    
+                    // get course_link
                     <input type="file" id="chapter_${i}_resources" name="chapter_${i}_resources" multiple>
                     <label for="chapter_${i}_note">Note:</label>
                     <textarea id="chapter_${i}_note" name="chapter_${i}_note" required></textarea>
@@ -163,5 +222,4 @@
                 chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
             }
         }
-    </script>
-{% endblock %}
+ 
