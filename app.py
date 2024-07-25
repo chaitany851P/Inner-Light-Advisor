@@ -798,24 +798,51 @@ def add_course():
     return render_template('add_course.html')
 
 
-@app.route("/meeting")
-def meeting():
+@app.route("/meeting2")
+def meeting2():
     return render_template("meeting.html", username=current_user.username)
 
-
-@app.route("/join", methods=["GET", "POST"])
+@app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
+@app.route('/view_chapter/<int:course_id>/<int:chapter_index>')
 @login_required
-def join():
-    if request.method == "POST":
-        if current_user.role == 'student':    
-            room_id = request.form.get("roomID")
-            return redirect(f"/meeting?roomID={room_id}&role=Audience")
-        if current_user.role == 'teacher':
-            room_id = request.form.get("roomID")
-            return redirect(f"/meeting?roomID={room_id}")
-            
-        
-    return render_template("join.html")
+def view_chapter(course_id, chapter_index):
+    course = Course.query.get_or_404(course_id)
+    if chapter_index < 0 or chapter_index >= len(course.chapters):
+        return jsonify({'message': 'Invalid chapter index'}), 400
+    chapter = course.chapters[chapter_index]
+    return render_template('view_chapter.html', course=course, chapter=chapter, chapter_index=chapter_index)
+
+@app.route('/meeting/<int:course_id>/', defaults={'chapter_index': 0})
+@app.route('/meeting/<int:course_id>/<int:chapter_index>')
+@login_required
+def meeting(course_id, chapter_index):
+    course = Course.query.get_or_404(course_id)
+    if chapter_index < 0 or chapter_index >= len(course.chapters):
+        return jsonify({'message': 'Invalid chapter index'}), 400
+    chapter = course.chapters[chapter_index]
+    room_id = request.args.get('roomID')
+    role = request.args.get('role', 'Host')
+    return render_template('view_chapter.html', username=current_user.username, course=course, chapter=chapter, chapter_index=chapter_index, room_id=room_id, role=role)
+
+@app.route('/join/<int:course_id>/', defaults={'chapter_index': 0}, methods=['GET', 'POST'])
+@app.route('/join/<int:course_id>/<int:chapter_index>', methods=['GET', 'POST'])
+@login_required
+def join(course_id, chapter_index):
+    if request.method == 'POST':
+        room_id = request.form.get('roomID')
+        course = Course.query.get_or_404(course_id)
+        if chapter_index < 0 or chapter_index >= len(course.chapters):
+            return jsonify({'message': 'Invalid chapter index'}), 400
+        if current_user.role == 'student':
+            return redirect(url_for('meeting', course_id=course_id, chapter_index=chapter_index, roomID=room_id, role='Audience'))
+        elif current_user.role == 'teacher':
+            return redirect(url_for('meeting', course_id=course_id, chapter_index=chapter_index, roomID=room_id))
+    else:
+        course = Course.query.get_or_404(course_id)
+        if chapter_index < 0 or chapter_index >= len(course.chapters):
+            return jsonify({'message': 'Invalid chapter index'}), 400
+        chapter = course.chapters[chapter_index]
+        return render_template('view_chapter.html', username=current_user.username, course=course, chapter=chapter, chapter_index=chapter_index)
 
 @app.route('/delete_course/<int:course_id>', methods=['POST'])
 @login_required
@@ -973,17 +1000,17 @@ def edit_course(course_id):
     # Render the edit course form with current course details
     return render_template('edit_course.html', course=course)
     
-@app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
-@app.route('/view_chapter/<int:course_id>/<int:chapter_index>')
-@login_required
-def view_chapter(course_id, chapter_index):
-    course = Course.query.get_or_404(course_id)
-    if chapter_index < 0 or chapter_index >= len(course.chapters):
-        return jsonify({'message': 'Invalid chapter index'}), 400
-    # save last view chapter and redirect ti that
+# @app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
+# @app.route('/view_chapter/<int:course_id>/<int:chapter_index>')
+# @login_required
+# def view_chapter(course_id, chapter_index):
+#     course = Course.query.get_or_404(course_id)
+#     if chapter_index < 0 or chapter_index >= len(course.chapters):
+#         return jsonify({'message': 'Invalid chapter index'}), 400
+#     # save last view chapter and redirect ti that
     
-    chapter = course.chapters[chapter_index]
-    return render_template('view_chapter.html', course=course, chapter=chapter, chapter_index=chapter_index)
+#     chapter = course.chapters[chapter_index]
+#     return render_template('view_chapter.html', course=course, chapter=chapter, chapter_index=chapter_index)
 
 @app.route('/enroll/<int:course_id>', methods=['POST'])
 @login_required
@@ -1003,4 +1030,4 @@ def enroll(course_id):
 if __name__ == '__main__':
     with app.app_context():
             db.create_all()  # Create database tables based on the models
-    app.run(host='0.0.0.0', port=5000)
+    app.run(debug=True)
