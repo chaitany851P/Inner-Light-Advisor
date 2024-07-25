@@ -138,8 +138,11 @@
                 if (learnerType === 'Visual') {
                     if (mode_of_class == 'Live'){
                     mediaFieldHTML = `
+                        <hr>
                         <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
                         <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
+            <a class="btn btn-primary" href="{{ url_for('meeting') }}">Create Meeting</a>
+
                     `;
                     }
                     else {
@@ -156,6 +159,8 @@
                 } else if (learnerType === 'Auditory') {
                     if (mode_of_class == 'Live'){
                     mediaFieldHTML = `
+                        <hr>
+                        <a class="btn btn-primary" href="{{ url_for('meeting') }}">Create Meeting</a>
                         <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
                         <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
                     `;
@@ -173,8 +178,10 @@
                 else if (learnerType === 'Kinesthetic') {
                     if (mode_of_class == 'Live'){
                     mediaFieldHTML = `
+                        <hr>
                         <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
                         <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
+                        <a class="btn btn-primary" href="{{ url_for('meeting') }}">Create Meeting</a>
                     `;
                     }else {
                             mediaFieldHTML = `
@@ -221,5 +228,9 @@
                 
                 chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
             }
-        }
+        };
+        </script>   
+</body>
+</html>
+{% endblock %}
  
