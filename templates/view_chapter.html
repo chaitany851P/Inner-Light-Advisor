@@ -3,8 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta  charset="UTF-8">
-    <meta  name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ course.name }} - {{ chapter.title }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <style>
@@ -89,212 +89,231 @@
         .notes {
             margin-top: 20px;
         }
-        ol h6 a:hover{
+        ol h6 a:hover {
             text-decoration: none !important;
-
         }
-        
+
         .sidebar {
-  /* position: fixed; */
-  top: 0;
-  left: 0;
-  width: 290px;
-  height: auto;
-  background-color: #f0f0f0;
-  padding: 20px;
-  transition: transform 0.3s ease-in-out;
-}
+            top: 0;
+            left: 0;
+            width: 290px;
+            height: auto;
+            background-color: #f0f0f0;
+            padding: 20px;
+            transition: transform 0.3s ease-in-out;
+        }
 
-.sidebar.hidden {
-  transform: translateX(-270px);
-}
+        .sidebar.hidden {
+            transform: translateX(-270px);
+        }
 
-.toggle-sidebar {
-  position: absolute;
-  top: 70px;
-  left: 250px;
-  height: 40px;
-  background-color: #fff;
-  border: none;
-  padding: 10px;
-  cursor: pointer;
-  
-}
+        .toggle-sidebar {
+            position: absolute;
+            top: 70px;
+            left: 250px;
+            height: 40px;
+            background-color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+        }
 
-.toggle-sidebar:hover {
-  background-color: #eee;
-}
+        .toggle-sidebar:hover {
+            background-color: #eee;
+        }
 
-#sidebar-icon {
-  font-size: 24px;
-}  
+        #sidebar-icon {
+            font-size: 24px;
+        }
+        #root {
+            width: 70vw;
+            height: 70vh;
+            text-align: center;
+            margin-bottom: 20px;
+            }
     </style>
 </head>
 <body>
     <div class="main-container">
         <div class="sidebar">
-            
-
-
             <h1>{{ course.name }}</h1>
-            
             <ul>
                 {% for chap in course.chapters %}
-                
-                <li><h4><i class="bi bi-play-circle"></i>  <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=loop.index0) }}">{{ chap.title }}</a></h4>
-                        <ol>
-                            {% for chapter in course.chapters %}
-                            {% if chapter.assignment_file %}       
-                                
-                                <h6><i class="bi bi-journal"></i>Assignment</h6>                                    
-                                        
-                                                             
-                            {% endif %}
-                            
-                            {% endfor %}  
-                            
-                            
-                            {% for chapter in course.chapters %}
-                            {% if chapter.resources_files %}
-                            {% for resource in chapter.resources_files %}
-                                <h6><i class="bi bi-code-slash"></i>Resource</h6>
-                                
-                                {% endfor %}
-                            {% endif %}
+                <li>
+                    <h4><i class="bi bi-play-circle"></i> <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=loop.index0) }}">{{ chap.title }}</a></h4>
+                    <ol>
+                        {% for chapter in course.chapters %}
+                        {% if chapter.assignment_file %}
+                            <h6><i class="bi bi-journal"></i>Assignment</h6>
+                        {% endif %}
                         {% endfor %}
-                             
-                        </ol>
+                        {% for chapter in course.chapters %}
+                        {% if chapter.resources_files %}
+                        {% for resource in chapter.resources_files %}
+                            <h6><i class="bi bi-code-slash"></i>Resource</h6>
+                        {% endfor %}
+                        {% endif %}
+                        {% endfor %}
+                    </ol>
                 </li>
                 {% endfor %}
             </ul>
         </div>
         <button class="toggle-sidebar" aria-label="Toggle sidebar">
             <i class="bi-code-slash"></i>
-          </button>
-          
+        </button>
         <div class="content">
             <h1>{{ course.name }}</h1>
             <h2>Chapter: {{ chapter.title }}</h2>
             <hr>
-            {% if chapter.meeting_link%}
+            {% if chapter.meeting_link %}
             <h2>Meeting</h2>
             <div class="video-wrapper">
-                <!-- meeting link panel -->
-                 <!-- <iframe width="70%" height="450" src="{{ chapter.meeting_link }}" frameborder="0" allow="accelerometer;
-                 autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                 <iframe src="https://us05web.zoom.us/j/85186699767?pwd=qWonnqm2a0LePl2f2YjbOaeFoQ0Eyc.1" height="800" width="800"  allow="camera;microphone">></iframe>
-                  -->
-                  <div class="container">
-                    <h1 class="text-center mt-5">Join Meeting</h1>
-                    <form method="POST" action="{{ url_for('join') }}" class="mt-4">
-                        <!-- <form method="POST" action="{{ url_for('join') }}" class="mt-4"></form> -->
+                <div class="container">
+                    
+                    <form method="POST" action="{{ url_for('join',course_id=course.id, chapter_index=chapter_index) }}" class="mt-4" id="joinForm">
                         <div class="form-group">
+                            <h1 class="text-center mt-5">Join Meeting</h1>
                             <input type="text" placeholder="Room ID:" class="form-control" id="roomID" name="roomID" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-lg">Join</button>
                     </form>
-
                     <div id="root">
-        
+
                     </div>
-                  </div>
-            </div>
-            <!-- <a href="https://www.youtube.com/embed/bm0OyhwFDuY?si=drnNnPyRWdEi2rMe">https://www.youtube.com/embed/bm0OyhwFDuY?si=drnNnPyRWdEi2rMe</a> -->
-            
-            {% endif %}
-
-            {% if chapter.course_file %}
-                <div class="video-wrapper">
-                 
-
-                    {% if current_user.learning_style == 'Visual' %}
-                     <video  controls >
-                        <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="video/mp4" >
-                        Your browser does not support the video tag.
-                        </video>
-                     </video>
-                     {% endif %}
-                    
-                     {% if current_user.learning_style == 'Auditory' %}
-
-                     <audio  controls poster="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}">
-                        <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/mp4">
-                        Your browser does not support the audio tag.
-                     </audio>
-                     {% endif %}
-
                 </div>
+            </div>
+            {% endif %}
+            {% if chapter.course_file %}
+            <div class="video-wrapper">
+                {% if current_user.learning_style == 'Visual' %}
+                <video controls>
+                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+                {% endif %}
+                {% if current_user.learning_style == 'Auditory' %}
+                <audio controls poster="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}">
+                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/mp4">
+                    Your browser does not support the audio tag.
+                </audio>
+                {% endif %}
+            </div>
             {% endif %}
             {% if chapter.course_link %}
-            <iframe width="70%" height="450" src="{{ chapter.course_link }}" frameborder="0" allow="accelerometer;
-            autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <iframe width="70%" height="450" src="{{ chapter.course_link }}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             {% endif %}
             <hr>
             <h3>Description:</h3>
             <p>{{ chapter.description }}</p>
             {% if chapter.assignment_file %}
-                <h3>Assignment:</h3>
-                <p>{{ chapter.assignment_file }}</p>
-                <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
+            <h3>Assignment:</h3>
+            <p>{{ chapter.assignment_file }}</p>
+            <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
             {% endif %}
-            
             {% if chapter.resource_file %}
-
             <h3>Resources:</h3>
             {% for resource in chapter.resources_files %}
-                <p>{{ resource }}</p>
-                <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download</a></p>
-                
+            <p>{{ resource }}</p>
+            <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download</a></p>
             {% endfor %}
-
             {% endif %}
-            <!-- resource link -->
-             {% if chapter.resource_link %}
-             <h3>Resources:</h3>
-             <a href="{{chapter.resource_link}}">{{ chapter.resource_link }}</a>
-             {% endif %}
-             
-            
+            {% if chapter.resource_link %}
+            <h3>Resources:</h3>
+            <a href="{{chapter.resource_link}}">{{ chapter.resource_link }}</a>
+            {% endif %}
             <div class="notes">
                 <h3>Notes:</h3>
                 <p>{{ chapter.note if chapter.note else 'No notes available for this chapter.' }}</p>
             </div>
-            <!-- Navigation Buttons -->
             <div class="lecture-navigation">
                 {% if chapter_index > 0 %}
-                    <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index - 1) }}">
-                        <button id="prevLectureBtn">&lt; Previous Lecture</button>
-                    </a>
+                <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index - 1) }}">
+                    <button id="prevLectureBtn">&lt; Previous Lecture</button>
+                </a>
                 {% endif %}
                 {% if chapter_index < course.chapters|length - 1 %}
-                    <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index + 1) }}">
-                        <button id="nextLectureBtn">Next Lecture &gt;</button>
-                    </a>
+                <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=chapter_index + 1) }}">
+                    <button id="nextLectureBtn">Next Lecture &gt;</button>
+                </a>
                 {% else %}
-                    <a href="{{ url_for('quiz', course_id=course.id) }}">
-                        <button id="quizBtn">Go to Quiz</button>
-                    </a>
+                <a href="{{ url_for('quiz', course_id=course.id) }}">
+                    <button id="quizBtn">Go to Quiz</button>
+                </a>
                 {% endif %}
             </div>
         </div>
     </div>
+    <script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+    <script>
+        window.onload = function () {
+            function getUrlParams(url) {
+                let urlStr = url.split('?')[1];
+                const urlSearchParams = new URLSearchParams(urlStr);
+                const result = Object.fromEntries(urlSearchParams.entries());
+                return result;
+            }
+
+            const roomID = getUrlParams(window.location.href)['roomID'];
+            if (roomID) {
+                document.getElementById("joinForm").style.display = "none";
+
+                const userID = Math.floor(Math.random() * 10000) + "";
+                const userName = "{{username}}";
+                const appID = 799094754;
+                const serverSecret = "c296b216b6a4275c7cea4b6cf9d1802d";
+                const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, roomID, userID, userName);
+
+                let role = getUrlParams(window.location.href)['role'] || 'Host';
+                role = role === 'Host' ? ZegoUIKitPrebuilt.Host : ZegoUIKitPrebuilt.Audience;
+                let config = {}
+                if (role === 'Host') {
+                    config = {
+                        turnOnCameraWhenJoining: true,
+                        showMyCameraToggleButton: true,
+                        showAudioVideoSettingsButton: true,
+                        showScreenSharingButton: true,
+                        showTextChat: true,
+                        showUserList: true,
+
+
+                        sharedLinks: [{
+                            name: 'Room ID for Student',
+                            url: roomID
+                        }],
+                    }
+                }
+                const zp = ZegoUIKitPrebuilt.create(kitToken);
+                zp.joinRoom({
+                    container: document.querySelector("#root"),
+                    scenario: {
+                        mode: ZegoUIKitPrebuilt.LiveStreaming,
+                        config: {
+                            role,
+                        },
+                    },
+
+                    ...config
+                });
+            }
+        }
+    </script>
     <script>
         const sidebar = document.querySelector('.sidebar');
-const toggleButton = document.querySelector('.toggle-sidebar');
-const sidebarIcon = document.querySelector('#sidebar-icon');
+        const toggleButton = document.querySelector('.toggle-sidebar');
+        const sidebarIcon = document.querySelector('#sidebar-icon');
 
-toggleButton.addEventListener('click', () => {
-  sidebar.classList.toggle('hidden');
-  if (sidebar.classList.contains('hidden')) {
-    sidebarIcon.classList.remove('fa-angle-double-left');
-    sidebarIcon.classList.add('fa-angle-double-right');
-  } else {
-    sidebarIcon.classList.remove('fa-angle-double-right');
-    sidebarIcon.classList.add('fa-angle-double-left');
-  }
-});
+        toggleButton.addEventListener('click', () => {
+            sidebar.classList.toggle('hidden');
+            if (sidebar.classList.contains('hidden')) {
+                sidebarIcon.classList.remove('fa-angle-double-left');
+                sidebarIcon.classList.add('fa-angle-double-right');
+            } else {
+                sidebarIcon.classList.remove('fa-angle-double-right');
+                sidebarIcon.classList.add('fa-angle-double-left');
+            }
+        });
     </script>
-    
 </body>
 </html>
 {% endblock %}

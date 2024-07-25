@@ -205,6 +205,7 @@
             <a href="{{url_for('contact')}}">Contact</a>
             {% if current_user.role == 'teacher' %}
             <a href="{{ url_for ('chatbot')}}">Research with AI</a>
+            
             {% endif %}
             <a href="{{ url_for('FAQs')}}">FAQs</a>
             <nav class="navbar2">
