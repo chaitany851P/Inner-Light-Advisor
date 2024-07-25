@@ -113,6 +113,8 @@
                         {% endif %}
                     </div>
                     <p>{{ course.description }}</p>
+                    <!-- if temp_video -->
+                     
                     <div class="video-wrapper">
                         <video src="{{ url_for('static', filename='uploads/sample_video/' + course.temp_video) }}" controls></video>
                     </div>
