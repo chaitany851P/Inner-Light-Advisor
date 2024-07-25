@@ -188,13 +188,13 @@
             <div class="video-wrapper">
                 {% if current_user.learning_style == 'Visual' %}
                 <video controls>
-                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="video/mp4">
+                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="70%" height="50%" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 {% endif %}
                 {% if current_user.learning_style == 'Auditory' %}
                 <audio controls poster="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}">
-                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/mp4">
+                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}"width="50%" height="350" type="audio/mp4">
                     Your browser does not support the audio tag.
                 </audio>
                 {% endif %}
