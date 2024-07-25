@@ -5,7 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user 
 import os 
-from openai import OpenAI,ChatCompletion
 import json
 from werkzeug.utils import secure_filename
 from sqlalchemy.ext.mutable import MutableList
@@ -13,12 +12,6 @@ from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
-# from env import load_dotenv
-
-# Initialize OpenAI API key
-# load_dotenv()
-api_key = os.getenv('sk-proj-I59lHlwYy3Ns6mpMga8aT3BlbkFJYmnAY7QXsjUSueUG7sae') 
-client = OpenAI(api_key='sk-proj-I59lHlwYy3Ns6mpMga8aT3BlbkFJYmnAY7QXsjUSueUG7sae')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
@@ -1030,4 +1023,4 @@ def enroll(course_id):
 if __name__ == '__main__':
     with app.app_context():
             db.create_all()  # Create database tables based on the models
-    app.run(debug=True)
+    app.run(debug=True,host='0.0.0.0')
