@@ -141,7 +141,7 @@
                         <hr>
                         <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
                         <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
-            <a class="btn btn-primary" href="{{ url_for('meeting') }}">Create Meeting</a>
+            <a class="btn btn-primary" href="{{ url_for('meeting2') }}">Create Meeting</a>
 
                     `;
                     }
@@ -160,7 +160,7 @@
                     if (mode_of_class == 'Live'){
                     mediaFieldHTML = `
                         <hr>
-                        <a class="btn btn-primary" href="{{ url_for('meeting') }}">Create Meeting</a>
+                        <a class="btn btn-primary" href="{{ url_for('meeting2') }}">Create Meeting</a>
                         <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
                         <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
                     `;
@@ -181,7 +181,7 @@
                         <hr>
                         <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
                         <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
-                        <a class="btn btn-primary" href="{{ url_for('meeting') }}">Create Meeting</a>
+                        <a class="btn btn-primary" href="{{ url_for('meeting2') }}">Create Meeting</a>
                     `;
                     }else {
                             mediaFieldHTML = `
