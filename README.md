@@ -10,7 +10,7 @@ A simple app to help you find your Learner type and coures by your lerning style
     - source env/Script/activate.bat
     - activeate 
 
-<h2>Path for run -[(env) Drivename:\Inner-Light-Advisor> ]
+<h3>Path for run -(env) Drivename:\Inner-Light-Advisor> </h3>
 <h3>Run code </h3>
     - python app.py
 
