@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+{% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,29 +9,116 @@
     <title>{{ course.name }} - Quiz</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container2 {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        p {
+            text-align: center;
+            color: #555;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .quiz-question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fafafa;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .quiz-question h3 {
+            color: #444;
+            margin-bottom: 10px;
+        }
+
+        .quiz-question p {
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .quiz-question input[type="radio"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        label {
+            cursor: pointer;
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: #5a627a;
+            color: #fff;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #444c63;
+        }
+
+        /* Responsive styling */
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 15px;
+            }
+
+            button[type="submit"] {
+                font-size: 1em;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container2">
         <h1>{{ course.name }} - Quiz</h1>
-        <p>Quiz instructions and details go here...</p>
+        <p>
+            To pass and receive a certificate, you must score a minimum of 60%.
+        </p>
         
         <!-- Quiz form -->
         <form id="quizForm">
             {% for quiz in course.quizzes %}
             <div class="quiz-question">
-                <h3>Question {{ loop.index  }}:</h3>
-                <p>{{ quiz.question }}</p>
+                <h3>Question {{ loop.index }}:</h3>
+                <h4>{{ quiz.question }}</h4>
                 
                 <!-- list in abcd -->
-                 
                 <input type="radio" id="quiz_{{ loop.index }}_option_0" name="question{{ loop.index }}" value="1" required>
-                A. <label for="quiz_{{ loop.index }}_option_1">{{ quiz.options[0] }}</label><br>
+                <label for="quiz_{{ loop.index }}_option_0">A. {{ quiz.options[0] }}</label><br>
                 <input type="radio" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="2" required>
-                B. <label for="quiz_{{ loop.index }}_option_2">{{ quiz.options[1] }}</label><br>
+                <label for="quiz_{{ loop.index }}_option_1">B. {{ quiz.options[1] }}</label><br>
                 <input type="radio" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="3" required>
-                C. <label for="quiz_{{ loop.index }}_option_3">{{ quiz.options[2] }}</label><br>
+                <label for="quiz_{{ loop.index }}_option_2">C. {{ quiz.options[2] }}</label><br>
                 <input type="radio" id="quiz_{{ loop.index }}_option_3" name="question{{ loop.index }}" value="4" required>
-                D. <label for="quiz_{{ loop.index }}_option_4">{{ quiz.options[3] }}</label><br>
+                <label for="quiz_{{ loop.index }}_option_3">D. {{ quiz.options[3] }}</label><br>
             </div>
             {% endfor %}
             
@@ -61,3 +151,4 @@
     </script>
 </body>
 </html>
+{% endblock %}

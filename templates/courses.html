@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -132,6 +133,11 @@
                 <h1>Auditory Learner Courses</h1>
             {% elif current_user.learning_style == 'Kinesthetic' %}
                 <h1>Kinesthetic Learner Courses</h1>
+             {% else %}
+                 <h1>Learner Type not define ⬇</h1>
+                 <h1><a href="{{url_for('test')}}" style="color: #ddd;"> Retest </a></h1>
+
+
             {% endif %}
         {% elif current_user.role == 'teacher' %}
             <h1>Course List</h1>
@@ -192,6 +198,8 @@
                             <a href="{{ url_for('course_detail', course_id=course.id) }}" ><button class="filter-button"> <i class="bi bi-box-arrow-in-right"></i> Enroll Now</button></a>
                         </div>
                     </div>
+                {% else %}
+                    <h3><a href="{{url_for('test')}}"> Retest </a></h3>
                 {% endif %}
             {% endfor %}
         {% elif current_user.role == 'teacher' %}

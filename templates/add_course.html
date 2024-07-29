@@ -1,12 +1,73 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <head>
     <title>Add Course</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <!-- css for page -->
-     <style>
-
-     </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+        .container2 {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        form {
+            /* display: flex; */
+            flex-direction: column;
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px; 
+        }
+        label {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="file"],
+        input[type="radio"],
+        input[type="link"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+        }
+        button {
+            background-color:#5a627a;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #444c63;
+        }
+        .chapter-section, .quiz-section {
+            margin-top: 20px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .btn {
+            margin-top: 5px;
+            display: inline-block;
+        }
+    </style>
 </head>
 <div class="container2">
     <h1>Add Course</h1>
@@ -75,162 +136,179 @@
         
         <div id="chaptersContainer">
             <label for="chapter_count">Number of Chapters:</label>
-            <input type="number" id="chapter_count" name="chapter_count" min="1" required>
-            <!-- select user will upload coures file or coures link js work on radio button -->
-             <label for="course_file">Course File:</label>
-             <input type="radio" id="course_file" name="course_file" value="course
-             file" required>
-            <label for="course_link">Course Link:</label>
-            <input type="radio" id="course_link" name="course_file" value="course
-            link" required>
-            <!-- js for coures link or file  -->
+            <input type="number" id="chapter_count" name="chapter_count" min="1" max="14" required>
 
-             
             <div id="chapters">
+                <hr>
                 <!-- JavaScript will dynamically generate chapter fields here -->
+                
             </div>
         </div>
+        
         <label for="quiz_count">Number of Quizzes:</label>
         <input type="number" id="quiz_count" name="quiz_count" min="1" max="30" required>
         
         <div id="quizzesContainer">
+            <hr>
             <!-- JavaScript will dynamically generate quiz fields here -->
         </div>
-            
-        <button type="submit">Add Course</button>
+            <br>
+        <button type="submit" >Add Course</button>
+        
     </form>
     
     <script>
-                        
+        document.getElementById('payment').addEventListener('change', function() {
+            document.getElementById('paymentDetailsContainer').style.display = this.value === 'Paid' ? 'block' : 'none';
+        });
+
+        document.getElementById('mode_of_class').addEventListener('change', function() {
+            document.getElementById('classDetailsContainer').style.display = this.value === 'Live' ? 'block' : 'none';
+        });
+
         document.getElementById('quiz_count').addEventListener('input', function() {
             const quizCount = parseInt(this.value);
             const quizzesContainer = document.getElementById('quizzesContainer');
             quizzesContainer.innerHTML = ''; // Clear previous quizzes
             for (let i = 1; i <= quizCount; i++) {
                 const quizHTML = `
-                    <h3>Quiz ${i}</h3>
-                    <label for="quiz_${i}_question">Question:</label>
-                    <input type="text" id="quiz_${i}_question" name="quiz_${i}_question" required>
-                    <label for="quiz_${i}_option_1">Option 1:</label>
-                    <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" required>
-                    <label for="quiz_${i}_option_2">Option 2:</label>
-                    <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" required>
-                    <label for="quiz_${i}_option_3">Option 3:</label>
-                    <input type="text" id="quiz_${i}_option_3" name="quiz_${i}_option_3" required>
-                    <label for="quiz_${i}_option_4">Option 4:</label>
-                    <input type="text" id="quiz_${i}_option_4" name="quiz_${i}_option_4" required>
-                    <label for="quiz_${i}_correct_answer">Correct Answer (1-4):</label>
-                    <input type="number" id="quiz_${i}_correct_answer" name="quiz_${i}_correct_answer" min="1" max="4" required>
+                    <div class="quiz-section">
+                        <h3>Quiz ${i}</h3>
+                        <label for="quiz_${i}_question">Question:</label>
+                        <input type="text" id="quiz_${i}_question" name="quiz_${i}_question" required>
+                        <label for="quiz_${i}_option_1">Option 1:</label>
+                        <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" required>
+                        <label for="quiz_${i}_option_2">Option 2:</label>
+                        <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" required>
+                        <label for="quiz_${i}_option_3">Option 3:</label>
+                        <input type="text" id="quiz_${i}_option_3" name="quiz_${i}_option_3" required>
+                        <label for="quiz_${i}_option_4">Option 4:</label>
+                        <input type="text" id="quiz_${i}_option_4" name="quiz_${i}_option_4" required>
+                        <label for="quiz_${i}_correct_answer">Correct Answer (1-4):</label>
+                        <input type="number" id="quiz_${i}_correct_answer" name="quiz_${i}_correct_answer" min="1" max="4" required>
+                    </div>
                 `;
                 quizzesContainer.insertAdjacentHTML('beforeend', quizHTML);
             }
         });
 
         document.getElementById('chapter_count').addEventListener('input', function() {
-            const chapterCount = parseInt(this.value);
-            const chaptersContainer = document.getElementById('chapters');
-            chaptersContainer.innerHTML = ''; // Clear previous chapters
+            generateChapters();
+        });
+
+        document.getElementById('learner_type').addEventListener('change', function() {
+            generateChapters();
+        });
+
+        function generateChapters() {
+            const chapterCount = parseInt(document.getElementById('chapter_count').value);
             const learnerType = document.getElementById('learner_type').value;
             const mode_of_class = document.getElementById('mode_of_class').value;
+            const chaptersContainer = document.getElementById('chapters');
+            chaptersContainer.innerHTML = ''; // Clear previous chapters
+
             for (let i = 1; i <= chapterCount; i++) {
                 let mediaFieldHTML = '';
                 
                 if (learnerType === 'Visual') {
-                    if (mode_of_class == 'Live'){
-                    mediaFieldHTML = `
-                        <hr>
-                        <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
-                        <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
-            <a class="btn btn-primary" href="{{ url_for('meeting2') }}">Create Meeting</a>
+                    if (mode_of_class == 'Live') {
+                        mediaFieldHTML = `
+                            
+                            <label for="chapter_${i}_meeting_link">Meeting Code [If you not create Meetinfg then create with Create button]:</label>
+                            <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
+                            <a class="btn btn-primary" href="{{ url_for('meeting2') }}" target="_blank">Create Meeting</a><br>
+                        `;
+                    } else {
+                        mediaFieldHTML = `
+                            <label for="chapter_${i}_course_file">Course File:</label>
+                            <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="video/*" required>
 
-                    `;
+                            <label for="chapter_${i}_course_link">Course Link:</label>
+                            <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link">
+                        `;
                     }
-                    else {
-                        
-                    mediaFieldHTML = `
-                    
-                        <label for="chapter_${i}_course_file">CourseFile:</label>
-                        <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="video/*" required>
-                        
-                        <label for="chapter_${i}_course_file">Course Link:[youtube secrate video link]</label>
-                        <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link"  required>
-
-                    `;}
                 } else if (learnerType === 'Auditory') {
-                    if (mode_of_class == 'Live'){
-                    mediaFieldHTML = `
-                        <hr>
-                        <a class="btn btn-primary" href="{{ url_for('meeting2') }}">Create Meeting</a>
-                        <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
-                        <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
-                    `;
-                    }
-                    else {
-                    mediaFieldHTML = `
-                        <label for="chapter_${i}_course_file">Course File:</label>
-                        <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="audio/*" required>
-                        
-                        <label for="chapter_${i}_course_file">Course Link:[youtube secrate music link]</label>
-                        <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link" required>
+                    if (mode_of_class == 'Live') {
+                        mediaFieldHTML = `
+                            
+                            <label for="chapter_${i}_meeting_link">Meeting Code [If you not create Meetinfg then create with Create button]:</label>
+                            <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
+                            <a class="btn btn-primary" href="{{ url_for('meeting2') }}" target="_blank">Create Meeting</a><br>
+                        `;
+                    } else {
+                        mediaFieldHTML = `
+                            <label for="chapter_${i}_course_file">Course File:</label>
+                            <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="audio/*" required>
 
-                    `;}
-                } 
-                else if (learnerType === 'Kinesthetic') {
-                    if (mode_of_class == 'Live'){
-                    mediaFieldHTML = `
-                        <hr>
-                        <label for="chapter_${i}_meeting_link">Zoom Meeting Link or Youtube Stream Link :</label>
-                        <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
-                        <a class="btn btn-primary" href="{{ url_for('meeting2') }}">Create Meeting</a>
-                    `;
-                    }else {
-                            mediaFieldHTML = `
+                            <label for="chapter_${i}_course_link">Course Link:</label>
+                            <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link">
+                        `;
+                    }
+                } else if (learnerType === 'Kinesthetic') {
+                    if (mode_of_class == 'Live') {
+                        mediaFieldHTML = `
+                            
+                            <label for="chapter_${i}_meeting_link">Meeting Code [If you not create Meetinfg then create with Create button]:</label>
+                            <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
+                            <a class="btn btn-primary" href="{{ url_for('meeting2') }}" target="_blank">Create Meeting</a><br>
+                        `;
+                    } else {
+                        mediaFieldHTML = `
                             <label for="chapter_${i}_course_file">Course File:</label>
                             <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="application/*" required>
-                            
-                            <label for="chapter_${i}_course_file">Course Link:[youtube secrate music link]</label>
-                            <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link" required>
 
-                            `;
-                            }
-                        }
+                            <label for="chapter_${i}_course_link">Course Link:</label>
+                            <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link">
+                        `;
+                    }
+                }
 
-                
                 const chapterHTML = `
-                    <h3>Chapter ${i}</h3>
-                    <label for="chapter_${i}_title">Title:</label>
-                    <input type="text" id="chapter_${i}_title" name="chapter_${i}_title" required>
-                    <label for="chapter_${i}_description">Description:</label>
-                    <textarea id="chapter_${i}_description" name="chapter_${i}_description" required></textarea>
-                    ${mediaFieldHTML}
-                    <label for="chapter_${i}_assignment_file">Assignment File:</label>
-                    <input type="file" id="chapter_${i}_assignment_file" name="chapter_${i}_assignment_file">
-                    <label for="chapter_${i}_resources">Resource Files:</label>
-                    // get course_link
-                    <input type="file" id="chapter_${i}_resources" name="chapter_${i}_resources" multiple>
-                    <label for="chapter_${i}_note">Note:</label>
-                    <textarea id="chapter_${i}_note" name="chapter_${i}_note" required></textarea>
-                    <label for="chapter_${i}_resource_link">Resource Link:</label>
-                    <input type="text" id="chapter_${i}_resource_link" name="chapter_${i}_resource_link">
-                    
+                    <div class="chapter-section">
+                        <h3>Chapter ${i}</h3>
+                        <label for="chapter_${i}_title">Title:</label>
+                        <input type="text" id="chapter_${i}_title" name="chapter_${i}_title" required>
+                        <label for="chapter_${i}_description">Description:</label>
+                        <textarea id="chapter_${i}_description" name="chapter_${i}_description" required></textarea>
+                        ${mediaFieldHTML}
+                        <label for="chapter_${i}_assignment_file">Assignment File:</label>
+                        <input type="file" id="chapter_${i}_assignment_file" name="chapter_${i}_assignment_file">
+                        <label for="chapter_${i}_resources">Resource Files:</label>
+                        <input type="file" id="chapter_${i}_resources" name="chapter_${i}_resources" multiple>
+                        <label for="chapter_${i}_note">Note:</label>
+                        <textarea id="chapter_${i}_note" name="chapter_${i}_note" required></textarea>
+                        <label for="chapter_${i}_resource_link">Resource Link:</label>
+                        <input type="text" id="chapter_${i}_resource_link" name="chapter_${i}_resource_link">
+                    </div>
                 `;
                 chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
-            }
-        });
 
-        function toggleChapterFields() {
-            const chapterCount = parseInt(document.getElementById('chapter_count').value);
-            const learnerType = document.getElementById('learner_type').value;
-            const chaptersContainer = document.getElementById('chapters');
-            chaptersContainer.innerHTML = ''; // Clear previous chapters
-            for (let i = 1; i <= chapterCount; i++) {
-                let mediaFieldHTML = '';
-                
-                chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
+                addCourseLinkFileToggle(i);
             }
-        };
-        </script>   
-</body>
-</html>
+        }
+
+        function addCourseLinkFileToggle(chapterIndex) {
+            const courseFileInput = document.getElementById(`chapter_${chapterIndex}_course_file`);
+            const courseLinkInput = document.getElementById(`chapter_${chapterIndex}_course_link`);
+
+            if (courseFileInput && courseLinkInput) {
+                courseFileInput.addEventListener('change', function() {
+                    if (this.value) {
+                        courseLinkInput.disabled = true;
+                    } else {
+                        courseLinkInput.disabled = false;
+                    }
+                });
+
+                courseLinkInput.addEventListener('input', function() {
+                    if (this.value) {
+                        courseFileInput.disabled = true;
+                    } else {
+                        courseFileInput.disabled = false;
+                    }
+                });
+            }
+        }
+    </script>
+</div>
 {% endblock %}
- 
