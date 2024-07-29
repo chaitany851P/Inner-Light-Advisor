@@ -24,7 +24,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
 db = SQLAlchemy(app)
-mail = Mail(app)
+# mail = Mail(app)
 
 # Flask-Login configuration
 login_manager = LoginManager()
