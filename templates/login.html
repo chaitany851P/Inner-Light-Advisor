@@ -1,4 +1,10 @@
-
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+            <div class="alert alert-danger">
+                {{ messages | join('<br>') | safe }}
+            </div>
+    {% endif %}
+{% endwith %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -248,8 +254,8 @@
                     <div class="input-block">
                         <label for="signup-role">Role</label>
                         <select id="signup-role" name="role" required>
-                            <option value="student">Student</option>
-                            <option value="teacher">Teacher</option>
+                            <option value="Student">Student</option>
+                            <option value="Teacher">Teacher</option>
                         </select>
                     </div>
                 </fieldset>

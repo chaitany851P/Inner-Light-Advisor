@@ -19,6 +19,7 @@
 
         .main-container {
             display: flex;
+            flex-wrap: wrap;
         }
 
         .sidebar {
@@ -26,6 +27,7 @@
             background-color: #f4f4f4;
             padding: 20px;
             border-right: 1px solid #ddd;
+            transition: transform 0.3s ease-in-out, width 0.3s ease-in-out;
         }
 
         .sidebar h2 {
@@ -53,7 +55,7 @@
         }
 
         .content {
-            width: 80%;
+            flex: 1;
             padding: 20px;
         }
 
@@ -89,23 +91,6 @@
         .notes {
             margin-top: 20px;
         }
-        ol h6 a:hover {
-            text-decoration: none !important;
-        }
-
-        .sidebar {
-            top: 0;
-            left: 0;
-            width: 290px;
-            height: auto;
-            background-color: #f0f0f0;
-            padding: 20px;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .sidebar.hidden {
-            transform: translateX(-270px);
-        }
 
         .toggle-sidebar {
             position: absolute;
@@ -125,12 +110,47 @@
         #sidebar-icon {
             font-size: 24px;
         }
+
+        .sidebar.hidden {
+            transform: translateX(-270px);
+            width: 0;
+        }
+
         #root {
-            width: 70vw;
+            width: 100%;
             height: 70vh;
             text-align: center;
             margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                transform: translateX(0);
             }
+
+            .toggle-sidebar {
+                left: auto;
+                right: 10px;
+            }
+
+            .sidebar.hidden {
+                transform: translateY(-100%);
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar h2, .sidebar ul li a {
+                font-size: 0.9em;
+            }
+
+            .lecture-navigation button {
+                padding: 5px 10px;
+                font-size: 0.8em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -160,7 +180,7 @@
             </ul>
         </div>
         <button class="toggle-sidebar" aria-label="Toggle sidebar">
-            <i class="bi-code-slash"></i>
+            <i class="bi-code-slash" >23</i>
         </button>
         <div class="content">
             <h1>{{ course.name }}</h1>
@@ -170,7 +190,6 @@
             <h2>Meeting</h2>
             <div class="video-wrapper">
                 <div class="container">
-                    
                     <form method="POST" action="{{ url_for('join',course_id=course.id, chapter_index=chapter_index) }}" class="mt-4" id="joinForm">
                         <div class="form-group">
                             <h1 class="text-center mt-5">Join Meeting</h1>
@@ -178,9 +197,7 @@
                         </div>
                         <button type="submit" class="btn btn-primary btn-lg">Join</button>
                     </form>
-                    <div id="root">
-
-                    </div>
+                    <div id="root"></div>
                 </div>
             </div>
             {% endif %}
@@ -193,15 +210,17 @@
                 </video>
                 {% endif %}
                 {% if current_user.learning_style == 'Auditory' %}
-                <audio controls poster="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}">
-                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}"width="50%" height="350" type="audio/mp4">
+                <audio controls>
+                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/mp4">
                     Your browser does not support the audio tag.
                 </audio>
                 {% endif %}
             </div>
             {% endif %}
             {% if chapter.course_link %}
-            <iframe width="70%" height="450" src="{{ chapter.course_link }}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            <div class="video-wrapper">
+                <iframe width="70%" height="450" src="{{ chapter.course_link }}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
             {% endif %}
             <hr>
             <h3>Description:</h3>
@@ -220,7 +239,7 @@
             {% endif %}
             {% if chapter.resource_link %}
             <h3>Resources:</h3>
-            <a href="{{chapter.resource_link}}">{{ chapter.resource_link }}</a>
+            <a href="{{ chapter.resource_link }}">{{ chapter.resource_link }}</a>
             {% endif %}
             <div class="notes">
                 <h3>Notes:</h3>
@@ -259,7 +278,7 @@
                 document.getElementById("joinForm").style.display = "none";
 
                 const userID = Math.floor(Math.random() * 10000) + "";
-                const userName = "{{username}}";
+                const userName = "{{ username }}";
                 const appID = 799094754;
                 const serverSecret = "c296b216b6a4275c7cea4b6cf9d1802d";
                 const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, roomID, userID, userName);
@@ -275,8 +294,6 @@
                         showScreenSharingButton: true,
                         showTextChat: true,
                         showUserList: true,
-
-
                         sharedLinks: [{
                             name: 'Room ID for Student',
                             url: roomID
@@ -292,7 +309,6 @@
                             role,
                         },
                     },
-
                     ...config
                 });
             }
@@ -312,6 +328,7 @@
                 sidebarIcon.classList.remove('fa-angle-double-right');
                 sidebarIcon.classList.add('fa-angle-double-left');
             }
+            document.querySelector('.content').style.flex = sidebar.classList.contains('hidden') ? '1 1 100%' : '1 1 calc(100% - 290px)';
         });
     </script>
 </body>

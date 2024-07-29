@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Certificate of Completion</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     
     <style>
         .certificate-bg {
@@ -25,6 +26,13 @@
             height: 70px;
             border-radius: 0%;
         }
+        /* make full page responsive */
+        @media screen and (max-width: 600px) {
+            .certificate-bg {
+                background-image: url('{{ url_for('static', filename='img/ila.jpeg') }}');
+                }
+                }
+        
     </style>
 </head>
 <body>

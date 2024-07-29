@@ -146,6 +146,7 @@
                 <input type="text" id="chapter_{{ index + 1 }}_meeting_link" name="chapter_{{ index + 1 }}_meeting_link" value="{{ chapter.meeting_link }}"><br><br>
               {% else%}
                 <p>No current meeting link</p><br>
+                
                 {% endif %}
             {% endif %}
             {% if chapter.course_link %}
@@ -171,6 +172,8 @@
              <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br><br>
              {% else%}
              <p>No current resource link</p><br>
+             <label for="chapter_{{ index + 1 }}_resource_link">Resource Link:</label>
+             <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br><br>
              {% endif %}
             {% set index = index + 1 %}
         {% endfor %}

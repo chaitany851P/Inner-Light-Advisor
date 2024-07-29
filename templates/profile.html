@@ -137,7 +137,18 @@
             height: 70px;
             border-radius: 0%;
         }
-        
+        /* responsiv every style and button */
+        @media (max-width: 768px) {
+            .container2 {
+                width: 90%;
+                padding: 15px;
+            }
+
+            .img img {
+                width: 100px;
+                height: 40px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -147,10 +158,18 @@
         
         <div class="user-info">
         
-                    <img src="{{ url_for('static', filename=current_user.img) }}" alt="Profile Image">
+            {% if current_user.img %}
+            <div class="img">
+                <br>
+                <strong> Profile : </strong> <img src="{{ url_for('static', filename=current_user.img) }}" alt="Profile Image" >
+            </div>
+            {% else %}
+         <p>No Profile  image found.</p>
+         {% endif %}    
                
             {% if current_user.role == 'teacher' %}
-                 {% if current_user.signature %}
+                
+                {% if current_user.signature %}
                     <div class="img">
                         <br>
                         <strong> Signature: </strong> <img src="{{ url_for('static', filename=current_user.signature) }}" alt="Signature Image">
@@ -163,7 +182,13 @@
             
             <p><strong>Name:</strong> {{ current_user.name }}</p>
             <p><strong>Date of Birth:</strong> {{ current_user.dob }}</p>
-            <p><strong>Learner Type:</strong> {{ current_user.learning_style }}</p>
+            
+            <!-- if lerner type is not define -->
+             {% if current_user.learning_style == 'Unassigned' %}
+             <p><strong>Learner Type:</strong> No Learner Type define, Give <a href="{{url_for('test')}}" class="btn btn-primary">test</a></p> 
+             {% else %}
+                <p><strong>Learner Type:</strong> {{ current_user.learning_style }}</p>
+             {% endif %}
             <p><strong>Role:</strong> {{ current_user.role }}</p>
             <p><strong>Email:</strong> {{ current_user.email }}</p>
 
@@ -187,11 +212,11 @@
         <div class="user-info">
         <form method="POST" enctype="multipart/form-data">
             <label for="profile_image">Profile Image</label>
-            <input type="file" id="profile_image" name="profile_image">
+            <input type="file" id="profile_image" name="profile_image" accept="image/*">
             
             {% if current_user.role == 'teacher' %}
                 <label for="signature">Signature</label>
-                <input type="file" id="signature_image" name="signature_image">
+                <input type="file" id="signature_image" name="signature_image" accept="image/*">
             {% endif %}
         
             <button type="submit">Upload</button>

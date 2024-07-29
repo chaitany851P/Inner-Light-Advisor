@@ -90,6 +90,7 @@
             height: 100%;
         }
         
+        
         @media (max-width: 768px) {
             .course-container {
                 padding: 10px;
@@ -97,7 +98,8 @@
             .course-container h1 {
                 font-size: 1.8em;
             }
-            /* Adjust other styles as needed */
+
+            
         }
     </style>
 </head>
@@ -135,7 +137,7 @@
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link active" id="nav-content-tab" data-toggle="tab" href="#nav-content" role="tab" aria-controls="nav-content" aria-selected="true">Content</a>
-                            <a class="nav-item nav-link" id="nav-assessments-tab" data-toggle="tab" href="#nav-assessments" role="tab" aria-controls="nav-assessments" aria-selected="false">Assessments</a>
+                            <a class="nav-item nav-link" id="nav-assessments-tab" data-toggle="tab" href="#nav-assessments" role="tab" aria-controls="nav-assessments" aria-selected="false">Assignment</a>
                             <a class="nav-item nav-link" id="nav-resource-tab" data-toggle="tab" href="#nav-resource" role="tab" aria-controls="nav-resource" aria-selected="false">Resource</a>
                             <a class="nav-item nav-link" id="nav-quiz-tab" data-toggle="tab" href="#nav-quiz" role="tab" aria-atomic="nav-quzi" aria-selected="false">Quiz</a>
                         </div>
@@ -158,6 +160,8 @@
                                         <li>
                                             <p>{{ chapter.assignment_file }}</p>
                                         </li> 
+                                    {% else %}
+                                        <strong><p>No Assignment</p> </strong>
                                     {% endif %}
                                 {% endfor %}
                             </ol>
@@ -170,14 +174,16 @@
                                         <p>{{ resource }}</p></li>
                                         
                                         {% endfor %}
+                                    {% else %}
+                                        <Strong> <p>No Resources</p> </Strong>
                                     {% endif %}
                                 {% endfor %}
                             </ol>
                         </div>
                         <div class="tab-pane fade" id="nav-quiz" role="tabpanel" aria-labelledby="nav-quiz-tab">
                             <ol style="list-style-type: upper-roman;">
-                                <li>ok</li>
-                            </ol>
+                            <strong><p>Yes</p></strong>
+                        </ol>
                         </div>
                     </div>
 
