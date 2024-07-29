@@ -1,6 +1,6 @@
 from multiprocessing import reduction
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
-
+from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user 
@@ -12,13 +12,19 @@ from sqlalchemy.dialects.sqlite import JSON
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
+import datetime
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')  # Define upload folder
+app.config['MAIL_USERNAME'] = 'innerlightadvisor@gmail.com'
+app.config['MAIL_PASSWORD'] = '85173221Pc_'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 
 db = SQLAlchemy(app)
+mail = Mail(app)
 
 # Flask-Login configuration
 login_manager = LoginManager()
@@ -66,26 +72,28 @@ student_courses_completed = db.Table(
 
 class Teacher(User):
     id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    education = db.Column(MutableList.as_mutable(JSON), nullable=False, default=[])
+    education = db.Column(MutableList.as_mutable(JSON), nullable=True, default=[])
     img = db.Column(db.String(200), nullable=True)
     courses = db.relationship('Course', backref='teacher', lazy=True)
     tasks = db.relationship('Task', backref='assigned_teacher', lazy=True)
-    signature = db.Column(db.String(255), nullable=False) 
+    signature = db.Column(db.String(255), nullable=True) 
     __mapper_args__ = {'polymorphic_identity': 'teacher'}
 
-    def __init__(self, name, dob, phone, username, email, password, learning_style, education, img=None, signature=None):
+    def __init__(self, name, dob, phone, username, email, password, learning_style, education=None, img=None, signature=None):
         super().__init__(name=name, dob=dob, phone=phone, username=username, email=email, password=password, role='teacher', learning_style=learning_style)
-        self.education = education
+        self.education = education if education is not None else []
         self.img = img
         self.signature = signature
 
+
+tm = datetime.date.today() + datetime.timedelta(days=1)
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(20), default='Pending')  # Example status field
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
-    due_date = db.Column(db.String(20), default=[])
+    due_date = db.Column(db.String(20), default=[tm])
 
     def __repr__(self):
         return f"<Task(title='{self.title}', status='{self.status}')>"
@@ -167,9 +175,9 @@ def signup():
 
         # Create a new user instance based on the selected role
         if role == 'student':
-            new_user = Student(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password,   learning_style='Unassigned')
+            new_user = Student(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password, learning_style='Unassigned')
         elif role == 'teacher':
-            new_user = Teacher(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password,   learning_style='Unassigned',  education=[])
+            new_user = Teacher(name=name, dob=dob, phone=phone, username=username, email=email, password=hashed_password, learning_style='Unassigned')
         else:
             flash('Invalid role selected!', 'danger')
             return redirect(url_for('signup'))
@@ -181,7 +189,10 @@ def signup():
             db.session.commit()
         except Exception as e:
             db.session.rollback()
-            flash('An error occurred while signing up. Please try again.', 'danger')
+            # Log the full error for debugging
+            print("Error during user signup:", str(e))
+            # Flash a user-friendly error message
+            flash('An error occurred while signing up. Please try again. Error: {}'.format(str(e)), 'danger')
             return redirect(url_for('signup'))
 
         # Log in the new user after successful registration
@@ -636,11 +647,27 @@ def contact():
         try:
             db.session.add(new_contact)
             db.session.commit()
+
+            # Send email
+            msg = Message(
+                subject='New Contact Message',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=['chaitanythakar851@gmail.com']  # Replace with your recipient's email
+            )
+            msg.body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+            mail.send(msg)
+
             return redirect('/contact')  # Redirect to home or success page
-        except:
-            return 'There was an issue adding your contact information.'
+        except Exception as e:
+            db.session.rollback()
+            # Log the error with print for debugging purposes
+            print("There was an issue adding your contact information:", e)
+            flash('There was an issue adding your contact information. Please try again later.', e)
+            return render_template('contect.html')
 
     return render_template('contect.html')
+
+
 
 @app.route('/FAQs')
 def FAQs():
@@ -1023,4 +1050,4 @@ def enroll(course_id):
 if __name__ == '__main__':
     with app.app_context():
             db.create_all()  # Create database tables based on the models
-    app.run(debug=True,host='0.0.0.0')
+    app.run(debug=True,host='0.0.0.0',port='5000')
