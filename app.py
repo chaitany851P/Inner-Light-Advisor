@@ -1,6 +1,6 @@
 from multiprocessing import reduction
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
-from flask_mail import Mail, Message
+# from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user 
@@ -648,14 +648,14 @@ def contact():
             db.session.add(new_contact)
             db.session.commit()
 
-            # Send email
-            msg = Message(
-                subject='New Contact Message',
-                sender=app.config['MAIL_USERNAME'],
-                recipients=['chaitanythakar851@gmail.com']  # Replace with your recipient's email
-            )
-            msg.body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
-            mail.send(msg)
+            # # Send email
+            # msg = Message(
+            #     subject='New Contact Message',
+            #     sender=app.config['MAIL_USERNAME'],
+            #     recipients=['chaitanythakar851@gmail.com']  # Replace with your recipient's email
+            # )
+            # msg.body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
+            # mail.send(msg)
 
             return redirect('/contact')  # Redirect to home or success page
         except Exception as e:
