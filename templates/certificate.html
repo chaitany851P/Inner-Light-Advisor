@@ -8,7 +8,7 @@
     <title>Certificate of Completion</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    
+
     <style>
         .certificate-bg {
             background-image: url('{{ url_for('static', filename='img/ila.jpeg') }}');
@@ -20,46 +20,42 @@
         .text-shadow {
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
-        img {
+        .teacher-signature img, .provider-stamp img {
             width: 180px;
-            aspect-ratio: auto 32 / 32;
             height: 70px;
+            aspect-ratio: auto 32 / 32;
             border-radius: 0%;
         }
-        @media screen and (max-width: 768px) {
+        .signatures {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 4rem;
+        }
+        .signature-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .signature-section div {
+            margin-top: 0.5rem;
+        }
+        @media screen and (max-width: 600px) {
             .certificate-bg {
-                background-size: contain;
-                background-position: top;
+                background-image: url('{{ url_for('static', filename='img/ila.jpeg') }}');
             }
-            img {
-                width: 150px;
-                height: auto;
+            .signatures {
+               justify-content: space-around;
+            width: 100%;
+            margin-top: 4rem;
             }
-            .flex-stamps {
-                flex-direction: column;
-                align-items: center;
-            }
-            .mx-40 {
-                margin-left: 1rem;
-                margin-right: 1rem;
-            }
-            .text-lg {
-                font-size: 1rem;
-            }
-            .text-4xl {
-                font-size: 2rem;
-            }
-            .text-6xl {
-                font-size: 3rem;
-            }
-            .text-2xl {
-                font-size: 1.5rem;
-            }
-            .text-3xl {
-                font-size: 2rem;
+            .teacher-signature img, .provider-stamp img {
+                ight: 70px;
+            aspect-ratio: auto 32 / 32;
+            border-radius: 0%;
             }
         }
-        
     </style>
 </head>
 <body>
@@ -72,13 +68,13 @@
             <div class="mt-4 text-6xl font-bold text-blue-400 text-shadow">{{ user.name }}</div>
             <div class="mt-4 text-2xl font-bold text-shadow">For successfully completing the online course</div>
             <div class="mt-2 text-3xl font-bold text-shadow">{{ course.name }}</div>
-            <div class="flex justify-around w-full mt-16">
-                <div class="mx-40 flex flex-col items-center justify-center">
+            <div class="signatures">
+                <div class="signature-section teacher-signature">
                     <img src="{{ url_for('static', filename=course.teacher.signature) }}" alt="Instructor Signature">
                     <div class="mt-2 border-t-2 border-white w-48 mx-auto">{{ course.teacher.name }}</div>
                     <div class="mt-2 text-lg">Instructor</div>
                 </div>
-                <div class="mx-40 flex flex-col items-center justify-center">
+                <div class="signature-section provider-stamp">
                     <img src="{{ url_for('static', filename='img/ila.png') }}" alt="Provider">
                     <div class="mt-2 border-t-2 border-white w-48 mx-auto">Inner Light Advisor</div>
                     <div class="mt-2 text-lg">Course Provider</div>
