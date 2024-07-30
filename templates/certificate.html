@@ -26,7 +26,6 @@
             height: 70px;
             border-radius: 0%;
         }
-        /* Make the certificate page responsive */
         @media screen and (max-width: 768px) {
             .certificate-bg {
                 background-size: contain;
@@ -36,18 +35,16 @@
                 width: 150px;
                 height: auto;
             }
-            .flex-col-md {
-                flex-direction: row;
+            .flex-stamps {
+                flex-direction: column;
+                align-items: center;
             }
-        }
-        @media screen and (max-width: 480px) {
-            .certificate-bg {
-                background-size: cover;
-                background-position: center;
-                height: auto;
+            .mx-40 {
+                margin-left: 1rem;
+                margin-right: 1rem;
             }
             .text-lg {
-                font-size: 1.25rem;
+                font-size: 1rem;
             }
             .text-4xl {
                 font-size: 2rem;
@@ -61,42 +58,30 @@
             .text-3xl {
                 font-size: 2rem;
             }
-            .mx-40 {
-                margin-left: 1rem;
-                margin-right: 1rem;
-            }
-            .flex-col-md {
-                flex-direction: column;
-            }
-            .flex-stamps {
-                flex-direction: column;
-                align-items: center;
-            }
         }
+        
     </style>
 </head>
 <body>
 
 <div class="flex items-center justify-center h-screen bg-gray-100" style="background-image: url('{{ url_for('static', filename='img/ila.jpeg') }}'); background-repeat: no-repeat; background-position: center center; background-size: cover;">
-    <div class="certificate-bg relative flex items-center justify-center p-4" id="certificate">
-        <div class="flex flex-col items-center justify-center text-center text-white max-w-screen-md mx-auto">
+    <div class="certificate-bg relative flex items-center justify-center" id="certificate">
+        <div class="flex flex-col items-center justify-center text-center text-white">
             <div class="text-lg font-bold text-shadow">CERTIFICATE OF COMPLETION</div>
             <div class="mt-4 text-4xl font-bold text-shadow">We proudly bestow this Certificate of</div>
             <div class="mt-4 text-6xl font-bold text-blue-400 text-shadow">{{ user.name }}</div>
             <div class="mt-4 text-2xl font-bold text-shadow">For successfully completing the online course</div>
             <div class="mt-2 text-3xl font-bold text-shadow">{{ course.name }}</div>
-            <div class="flex flex-col-md justify-around w-full mt-16">
-                <div class="flex-stamps">
-                    <div class="flex flex-col items-center justify-center mb-8 md:mb-0">
-                        <img src="{{ url_for('static', filename=course.teacher.signature) }}" alt="Instructor Signature">
-                        <div class="mt-2 border-t-2 border-white w-48 mx-auto">{{ course.teacher.name }}</div>
-                        <div class="mt-2 text-lg">Instructor</div>
-                    </div>
-                    <div class="flex flex-col items-center justify-center">
-                        <img src="{{ url_for('static', filename='img/ila.png') }}" alt="Provider">
-                        <div class="mt-2 border-t-2 border-white w-48 mx-auto">Inner Light Advisor</div>
-                        <div class="mt-2 text-lg">Course Provider</div>
-                    </div>
+            <div class="flex justify-around w-full mt-16">
+                <div class="mx-40 flex flex-col items-center justify-center">
+                    <img src="{{ url_for('static', filename=course.teacher.signature) }}" alt="Instructor Signature">
+                    <div class="mt-2 border-t-2 border-white w-48 mx-auto">{{ course.teacher.name }}</div>
+                    <div class="mt-2 text-lg">Instructor</div>
+                </div>
+                <div class="mx-40 flex flex-col items-center justify-center">
+                    <img src="{{ url_for('static', filename='img/ila.png') }}" alt="Provider">
+                    <div class="mt-2 border-t-2 border-white w-48 mx-auto">Inner Light Advisor</div>
+                    <div class="mt-2 text-lg">Course Provider</div>
                 </div>
             </div>
         </div>
