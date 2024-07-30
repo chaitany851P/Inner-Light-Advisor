@@ -100,7 +100,7 @@ class Task(db.Model):
 
 
 class Course(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,unique=True,autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(1000), nullable=False)
     level = db.Column(db.String(50), nullable=False)
@@ -731,7 +731,7 @@ def add_course():
                 chapter_assignment_file.save(assignment_path)
 
             # Save resources files if provided
-            resources_filenames = []
+            resources_filenames = []    
             for file in chapter_resources_files:
                 if file and file.filename != '':
                     filename = secure_filename(file.filename)
@@ -897,31 +897,137 @@ def delete_course(course_id):
             delete_file(assignment_path)
                 
         if 'course_file' in chapter and chapter['course_file']:
-            course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', chapter['course_file'])
+            course_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', chapter['course_file'])
             delete_file(course_file_path)
 
-    # Delete the course from the database
+    # Delete the course from the database by id
     try:
-        db.session.delete(course)
+        db.session.query(Course).filter_by(id=course_id).delete()
+        db.session.query(student_courses_enrolled).filter_by(course_id=course_id).delete()
+        db.session.query(student_courses_completed).filter_by(course_id=course_id).delete()
+
         db.session.commit()
     except Exception as e:
+        db.session.rollback()  # Rollback in case of error
         return jsonify({'message': f'Failed to delete course from database: {str(e)}'}), 500
     
     return redirect(url_for('courses'))
     
+# @app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
+# @login_required
+# def edit_course(course_id):
+#     course = Course.query.get_or_404(course_id)
+
+#     if current_user.role != 'teacher' or current_user.id != course.teacher_id:
+#         flash('Unauthorized to edit this course.', 'danger')
+#         return redirect(url_for('dashboard'))
+
+#     if request.method == 'POST':
+#         course.name = request.form['name']
+#         course.description = request.form['description']
+#         course.level = request.form['level']
+#         course.domain = request.form['domain']
+#         course.language = request.form['language']
+#         course.payment = request.form['payment']
+#         course.mode_of_class = request.form['mode_of_class']
+#         course.learner_type = request.form['learner_type']
+
+#         # Handle thumbnail image update
+#         thumbnail_img = request.files.get('thumbnail_img')
+#         if thumbnail_img and thumbnail_img.filename != '':
+#             thumbnail_img_filename = secure_filename(thumbnail_img.filename)
+#             thumbnail_img.save(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', thumbnail_img_filename))
+#             course.thumbnail_img = thumbnail_img_filename
+
+#         # Handle sample video update
+#         temp_video = request.files.get('temp_video')
+#         if temp_video and temp_video.filename != '':
+#             temp_video_filename = secure_filename(temp_video.filename)
+#             temp_video.save(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', temp_video_filename))
+#             course.temp_video = temp_video_filename
+
+#         # Handle chapters
+#         chapter_count = int(request.form.get('chapter_count', 0))
+#         updated_chapters = []
+
+#         for i in range(1, chapter_count + 1):
+#             chapter_title = request.form.get(f'chapter_{i}_title')
+#             chapter_description = request.form.get(f'chapter_{i}_description')
+#             chapter_note = request.form.get(f'chapter_{i}_note')
+#             chapter_meeting_link = request.form.get(f'chapter_{i}_meeting_link')
+#             chapter_course_link = request.form.get(f'chapter_{i}_course_link')
+#             chapter_resource_link = request.form.get(f'chapter_{i}_resource_link')
+
+#             existing_chapter = next((c for c in course.chapters if c['title'] == chapter_title), {})
+
+#             chapter = {
+#                 'title': chapter_title,
+#                 'description': chapter_description,
+#                 'assignment_file': existing_chapter.get('assignment_file', ''),
+#                 'resources_files': existing_chapter.get('resources_files', []),
+#                 'course_file': existing_chapter.get('course_file', ''),
+#                 'note': chapter_note,
+#                 'meeting_link': chapter_meeting_link,
+#                 'course_link': chapter_course_link,
+#                 'resource_link': chapter_resource_link if chapter_resource_link else existing_chapter.get('resource_link', '')
+#             }
+
+#             # Handle assignment file update
+#             chapter_assignment_file = request.files.get(f'chapter_{i}_assignment_file')
+#             if chapter_assignment_file and chapter_assignment_file.filename != '':
+#                 assignment_filename = secure_filename(chapter_assignment_file.filename)
+#                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', assignment_filename)
+#                 chapter_assignment_file.save(assignment_path)
+#                 chapter['assignment_file'] = assignment_filename
+#             else:
+#                 chapter['assignment_file'] = existing_chapter.get('assignment_file', '')
+
+#             # Handle course file update if mode is 'Recorded'
+#             if course.mode_of_class == 'Recorded':
+#                 chapter_course_file = request.files.get(f'chapter_{i}_course_file')
+#                 if chapter_course_file and chapter_course_file.filename != '':
+#                     course_filename = secure_filename(chapter_course_file.filename)
+#                     course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', course_filename)
+#                     try:
+#                         chapter_course_file.save(course_path)
+#                         chapter['course_file'] = course_filename
+#                     except FileNotFoundError as e:
+#                         flash(f'Error saving course file: {e}', 'danger')
+#                         return redirect(url_for('edit_course', course_id=course_id))
+#                 else:
+#                     chapter['course_file'] = existing_chapter.get('course_file', '')
+
+#             # Handle resources files update
+#             chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')
+#             if chapter_resources_files:
+#                 for file in chapter_resources_files:
+#                     if file and file.filename != '':
+#                         filename = secure_filename(file.filename)
+#                         file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', filename)
+#                         file.save(file_path)
+#                         chapter['resources_files'].append(filename)
+#             else:
+#                 chapter['resources_files'] = existing_chapter.get('resources_files', [])
+
+#             updated_chapters.append(chapter)
+
+#         course.chapters = updated_chapters
+#         db.session.commit()
+
+#         flash('Course updated successfully!', 'success')
+#         return redirect(url_for('courses'))
+
+#     return render_template('edit_course.html', course=course)
 @app.route('/edit_course/<int:course_id>', methods=['GET', 'POST'])
 @login_required
 def edit_course(course_id):
-    # Retrieve the course from the database
     course = Course.query.get_or_404(course_id)
 
-    # Check if the current user is the teacher of the course
     if current_user.role != 'teacher' or current_user.id != course.teacher_id:
         flash('Unauthorized to edit this course.', 'danger')
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        # Retrieve form fields
         course.name = request.form['name']
         course.description = request.form['description']
         course.level = request.form['level']
@@ -932,94 +1038,116 @@ def edit_course(course_id):
         course.learner_type = request.form['learner_type']
 
         # Handle thumbnail image update
-        thumbnail_img = request.files['thumbnail_img']
+        thumbnail_img = request.files.get('thumbnail_img')
         if thumbnail_img and thumbnail_img.filename != '':
+            old_thumbnail_img = course.thumbnail_img
             thumbnail_img_filename = secure_filename(thumbnail_img.filename)
             thumbnail_img.save(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', thumbnail_img_filename))
             course.thumbnail_img = thumbnail_img_filename
 
+            # Delete old thumbnail image if it exists
+            if old_thumbnail_img and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', old_thumbnail_img)):
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', old_thumbnail_img))
+
         # Handle sample video update
-        temp_video = request.files['temp_video']
+        temp_video = request.files.get('temp_video')
         if temp_video and temp_video.filename != '':
+            old_temp_video = course.temp_video
             temp_video_filename = secure_filename(temp_video.filename)
             temp_video.save(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', temp_video_filename))
             course.temp_video = temp_video_filename
 
-        # Handle chapters update
-        updated_chapters = []
+            # Delete old sample video if it exists
+            if old_temp_video and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', old_temp_video)):
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', old_temp_video))
+
+        # Handle chapters
         chapter_count = int(request.form.get('chapter_count', 0))
+        updated_chapters = []
+
         for i in range(1, chapter_count + 1):
-            chapter_title = request.form[f'chapter_{i}_title']
-            chapter_description = request.form[f'chapter_{i}_description']
-            chapter_assignment_file = request.files.get(f'chapter_{i}_assignment_file')
-            chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')
-            chapter_note = request.form[f'chapter_{i}_note']
-            chapter_course_file = request.files.get(f'chapter_{i}_course_file')
+            chapter_title = request.form.get(f'chapter_{i}_title')
+            chapter_description = request.form.get(f'chapter_{i}_description')
+            chapter_note = request.form.get(f'chapter_{i}_note')
             chapter_meeting_link = request.form.get(f'chapter_{i}_meeting_link')
             chapter_course_link = request.form.get(f'chapter_{i}_course_link')
+            chapter_resource_link = request.form.get(f'chapter_{i}_resource_link')
 
-            # Retrieve existing chapter or create a new one
-            if i <= len(course.chapters):
-                chapter = course.chapters[i - 1]
-            else:
-                chapter = {
-                    'title': '',
-                    'description': '',
-                    'assignment_file': '',
-                    'resources_files': [],
-                    'course_file': '',
-                    'note': '',
-                    'meeting_link': '',
-                    'course_link': ''
-                }
+            existing_chapter = next((c for c in course.chapters if c['title'] == chapter_title), {})
 
-            chapter['title'] = chapter_title
-            chapter['description'] = chapter_description
-            chapter['note'] = chapter_note
-            chapter['meeting_link'] = chapter_meeting_link
-            chapter['course_link'] = chapter_course_link
+            chapter = {
+                'title': chapter_title,
+                'description': chapter_description,
+                'assignment_file': existing_chapter.get('assignment_file', ''),
+                'resources_files': existing_chapter.get('resources_files', ''),
+                'course_file': existing_chapter.get('course_file', ''),
+                'note': chapter_note,
+                'meeting_link': chapter_meeting_link,
+                'course_link': chapter_course_link,
+                'resource_link': chapter_resource_link if chapter_resource_link else existing_chapter.get('resource_link', '')
+            }
 
-            # Update assignment file if provided
+            # Handle assignment file update
+            chapter_assignment_file = request.files.get(f'chapter_{i}_assignment_file')
             if chapter_assignment_file and chapter_assignment_file.filename != '':
+                old_assignment_file = existing_chapter.get('assignment_file', '')
                 assignment_filename = secure_filename(chapter_assignment_file.filename)
                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', assignment_filename)
                 chapter_assignment_file.save(assignment_path)
                 chapter['assignment_file'] = assignment_filename
 
-            # Update resources files if provided
-            resources_filenames = []
+                # Delete old assignment file if it exists
+                if old_assignment_file and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', old_assignment_file)):
+                    os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', old_assignment_file))
+
+            # Handle course file update if mode is 'Recorded'
+            if course.mode_of_class == 'Recorded':
+                chapter_course_file = request.files.get(f'chapter_{i}_course_file')
+                if chapter_course_file and chapter_course_file.filename != '':
+                    old_course_file = existing_chapter.get('course_file', '')
+                    course_filename = secure_filename(chapter_course_file.filename)
+                    course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', course_filename)
+                    try:
+                        chapter_course_file.save(course_path)
+                        chapter['course_file'] = course_filename
+
+                        # Delete old course file if it exists
+                        if old_course_file and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], 'Course', old_course_file)):
+                            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', old_course_file))
+                    except FileNotFoundError as e:
+                        flash(f'Error saving course file: {e}', 'danger')
+                        return redirect(url_for('edit_course', course_id=course_id))
+                else:
+                    chapter['course_file'] = existing_chapter.get('course_file', '')
+
+            # Handle resources files update
+            chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')
+            old_resources_files = existing_chapter.get('resources_files', '')
+
             for file in chapter_resources_files:
                 if file and file.filename != '':
                     filename = secure_filename(file.filename)
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', filename)
                     file.save(file_path)
-                    resources_filenames.append(filename)
-            chapter['resources_files'] = resources_filenames
+                    chapter['resources_files'].append(filename)
 
-            # Update course file if provided
-            if chapter_course_file and chapter_course_file.filename != '':
-                course_filename = secure_filename(chapter_course_file.filename)
-                course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', course_filename)
-                try:
-                    chapter_course_file.save(course_path)
-                    chapter['course_file'] = course_filename  # Update chapter with the course file name
-                except FileNotFoundError as e:
-                    flash('Error saving course file: {}'.format(e), 'danger')
-                    return redirect(url_for('edit_course', course_id=course_id))  # Redirect in case of error
+            # Delete old resource files if new ones are uploaded
+            if chapter_resources_files:
+                for old_file in old_resources_files:
+                    old_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', old_file)
+                    if old_file_path not in [os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', f.filename) for f in chapter_resources_files]:
+                        if os.path.exists(old_file_path):
+                            os.remove(old_file_path)
 
             updated_chapters.append(chapter)
 
-        course.chapters = updated_chapters  # Update course chapters
-
-        # Commit changes to the database
+        course.chapters = updated_chapters
         db.session.commit()
 
         flash('Course updated successfully!', 'success')
         return redirect(url_for('courses'))
 
-    # Render the edit course form with current course details
-    return render_template('edit_course.html', course=course)
-    
+    return render_template('edit_course.html', course=course)    
 # @app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
 # @app.route('/view_chapter/<int:course_id>/<int:chapter_index>')
 # @login_required

@@ -205,6 +205,7 @@
             <div class="video-wrapper">
                 {% if current_user.learning_style == 'Visual' %}
                 <video controls>
+                    
                     <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="70%" height="50%" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
@@ -230,15 +231,15 @@
             <p>{{ chapter.assignment_file }}</p>
             <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
             {% endif %}
-            {% if chapter.resource_file %}
-            <h3>Resources:</h3>
-            {% for resource in chapter.resources_files %}
-            <p>{{ resource }}</p>
-            <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download</a></p>
-            {% endfor %}
+            {% if chapter.resources_files %}
+            <h3>Resource:</h3>
+            <!-- {% for resource in chapter.resources_files %} -->
+            <p>{{ chapter.resources_files }}</p>
+            <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download Resource</a></p>
+            <!-- {% endfor %} -->
             {% endif %}
             {% if chapter.resource_link %}
-            <h3>Resources:</h3>
+            <h3>Resource link:</h3>
             <a href="{{ chapter.resource_link }}">{{ chapter.resource_link }}</a>
             {% endif %}
             <div class="notes">
@@ -260,6 +261,7 @@
                     <button id="quizBtn">Go to Quiz</button>
                 </a>
                 {% endif %}
+                
             </div>
         </div>
     </div>

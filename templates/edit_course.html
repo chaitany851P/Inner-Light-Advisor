@@ -1,5 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+            <div class="alert alert-danger">
+                {{ messages | join('<br>') | safe }}
+            </div>
+    {% endif %}
+{% endwith %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -84,24 +92,23 @@
         <label for="learner_type">Learner Type:</label>
         <input type="text" id="learner_type" name="learner_type" value="{{ course.learner_type }}" required><br><br>
 
-        <label for="thumbnail_img">Thumbnail Image:</label><br>
+        
         {% if course.thumbnail_img %}
-            <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="Thumbnail Image"><br><br>
+        <label for="thumbnail_img">Thumbnail Image:</label>
+            <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="Thumbnail Image" width="299px">
         {% else %}
-            <p>No current thumbnail image</p><br><br>
+            <p>No current thumbnail image</p>
         {% endif %}
-        <input type="file" id="thumbnail_img" name="thumbnail_img"><br><br>
+        <input type="file" id="thumbnail_img" name="thumbnail_img" accept="image/*">
 
-        <label for="temp_video">Sample Video:</label><br>
+        <label for="temp_video">Sample Video:</label>
         {% if course.temp_video %}
-            
-                <video src="{{ url_for('static', filename='uploads/sample_video/' ~ course.temp_video) }}" type="video/*">
-                </video><!-- Your browser does not support the video tag. -->
-            <br><br>
+            <video src="{{ url_for('static', filename='uploads/sample_video/' ~ course.temp_video) }}" alt="Sample Video" width="299px" controls></video>
         {% else %}
-            <p>No current sample video</p><br><br>
+            <p>No current sample video</p>
         {% endif %}
-        <input type="file" id="temp_video" name="temp_video"><br><br>
+        <input type="file" id="temp_video" name="temp_video">
+
         
         <h3>Chapters:</h3>
         <input type="hidden" id="chapter_count" name="chapter_count" value="{{ course.chapters|length }}">
@@ -113,7 +120,33 @@
 
             <label for="chapter_{{ index + 1 }}_description">Chapter {{ index + 1 }} Description:</label><br>
             <textarea id="chapter_{{ index + 1 }}_description" name="chapter_{{ index + 1 }}_description" rows="4">{{ chapter.description }}</textarea><br><br>
+            {% if course.mode_of_class == 'Recorded' %}
+            {% if chapter.course_file %}
+            <label for="chapter_{{ index + 1 }}_course_file">Course File:</label><br>
+            
+            <div class="video-wrapper">
+                <video src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="80%" controls></video>
+                <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file"><br><br>
+    
+            </div>
+        
+            {% elif chapter.course_link %}
+                <label for="chapter_{{ index + 1 }}_course_link">Course Link:</label>
+                <input type="text" id="chapter_{{ index + 1 }}_course_link" name="chapter_{{ index + 1 }}_course_link" value="{{ chapter.course_link }}"><br><br>
+            {% else %}
+                <p>No current Course content</p>
+            {% endif %}
 
+            {% else %}
+            {% if chapter.meeting_link %}
+
+            <label for="chapter_{{ index + 1 }}_meeting_link">Meeting Link:</label>
+            <input type="text" id="chapter_{{ index + 1 }}_meeting_link" name="chapter_{{ index + 1 }}_meeting_link" value="{{ chapter.meeting_link }}"><br><br>
+          {% else%}
+            <p>No current meeting link</p><br>
+            
+            {% endif %}
+            {% endif %}
             <label for="chapter_{{ index + 1 }}_assignment_file">Assignment File:</label><br>
             {% if chapter.assignment_file %}
                 <p>Current File: {{ chapter.assignment_file }}</p><br>
@@ -123,36 +156,7 @@
             {% endif %}
             <input type="file" id="chapter_{{ index + 1 }}_assignment_file" name="chapter_{{ index + 1 }}_assignment_file"><br><br>
             <!-- if mode of class is recorded -->
-             {% if course.mode_of_class == 'Recorded' %}
-
-                <label for="chapter_{{ index + 1 }}_course_file">Course File:</label><br>
-                {% if chapter.course_file %}
-                <div class="video-wrapper">
-                    <video src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="80%" controls></video>
-                    <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file"><br><br>
-
-                </div>
-                {% else %}
-                <p>No current course file</p><br>
-                <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file" ><br><br>
-
-                {% endif %}
-                
-             {% else %}
-              
-              {% if chapter.meeting_link %}
-
-                <label for="chapter_{{ index + 1 }}_meeting_link">Meeting Link:</label>
-                <input type="text" id="chapter_{{ index + 1 }}_meeting_link" name="chapter_{{ index + 1 }}_meeting_link" value="{{ chapter.meeting_link }}"><br><br>
-              {% else%}
-                <p>No current meeting link</p><br>
-                
-                {% endif %}
-            {% endif %}
-            {% if chapter.course_link %}
-                <label for="chapter_{{ index + 1 }}_course_link">Course Link:</label>
-                <input type="text" id="chapter_{{ index + 1 }}_course_link" name="chapter_{{ index + 1 }}_course_link" value="{{ chapter.course_link }}"><br><br>
-            {% endif %}
+            
             
             <label for="chapter_{{ index + 1 }}_note">Chapter {{ index + 1 }} Note:</label>
             <input type="text" id="chapter_{{ index + 1 }}_note" name="chapter_{{ index + 1 }}_note" value="{{ chapter.note }}"><br><br>
