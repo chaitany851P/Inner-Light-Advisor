@@ -9,7 +9,7 @@ A simple app to help you find your learner type and courses based on your learni
 ### Install All Packages
 
 ```bash
-pip install -r requirements.txt
+pip install -r requirement.txt
 ```
 
 ### Set Up Virtual Environment
