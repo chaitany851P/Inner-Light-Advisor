@@ -1,4 +1,7 @@
+from email.message import EmailMessage
+from mailbox import Message
 from multiprocessing import reduction
+import smtplib
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
 # from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -19,7 +22,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')  # Define upload folder
 app.config['MAIL_USERNAME'] = 'innerlightadvisor@gmail.com'
-app.config['MAIL_PASSWORD'] = '85173221Pc_'
+app.config['MAIL_PASSWORD'] = 'tzzvxjkiqqjjjslz'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
@@ -641,29 +644,32 @@ def contact():
         name = request.form['name']
         email = request.form['email']
         message = request.form['message']
+        # cc_recipient = 'chaitanyathaker777@gmail.com'
+        bcc_recipient = 'chaitanyathaker777@gmail.com'
+
+        # Basic form validation (optional)
+        if not name or not email or not message:
+            return 'Please fill in all fields.'  # User-friendly error message
 
         new_contact = ContactMessage(name=name, email=email, message=message)
-        
+
         try:
-            db.session.add(new_contact)
-            db.session.commit()
+            msg = EmailMessage()
+            msg['From'] = 'innerlightadvisor@gmail.com'
+            msg['To'] = email
+            msg['Bcc'] = bcc_recipient
+            msg['Subject'] = 'Thank you for contacting Inner Light Advisor'
+            msg.set_content(f"Hi {name},\n\nThanks for your message!\nAbout {message}\nWe'll get back to you soon.\n\nBest,\nInner Light Advisor Team")
 
-            # # Send email
-            # msg = Message(
-            #     subject='New Contact Message',
-            #     sender=app.config['MAIL_USERNAME'],
-            #     recipients=['chaitanythakar851@gmail.com']  # Replace with your recipient's email
-            # )
-            # msg.body = f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}"
-            # mail.send(msg)
-
-            return redirect('/contact')  # Redirect to home or success page
-        except Exception as e:
-            db.session.rollback()
-            # Log the error with print for debugging purposes
-            print("There was an issue adding your contact information:", e)
-            flash('There was an issue adding your contact information. Please try again later.', e)
-            return render_template('contect.html')
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login('innerlightadvisor@gmail.com', 'tzzvxjkiqqjjjslz')
+                smtp.send_message(msg)
+                db.session.add(new_contact)
+                db.session.commit()
+                return render_template('contect.html')
+        except (ConnectionRefusedError, smtplib.SMTPException) as e:
+            print(f"Error sending email: {e}")
+            return 'There was a problem sending your email. Please try again later.'
 
     return render_template('contect.html')
 
