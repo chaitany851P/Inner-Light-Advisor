@@ -111,14 +111,9 @@
         <label for="mode_of_class">Mode of Class:</label>
         <select id="mode_of_class" name="mode_of_class" onchange="showClassDetails()">
             <option></option>
-            <option value="Live">Live</option>
             <option value="Recorded">Recorded</option>
+            <option value="Live">Live</option>
         </select>
-
-        <div id="classDetailsContainer" style="display: none;">
-            <label for="class_details">Class Details:</label>
-            <textarea id="class_details" name="class_details" rows="3"></textarea>
-        </div>
         
         <label for="learner_type">Learner Type:</label>
         <select id="learner_type" name="learner_type" required onchange="toggleChapterFields()">
