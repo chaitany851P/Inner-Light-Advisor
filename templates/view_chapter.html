@@ -231,7 +231,7 @@
             {% endif %}
             {% if chapter.course_file %}
             <div class="video-wrapper">
-                {% if current_user.learning_style == 'Visual' %}
+                {% if current_user.learning_style == 'Visual' or 'Kinesthetic' %}
                 <video controls>
                     
                     <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="70%" height="50%" type="video/mp4">

@@ -87,7 +87,11 @@
         </select>
         
         <label for="domain">Domain:</label>
-        <input type="text" id="domain" name="domain" required>
+        <select name="domain" id="domain">
+            <option value=""></option>
+            <option value="Programming">Programming</option>
+            <option value=""></option>
+        </select>
         
         <label for="language">Language:</label>
         <select id="language" name="language" required>
@@ -205,7 +209,7 @@
             for (let i = 1; i <= chapterCount; i++) {
                 let mediaFieldHTML = '';
                 
-                if (learnerType === 'Visual') {
+                if (learnerType === 'Visual' || 'Kinesthetic') {
                     if (mode_of_class == 'Live') {
                         mediaFieldHTML = `
                             
@@ -239,23 +243,7 @@
                             <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link">
                         `;
                     }
-                } else if (learnerType === 'Kinesthetic') {
-                    if (mode_of_class == 'Live') {
-                        mediaFieldHTML = `
-                            
-                            <label for="chapter_${i}_meeting_link">Meeting Code [If you not create Meetinfg then create with Create button]:</label>
-                            <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
-                            <a class="btn btn-primary" href="{{ url_for('meeting2') }}" target="_blank">Create Meeting</a><br>
-                        `;
-                    } else {
-                        mediaFieldHTML = `
-                            <label for="chapter_${i}_course_file">Course File:</label>
-                            <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="application/*" required>
-
-                            <label for="chapter_${i}_course_link">Course Link:</label>
-                            <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link">
-                        `;
-                    }
+                
                 }
 
                 const chapterHTML = `
