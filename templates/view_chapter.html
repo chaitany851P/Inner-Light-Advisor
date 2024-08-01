@@ -122,33 +122,34 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        /* form {
+        /* .f2 form {
             margin-top: 20px;
-        }
-        form label {
+        } */
+        .f2 form label {
             display: block;
             font-weight: bold;
             margin-bottom: 5px;
             color: #333;
-        } */
-        /* form input[type="text"]{
-            width: 50%;
+        } 
+        .f2 form textarea[type="text"] {
+            width: 40%;
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
-            border-radius: 10px;
+            border-radius: 30px;
         }
-        form button {
+        .f2 form button {
             padding: 10px 20px;
             background-color: #5a627a;
             color: #fff;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin-left: 40%;
         }
-        form button:hover {
+        .f2 button:hover {
             background-color: #444c5e;
-        } */
+        }
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -219,7 +220,7 @@
                     <form method="POST" action="{{ url_for('join',course_id=course.id, chapter_index=chapter_index) }}" class="mt-4" id="joinForm">
                         <div class="form-group">
                             <h1 class="text-center mt-5">Join Meeting</h1>
-                            <input type="text" placeholder="Room ID:" class="form-control" id="roomID" name="roomID" required>
+                            <input type="text" placeholder="Room ID:" class="form-control" id="roomID" name="roomID" value="{{ chapter.meeting_link }}" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-lg">Join</button>
                     </form>
@@ -249,6 +250,7 @@
                 <iframe width="70%" height="450" src="{{ chapter.course_link }}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
             {% endif %}
+        
             <hr>
             <h3>Description:</h3>
             <p>{{ chapter.description }}</p>
@@ -283,19 +285,18 @@
                     <button id="nextLectureBtn">Next Lecture &gt;</button>
                 </a>
                 {% else %}
+                </div>
                 <!-- if role is teacher -->
                 {% if current_user.role == 'student' %}
-                <form action="{{ url_for('quiz', course_id=course.id) }}" method="POST">
-                    
+                <div class="f2">
+                <form action="{{ url_for('quiz', course_id=course.id) }}" method="POST" >
+                   
                     <h6><label for="message" style="font-size:larger;">Feedback:</label></h6>
-                    <input type="text" name="message" style="width: 50%;
-                    padding: 10px;
-                    margin-bottom: 10px;
-                    border: 1px solid #ccc;
-                    border-radius: 10px;"><br>
+                    <textarea name="" rows="5" type="text" name="message" ></textarea><br>
                     <!-- <textarea id="message"  rows="5" ></textarea><br> -->
                     <button type="submit" id="quizBtn">Go to Quiz</button>
-                </form>               
+                </form>         
+                      
                 {% else %}
                      <!-- back to coureses -->
                      <button><a href="{{ url_for ('courses')}}" style="color: #fff;text-decoration: none;display: block;">Back to Courses</a></button>
