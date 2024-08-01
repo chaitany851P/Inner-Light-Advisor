@@ -68,34 +68,34 @@
     <h1>Edit Course</h1>
     <form action="{{ url_for('edit_course', course_id=course.id) }}" method="POST" enctype="multipart/form-data">
         <label for="name">Course Name:</label>
-        <input type="text" id="name" name="name" value="{{ course.name }}" required><br><br>
+        <input type="text" id="name" name="name" value="{{ course.name }}" required><br>
 
-        <label for="description">Description:</label><br>
-        <textarea id="description" name="description" rows="4" required>{{ course.description }}</textarea><br><br>
+        <label for="description">Description:</label>
+        <textarea id="description" name="description" rows="4" required>{{ course.description }}</textarea><br>
 
         <label for="level">Level:</label>
-        <input type="text" id="level" name="level" value="{{ course.level }}" required><br><br>
+        <input type="text" id="level" name="level" value="{{ course.level }}" required><br>
 
         <label for="domain">Domain:</label>
-        <input type="text" id="domain" name="domain" value="{{ course.domain }}" required><br><br>
+        <input type="text" id="domain" name="domain" value="{{ course.domain }}" required><br>
 
         <label for="language">Language:</label>
-        <input type="text" id="language" name="language" value="{{ course.language }}" required><br><br>
+        <input type="text" id="language" name="language" value="{{ course.language }}" required><br>
         
 
         <label for="payment">Payment:</label>
-        <input type="text" id="payment" name="payment" value="{{ course.payment }}" required><br><br>
+        <input type="text" id="payment" name="payment" value="{{ course.payment }}" required><br>
 
         <label for="mode_of_class">Mode:</label>
-        <input type="text" id="mode_of_class" name="mode_of_class" value="{{ course.mode_of_class }}" required><br><br>
+        <input type="text" id="mode_of_class" name="mode_of_class" value="{{ course.mode_of_class }}" required><br>
 
         <label for="learner_type">Learner Type:</label>
-        <input type="text" id="learner_type" name="learner_type" value="{{ course.learner_type }}" required><br><br>
+        <input type="text" id="learner_type" name="learner_type" value="{{ course.learner_type }}" required><br>
 
         
         {% if course.thumbnail_img %}
         <label for="thumbnail_img">Thumbnail Image:</label>
-            <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="Thumbnail Image" width="299px">
+            <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="Thumbnail Image" width="299px" >
         {% else %}
             <p>No current thumbnail image</p>
         {% endif %}
@@ -107,7 +107,7 @@
         {% else %}
             <p>No current sample video</p>
         {% endif %}
-        <input type="file" id="temp_video" name="temp_video">
+        <input type="file" id="temp_video" name="temp_video" accept="video/*">
 
         
         <h3>Chapters:</h3>
@@ -116,23 +116,40 @@
         {% for chapter in course.chapters %}
         
             <label for="chapter_{{ index + 1 }}_title">Chapter {{ index + 1 }} Title:</label>
-            <input type="text" id="chapter_{{ index + 1 }}_title" name="chapter_{{ index + 1 }}_title" value="{{ chapter.title }}"><br><br>
+            <input type="text" id="chapter_{{ index + 1 }}_title" name="chapter_{{ index + 1 }}_title" value="{{ chapter.title }}"><br>
 
             <label for="chapter_{{ index + 1 }}_description">Chapter {{ index + 1 }} Description:</label><br>
-            <textarea id="chapter_{{ index + 1 }}_description" name="chapter_{{ index + 1 }}_description" rows="4">{{ chapter.description }}</textarea><br><br>
+            <textarea id="chapter_{{ index + 1 }}_description" name="chapter_{{ index + 1 }}_description" rows="4">{{ chapter.description }}</textarea><br>
             {% if course.mode_of_class == 'Recorded' %}
             {% if chapter.course_file %}
             <label for="chapter_{{ index + 1 }}_course_file">Course File:</label><br>
             
             <div class="video-wrapper">
-                <video src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="80%" controls></video>
-                <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file"><br><br>
-    
+                {% if current_user.learning_style == 'Visual' %}
+                <video controls>
+
+                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="70%" height="50%" type="video/*">
+                    Your browser does not support the video tag.
+                    <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file" accept="video/*"><br>
+                </video>
+                {% endif %}
+                {% if current_user.learning_style == 'Auditory' %}
+                <audio controls>
+                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/*">
+                    Your browser does not support the audio tag.
+                    <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file" accept="audio/*"><br>
+
+                </audio>
+                {% else %}
+                <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}">
+                    
+                {% endif %}
+                    
             </div>
         
             {% elif chapter.course_link %}
                 <label for="chapter_{{ index + 1 }}_course_link">Course Link:</label>
-                <input type="text" id="chapter_{{ index + 1 }}_course_link" name="chapter_{{ index + 1 }}_course_link" value="{{ chapter.course_link }}"><br><br>
+                <input type="text" id="chapter_{{ index + 1 }}_course_link" name="chapter_{{ index + 1 }}_course_link" value="{{ chapter.course_link }}"><br>
             {% else %}
                 <p>No current Course content</p>
             {% endif %}
@@ -141,7 +158,7 @@
             {% if chapter.meeting_link %}
 
             <label for="chapter_{{ index + 1 }}_meeting_link">Meeting Link:</label>
-            <input type="text" id="chapter_{{ index + 1 }}_meeting_link" name="chapter_{{ index + 1 }}_meeting_link" value="{{ chapter.meeting_link }}"><br><br>
+            <input type="text" id="chapter_{{ index + 1 }}_meeting_link" name="chapter_{{ index + 1 }}_meeting_link" value="{{ chapter.meeting_link }}"><br>
           {% else%}
             <p>No current meeting link</p><br>
             
@@ -154,30 +171,30 @@
             {% else %}
                 <p>No current assignment file</p><br>
             {% endif %}
-            <input type="file" id="chapter_{{ index + 1 }}_assignment_file" name="chapter_{{ index + 1 }}_assignment_file"><br><br>
+            <input type="file" id="chapter_{{ index + 1 }}_assignment_file" name="chapter_{{ index + 1 }}_assignment_file"><br>
             <!-- if mode of class is recorded -->
             
             
             <label for="chapter_{{ index + 1 }}_note">Chapter {{ index + 1 }} Note:</label>
-            <input type="text" id="chapter_{{ index + 1 }}_note" name="chapter_{{ index + 1 }}_note" value="{{ chapter.note }}"><br><br>
+            <input type="text" id="chapter_{{ index + 1 }}_note" name="chapter_{{ index + 1 }}_note" value="{{ chapter.note }}"><br>
 
             <label for="chapter_{{ index + 1 }}_resources">Resources Files:</label><br>
             {% if chapter.resources_files %}
                 <p>Current Files:<br> {% for file in chapter.resources_files %}
-                    <p>{{ file }}</p><br>
+                    <p>{{ file }}</p>
                 {% endfor %}</p><br>
             {% else %}
                 <p>No current resource files</p><br>
             {% endif %}
-            <input type="file" id="chapter_{{ index + 1 }}_resources" name="chapter_{{ index + 1 }}_resources" multiple><br><br>
+            <input type="file" id="chapter_{{ index + 1 }}_resources" name="chapter_{{ index + 1 }}_resources" multiple><br>
             <!-- if resource_link -->
              {% if chapter.resource_link %}
              <label for="chapter_{{ index + 1 }}_resource_link">Resource Link:</label>
-             <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br><br>
+             <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br>
              {% else%}
              <p>No current resource link</p><br>
              <label for="chapter_{{ index + 1 }}_resource_link">Resource Link:</label>
-             <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br><br>
+             <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br>
              {% endif %}
             {% set index = index + 1 %}
         {% endfor %}
