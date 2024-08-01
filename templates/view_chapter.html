@@ -152,19 +152,20 @@
         }
         @media (max-width: 768px) {
             .sidebar {
-                width: 100%;
+                /* width: 100%; */
                 position: relative;
                 transform: translateX(0);
             }
 
             .toggle-sidebar {
                 left: auto;
-                right: 10px;
+                position: relative;
+                right: auto;
             }
 
             .sidebar.hidden {
-                transform: translateY(-100%);
-                width: 100%;
+                transform: translateX(-270px);
+            width: 0;
             }
         }
 
@@ -220,7 +221,7 @@
                     <form method="POST" action="{{ url_for('join',course_id=course.id, chapter_index=chapter_index) }}" class="mt-4" id="joinForm">
                         <div class="form-group">
                             <h1 class="text-center mt-5">Join Meeting</h1>
-                            <input type="text" placeholder="Room ID:" class="form-control" id="roomID" name="roomID" value="{{ chapter.meeting_link }}" required>
+                            <input type="text" placeholder="Room ID:" class="form" id="roomID" name="roomID" value="{{ chapter.meeting_link }}" required>
                         </div>
                         <button type="submit" class="btn btn-primary btn-lg">Join</button>
                     </form>
@@ -285,21 +286,24 @@
                     <button id="nextLectureBtn">Next Lecture &gt;</button>
                 </a>
                 {% else %}
-                </div>
+               
                 <!-- if role is teacher -->
-                {% if current_user.role == 'student' %}
-                <div class="f2">
-                <form action="{{ url_for('quiz', course_id=course.id) }}" method="POST" >
+                {% if current_user.role == 'teacher' %}
+                
+                    <button><a href="{{ url_for ('courses')}}" style="color: #fff;text-decoration: none;display: block;">Back to Courses</a></button>
                    
-                    <h6><label for="message" style="font-size:larger;">Feedback:</label></h6>
-                    <textarea name="" rows="5" type="text" name="message" ></textarea><br>
-                    <!-- <textarea id="message"  rows="5" ></textarea><br> -->
-                    <button type="submit" id="quizBtn">Go to Quiz</button>
-                </form>         
-                      
+                
                 {% else %}
-                     <!-- back to coureses -->
-                     <button><a href="{{ url_for ('courses')}}" style="color: #fff;text-decoration: none;display: block;">Back to Courses</a></button>
+                     
+                     <div class="f2">
+                        <form action="{{ url_for('quiz', course_id=course.id) }}" method="POST" >
+                           
+                            <h6><label for="message" style="font-size:larger;">Feedback:</label></h6>
+                            <textarea name="" rows="5" type="text" name="message" ></textarea><br>
+                            <!-- <textarea id="message"  rows="5" ></textarea><br> -->
+                            <button type="submit" id="quizBtn">Go to Quiz</button>
+                        </form>         
+                              </div>
                 {% endif %}
                 
                 {% endif %}
