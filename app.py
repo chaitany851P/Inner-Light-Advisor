@@ -493,8 +493,7 @@ def quiz(course_id):
         # cc_recipient = 'chaitanyathaker777@gmail.com'
         bcc_recipient = 'chaitanyathaker777@gmail.com', course.teacher.email
         # Basic form validation (optional)
-        if not name or not email or not message:
-            return 'Please fill in all fields.'  # User-friendly error message
+        # User-friendly error message
         # new_feedback = Feedback(name=name, email=email, message=message)
         try:
             msg = EmailMessage()
