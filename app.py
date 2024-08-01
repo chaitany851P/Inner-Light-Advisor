@@ -375,6 +375,7 @@ def forgot_password():
 @app.route('/join2')
 def join2():
     return render_template('join.html')
+
 @app.route('/test')
 def test():
     return render_template('test.html')
@@ -431,54 +432,35 @@ def course_detail(course_id):
 def coures_video():
     return render_template('student/coures_video.html')
 
-@app.route('/courses')
+@app.route('/courses', methods=['GET', 'POST'])
 def courses():
-    language = request.args.get('language', 'all')
-    payment = request.args.get('payment', 'all')
-    domain = request.args.get('domain', 'all')
-    mode = request.args.get('mode', 'all')
-    level = request.args.get('level', 'all')
+    if request.method == 'POST':
+        # Get form data with default to None
+        language = request.form['language']
+        payment = request.form['payment']
+        domain = request.form['domain']
+        level = request.form['level']
+        mode_of_class = request.form['mode_of_class']
+        payment_details = request.form.get('payment_details', None)
 
-    courses_query = Course.query
+        # Build the query
+        courses_query = Course.query
 
-    if language != 'all':
-        courses_query = courses_query.filter_by(language=language)
-    if payment != 'all':
-        courses_query = courses_query.filter_by(payment=payment)
-    if domain != 'all':
-        courses_query = courses_query.filter_by(domain=domain)
-    if mode != 'all':
-        courses_query = courses_query.filter_by(mode_of_class=mode)
-    if level != 'all':
-        courses_query = courses_query.filter_by(level=level)
+        # Apply filters if they are not empty
+        if language:
+            courses_query = courses_query.filter_by(language=language)
+        if payment:
+            courses_query = courses_query.filter_by(payment=payment)
+        if domain:
+            courses_query = courses_query.filter_by(domain=domain)
+        if level:
+            courses_query = courses_query.filter_by(level=level)
+        if mode_of_class:
+            courses_query = courses_query.filter_by(mode_of_class=mode_of_class)
 
-    courses = courses_query.all()
-
-    return render_template('courses.html', courses=courses)    
-
-@app.route('/courses', methods=['POST'])
-def course_list():
-    language = request.args.get('language', 'all')
-    payment = request.args.get('payment', 'all')
-    domain = request.args.get('domain', 'all')
-    mode = request.args.get('mode', 'all')
-    level = request.args.get('level', 'all')
-
-    filters = []
-    if language != 'all':
-        filters.append(Course.language == language)
-    if payment != 'all':
-        filters.append(Course.payment == payment)
-    if domain != 'all':
-        filters.append(Course.domain == domain)
-    if mode != 'all':
-        filters.append(Course.mode_of_class == mode)
-    if level != 'all':
-        filters.append(Course.level == level)
-
-    if filters:
-        courses = Course.query.filter(*filters).all()
+        courses = courses_query.all()
     else:
+        # If not a POST request, show all courses
         courses = Course.query.all()
 
     return render_template('courses.html', courses=courses)
