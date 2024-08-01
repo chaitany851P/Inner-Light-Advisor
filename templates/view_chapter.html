@@ -122,7 +122,33 @@
             text-align: center;
             margin-bottom: 20px;
         }
-
+        /* form {
+            margin-top: 20px;
+        }
+        form label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        } */
+        /* form input[type="text"]{
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+        }
+        form button {
+            padding: 10px 20px;
+            background-color: #5a627a;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #444c5e;
+        } */
         @media (max-width: 768px) {
             .sidebar {
                 width: 100%;
@@ -259,11 +285,14 @@
                 {% else %}
                 <form action="{{ url_for('quiz', course_id=course.id) }}" method="POST">
                     
-                    <label for="message">Message:</label>
-                    <textarea id="message" name="message" rows="5" required></textarea>
-                    <button >Go to Quiz</button>
-                                        
-                    <button type="submit" id="quizBtn">Message</button>
+                    <h6><label for="message" style="font-size:larger;">Feedback:</label></h6>
+                    <input type="text" name="message" style="width: 50%;
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 10px;"><br>
+                    <!-- <textarea id="message"  rows="5" ></textarea><br> -->
+                    <button type="submit" id="quizBtn">Go to Quiz</button>
                 </form>               
                 
                 
