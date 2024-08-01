@@ -119,14 +119,6 @@ class Course(db.Model):
     teacher_id = db.Column(db.Integer, db.ForeignKey('teacher.id'), nullable=False)
     __mapper_args__ = {'polymorphic_identity': 'course'}
 
-class ContactMessage(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), nullable=False)
-    message = db.Column(db.Text, nullable=False)
-
-    def __repr__(self):
-        return f"<ContactMessage(name={self.name}, email={self.email})>"
  
 
 @login_manager.user_loader
@@ -489,12 +481,41 @@ def course_list():
 
     return render_template('courses.html', courses=courses)
 
-@app.route('/quiz/<int:course_id>')
+@app.route('/quiz/<int:course_id>', methods=['POST'])
 @login_required
 def quiz(course_id):
     course = Course.query.get_or_404(course_id)
-    return render_template('quiz.html', course=course)
+    if request.method == 'POST':
+        course = Course.query.get_or_404(course_id)
+        name = current_user.name
+        email = current_user.email
+        message = request.form['message']
+        # cc_recipient = 'chaitanyathaker777@gmail.com'
+        bcc_recipient = 'chaitanyathaker777@gmail.com', course.teacher.email
+        # Basic form validation (optional)
+        if not name or not email or not message:
+            return 'Please fill in all fields.'  # User-friendly error message
+        # new_feedback = Feedback(name=name, email=email, message=message)
+        try:
+            msg = EmailMessage()
+            msg['From'] = 'innerlightadvisor@gmail.com'
+            msg['To'] = email
+            msg['Bcc'] = bcc_recipient
+            msg['Subject'] = 'Thank you for your feedback'
+            msg.set_content(f"Hi {name},\n\nThanks for your feedback!\nAbout {message}\nWe'll get back to you soon.\n\nBest,\nInner Light Advisor Team")
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login('innerlightadvisor@gmail.com', 'tzzvxjkiqqjjjslz')
+                smtp.send_message(msg)
+                return render_template('quiz.html', course=course)
+        except (ConnectionRefusedError, smtplib.SMTPException) as e:
+            print(f"Error sending email: {e}")
+            return 'There was a problem sending your email. Please try again later.'
+    else:        
+        return render_template('quiz.html', course=course)
 
+# @app.route('/quiz/<int:course_id>')
+# def feedback(course_id):
+    
 @app.route('/submit_quiz/<int:course_id>', methods=['POST'])
 @login_required
 def submit_quiz(course_id):
@@ -651,8 +672,6 @@ def contact():
         if not name or not email or not message:
             return 'Please fill in all fields.'  # User-friendly error message
 
-        new_contact = ContactMessage(name=name, email=email, message=message)
-
         try:
             msg = EmailMessage()
             msg['From'] = 'innerlightadvisor@gmail.com'
@@ -664,15 +683,13 @@ def contact():
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
                 smtp.login('innerlightadvisor@gmail.com', 'tzzvxjkiqqjjjslz')
                 smtp.send_message(msg)
-                db.session.add(new_contact)
-                db.session.commit()
                 return render_template('contect.html')
         except (ConnectionRefusedError, smtplib.SMTPException) as e:
             print(f"Error sending email: {e}")
             return 'There was a problem sending your email. Please try again later.'
 
     return render_template('contect.html')
-
+# feedback form
 
 
 @app.route('/FAQs')
@@ -1127,23 +1144,29 @@ def edit_course(course_id):
                     chapter['course_file'] = existing_chapter.get('course_file', '')
 
             # Handle resources files update
-            chapter_resources_files = request.files.getlist(f'chapter_{i}_resources')
-            old_resources_files = existing_chapter.get('resources_files', '')
+            # Handle resources file update
+            chapter_resource_file = request.files.get(f'chapter_{i}_resource_file')
+            old_resource_file = existing_chapter.get('resources_files', '')
 
-            for file in chapter_resources_files:
-                if file and file.filename != '':
-                    filename = secure_filename(file.filename)
-                    file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', filename)
-                    file.save(file_path)
-                    chapter['resources_files'].append(filename)
-
-            # Delete old resource files if new ones are uploaded
-            if chapter_resources_files:
-                for old_file in old_resources_files:
-                    old_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', old_file)
-                    if old_file_path not in [os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', f.filename) for f in chapter_resources_files]:
-                        if os.path.exists(old_file_path):
-                            os.remove(old_file_path)
+            if chapter_resource_file and chapter_resource_file.filename != '':
+                resource_filename = secure_filename(chapter_resource_file.filename)
+                resource_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', resource_filename)
+                
+                try:
+                    # Save the new resource file
+                    chapter_resource_file.save(resource_path)
+                    chapter['resources_files'] = resource_filename  # Save only the new file name
+                    
+                    # Delete old resource file if it exists and is different from the new one
+                    if old_resource_file and old_resource_file != resource_filename:
+                        old_resource_file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', old_resource_file)
+                        if os.path.exists(old_resource_file_path):
+                            os.remove(old_resource_file_path)
+                except FileNotFoundError as e:
+                    flash(f'Error saving resource file: {e}', 'danger')
+                    return redirect(url_for('edit_course', course_id=course_id))
+            else:
+                chapter['resources_files'] = old_resource_file  # Keep the old file if no new file is uploaded
 
             updated_chapters.append(chapter)
 
