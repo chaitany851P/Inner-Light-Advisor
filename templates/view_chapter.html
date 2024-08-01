@@ -283,6 +283,8 @@
                     <button id="nextLectureBtn">Next Lecture &gt;</button>
                 </a>
                 {% else %}
+                <!-- if role is teacher -->
+                {% if current_user.role == 'student' %}
                 <form action="{{ url_for('quiz', course_id=course.id) }}" method="POST">
                     
                     <h6><label for="message" style="font-size:larger;">Feedback:</label></h6>
@@ -294,9 +296,10 @@
                     <!-- <textarea id="message"  rows="5" ></textarea><br> -->
                     <button type="submit" id="quizBtn">Go to Quiz</button>
                 </form>               
-                
-                
-                <!-- feedback form -->  
+                {% else %}
+                     <!-- back to coureses -->
+                     <button><a href="{{ url_for ('courses')}}" style="color: #fff;text-decoration: none;display: block;">Back to Courses</a></button>
+                {% endif %}
                 
                 {% endif %}
                 
