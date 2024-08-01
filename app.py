@@ -1154,6 +1154,28 @@ def edit_course(course_id):
             updated_chapters.append(chapter)
 
         course.chapters = updated_chapters
+
+        quiz_count = int(request.form.get('quiz_count', 0))
+        updated_quizzes = []
+
+        for i in range(1, quiz_count + 1):
+            question = request.form.get(f'quiz_{i}_question')
+            options = [
+                request.form.get(f'quiz_{i}_option_1'),
+                request.form.get(f'quiz_{i}_option_2'),
+                request.form.get(f'quiz_{i}_option_3'),
+                request.form.get(f'quiz_{i}_option_4')
+            ]
+            correct_answer = int(request.form.get(f'quiz_{i}_correct_answer'))
+
+            updated_quizzes.append({
+                'question': question,
+                'options': options,
+                'correct_answer': correct_answer
+            })
+
+        course.quizzes = updated_quizzes
+
         db.session.commit()
 
         flash('Course updated successfully!', 'success')
