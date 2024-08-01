@@ -257,9 +257,18 @@
                     <button id="nextLectureBtn">Next Lecture &gt;</button>
                 </a>
                 {% else %}
-                <a href="{{ url_for('quiz', course_id=course.id) }}">
-                    <button id="quizBtn">Go to Quiz</button>
-                </a>
+                <form action="{{ url_for('quiz', course_id=course.id) }}" method="POST">
+                    
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                    <button >Go to Quiz</button>
+                                        
+                    <button type="submit" id="quizBtn">Message</button>
+                </form>               
+                
+                
+                <!-- feedback form -->  
+                
                 {% endif %}
                 
             </div>
