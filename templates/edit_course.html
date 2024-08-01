@@ -192,6 +192,31 @@
              <label for="chapter_{{ index + 1 }}_resource_link">Resource Link:</label>
              <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br>
              {% endif %}
+             <h3>Quizzes:</h3>
+        <input type="hidden" id="quiz_count" name="quiz_count" value="{{ course.quizzes|length }}">
+        {% set quiz_index = 0 %}
+        {% for quiz in course.quizzes %}
+            <div class="quiz">
+                <label for="quiz_{{ quiz_index + 1 }}_question">Question {{ quiz_index + 1 }}:</label>
+                <input type="text" id="quiz_{{ quiz_index + 1 }}_question" name="quiz_{{ quiz_index + 1 }}_question" value="{{ quiz.question }}"><br>
+
+                <label for="quiz_{{ quiz_index + 1 }}_option_1">Option 1:</label>
+                <input type="text" id="quiz_{{ quiz_index + 1 }}_option_1" name="quiz_{{ quiz_index + 1 }}_option_1" value="{{ quiz.options[0] }}"><br>
+
+                <label for="quiz_{{ quiz_index + 1 }}_option_2">Option 2:</label>
+                <input type="text" id="quiz_{{ quiz_index + 1 }}_option_2" name="quiz_{{ quiz_index + 1 }}_option_2" value="{{ quiz.options[1] }}"><br>
+
+                <label for="quiz_{{ quiz_index + 1 }}_option_3">Option 3:</label>
+                <input type="text" id="quiz_{{ quiz_index + 1 }}_option_3" name="quiz_{{ quiz_index + 1 }}_option_3" value="{{ quiz.options[2] }}"><br>
+
+                <label for="quiz_{{ quiz_index + 1 }}_option_4">Option 4:</label>
+                <input type="text" id="quiz_{{ quiz_index + 1 }}_option_4" name="quiz_{{ quiz_index + 1 }}_option_4" value="{{ quiz.options[3] }}"><br>
+
+                <label for="quiz_{{ quiz_index + 1 }}_correct_answer">Correct Answer (1-4):</label>
+                <input type="number" id="quiz_{{ quiz_index + 1 }}_correct_answer" name="quiz_{{ quiz_index + 1 }}_correct_answer" value="{{ quiz.correct_answer }}" min="1" max="4"><br>
+            </div>
+            {% set quiz_index = quiz_index + 1 %}
+        {% endfor %}
             {% set index = index + 1 %}
         {% endfor %}
 
