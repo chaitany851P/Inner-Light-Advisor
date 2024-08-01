@@ -372,7 +372,9 @@ def forgot_password():
         else:
             flash('No account found with that email address.', 'danger')
     return render_template('forgot_password.html')
-
+@app.route('/join2')
+def join2():
+    return render_template('join.html')
 @app.route('/test')
 def test():
     return render_template('test.html')
