@@ -36,6 +36,7 @@
 
         /* Styling for text inputs and textareas */
         input[type="text"],
+        input[type="number"],
         textarea {
             width: calc(100% - 20px);
             padding: 8px;
@@ -52,7 +53,8 @@
         }
 
         /* Styling for the submit button */
-        button[type="submit"] {
+        button[type="submit"],
+        button[type="button"] {
             background-color: #444c5e;
             color: white;
             padding: 12px 20px;
@@ -174,7 +176,7 @@
             <label for="chapter_{{ index + 1 }}_note">Chapter {{ index + 1 }} Note:</label>
             <input type="text" id="chapter_{{ index + 1 }}_note" name="chapter_{{ index + 1 }}_note" value="{{ chapter.note }}"><br>
 
-            <label for="chapter_{{ index + 1 }}_resources">Resources Files:</label><br>
+            <!-- <label for="chapter_{{ index + 1 }}_resources">Resources Files:</label><br>
             {% if chapter.resources_files %}
                 <p>Current Files:<br> {% for file in chapter.resources_files %}
                     <p>{{ file }}</p>
@@ -182,14 +184,14 @@
             {% else %}
                 <p>No current resource files</p><br>
             {% endif %}
-            <input type="file" id="chapter_{{ index + 1 }}_resources" name="chapter_{{ index + 1 }}_resources" multiple><br>
+            <input type="file" id="chapter_{{ index + 1 }}_resources" name="chapter_{{ index + 1 }}_resources" multiple><br> -->
             <!-- if resource_link -->
              {% if chapter.resource_link %}
              <label for="chapter_{{ index + 1 }}_resource_link">Resource Link:</label>
              <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br>
              {% else%}
-             <p>No current resource link</p><br>
              <label for="chapter_{{ index + 1 }}_resource_link">Resource Link:</label>
+             <p>No current resource link</p>
              <input type="text" id="chapter_{{ index + 1 }}_resource_link" name="chapter_{{ index + 1}}_resource_link" value="{{ chapter.resource_link }}" ><br>
              {% endif %}
              <h3>Quizzes:</h3>
@@ -217,12 +219,51 @@
             </div>
             {% set quiz_index = quiz_index + 1 %}
         {% endfor %}
+
+        <div id="quiz_container"></div>
+        <button type="button" onclick="addQuiz()">Add Quiz</button><hr>
+        
+    
+
             {% set index = index + 1 %}
         {% endfor %}
 
         <button type="submit">Update Course</button>
     </form>
 </div>
+<script>
+    function addQuiz() {
+        var quizCount = document.getElementById('quiz_count');
+        var newIndex = parseInt(quizCount.value) + 1;
+        quizCount.value = newIndex;
+
+        var quizContainer = document.getElementById('quiz_container');
+        var quizDiv = document.createElement('div');
+        quizDiv.className = 'quiz';
+
+        quizDiv.innerHTML = `
+            <label for="quiz_${newIndex}_question">Question ${newIndex}:</label>
+            <input type="text" id="quiz_${newIndex}_question" name="quiz_${newIndex}_question"><br>
+
+            <label for="quiz_${newIndex}_option_1">Option 1:</label>
+            <input type="text" id="quiz_${newIndex}_option_1" name="quiz_${newIndex}_option_1"><br>
+
+            <label for="quiz_${newIndex}_option_2">Option 2:</label>
+            <input type="text" id="quiz_${newIndex}_option_2" name="quiz_${newIndex}_option_2"><br>
+
+            <label for="quiz_${newIndex}_option_3">Option 3:</label>
+            <input type="text" id="quiz_${newIndex}_option_3" name="quiz_${newIndex}_option_3"><br>
+
+            <label for="quiz_${newIndex}_option_4">Option 4:</label>
+            <input type="text" id="quiz_${newIndex}_option_4" name="quiz_${newIndex}_option_4"><br>
+
+            <label for="quiz_${newIndex}_correct_answer">Correct Answer (1-4):</label>
+            <input type="number" id="quiz_${newIndex}_correct_answer" name="quiz_${newIndex}_correct_answer" min="1" max="4"><br>
+        `;
+
+        quizContainer.appendChild(quizDiv);
+    }
+</script>
 </body>
 </html>
 {% endblock %}
