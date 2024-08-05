@@ -1,1 +1,0 @@
-ssh -p 443 -R0:localhost:5000  -o StrictHostKeyChecking=no -o ServerAliveInterval=30 HV1L2ORGmmf@a.pinggy.io        

@@ -248,11 +248,19 @@
             {% endif %}
             {% if chapter.course_link %}
             <div class="video-wrapper">
-                <iframe width="70%" height="450" src="{{ chapter.course_link }}" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                <!-- show youtube video link without embed formate -->
+                 
+                <!-- <source width="70%" height="450"  > -->
+                <iframe width="70%" height="450"  src="https://www.youtube.com/embed/{{ chapter.course_link }}" frameborder="0" allowfullscreen></iframe>
             </div>
             {% endif %}
-        
+            
             <hr>
+            {% if chapter.date and chapter.time %}
+            <h2>Meeting: On {{ chapter.date }}  At {{ chapter.time }}</h2>
+            {% endif %}
+            <!-- <h2>Meeting Date: {{ chapter.date }}</h2>  -->
+            
             <h3>Description:</h3>
             <p>{{ chapter.description }}</p>
             {% if chapter.assignment_file %}

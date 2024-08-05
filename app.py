@@ -17,6 +17,8 @@ from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
 import datetime
 
+
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -204,19 +206,47 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+now = datetime.datetime.now()
+
+current_date = now.strftime('%Y-%m-%d')
+current_time = now.strftime('%H:%M')
 @app.route('/dashboard')
 @login_required
 def dashboard():
     if current_user.role == 'student':
         enrolled_courses = current_user.enrolled_courses  # Assuming Student model has enrolled_courses relationship
         completed_courses = current_user.completed_courses  # Query completed courses for the current_user
-        live_classes = []  # Query live classes for the current_user
+        live_classes = []
+        for course in enrolled_courses:
+            if course.mode_of_class == 'Live':
+                for index, chapter in enumerate(course.chapters):
+                    if chapter.get('date') >= current_date:
+                        if chapter.get('time') >= current_time:
+                            live_classes.append({
+                                "title": chapter.get('title'),
+                                "date": chapter.get('date'),
+                                "time": chapter.get('time'),
+                                "chapter_index": index  # Include chapter index
+                            })
         return render_template('dashboard.html', enrolled_courses=enrolled_courses, completed_courses=completed_courses, live_classes=live_classes)
+
     elif current_user.role == 'teacher':
-        created_courses = []  # Query courses created by the current_user
+        courses = current_user.courses  # Query courses created by the current_user
         upcoming_tasks = Task.query.filter_by(teacher_id=current_user.id).all()  # Query tasks assigned to the current_user
-        live_classes = []  # Query live classes for the current_user
-        return render_template('dashboard.html', created_courses=created_courses, upcoming_tasks=upcoming_tasks, live_classes=live_classes)
+        live_classes = []
+        for course in courses:
+            if course.teacher_id == current_user.id:
+                if course.mode_of_class == 'Live':
+                    for index, chapter in enumerate(course.chapters):
+                        if chapter.get('date') >= current_date:
+                            if chapter.get('time') >= current_time:
+                                live_classes.append({
+                                    "title": chapter.get('title'),
+                                    "date": chapter.get('date'),
+                                    "time": chapter.get('time'),
+                                    "chapter_index": index  # Include chapter index
+                                })
+        return render_template('dashboard.html', upcoming_tasks=upcoming_tasks, live_classes=live_classes)
     else:
         return redirect(url_for('login'))
     
@@ -726,6 +756,8 @@ def add_course():
             chapter_course_file = request.files.get(f'chapter_{i}_course_file')
             chapter_resource_link = request.form.get(f'chapter_{i}_resource_link')
             chapter_meeting_link = request.form.get(f'chapter_{i}_meeting_link')
+            chapter_date = request.form.get(f'chapter_{i}_date')
+            chapter_time = request.form.get(f'chapter_{i}_time')
             chapter_course_link = request.form.get(f'chapter_{i}_course_link')
             
 
@@ -752,16 +784,6 @@ def add_course():
                 course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', course_filename)
                 chapter_course_file.save(course_path)
 
-            # get meeting link
-            meeting_link = None
-            if chapter_meeting_link and chapter_meeting_link != '':
-                meeting_link = chapter_meeting_link
-
-            # get coures link
-            course_link = None
-            if chapter_course_link and chapter_course_link != '':
-                course_link = chapter_course_link
-
 
             chapters.append({
                 'title': chapter_title,
@@ -772,31 +794,36 @@ def add_course():
                 'course_file': course_filename,
                 'course_link': chapter_course_link,
                 'resource_link': chapter_resource_link,
-                'meeting_link': meeting_link
+                'meeting_link': chapter_meeting_link,
+                'date': chapter_date,
+                'time': chapter_time
             })
 
         # Handle quizzes
-        quizzes = []
-        quiz_count = int(request.form.get('quiz_count', 0))
-        for i in range(1, quiz_count + 1):
-            quiz_question = request.form.get(f'quiz_{i}_question')
-            quiz_options = [
-                request.form.get(f'quiz_{i}_option_1'),
-                request.form.get(f'quiz_{i}_option_2'),
-                request.form.get(f'quiz_{i}_option_3'),
-                request.form.get(f'quiz_{i}_option_4')
-            ]
-            quiz_correct_answer = request.form.get(f'quiz_{i}_correct_answer')
-            if quiz_correct_answer is not None:
-                quiz_correct_answer = int(quiz_correct_answer)
-            else:
-                quiz_correct_answer = -1  # Assign a default value to handle missing correct answer
+        try:
+            quizzes = []
+            quiz_count = int(request.form.get('quiz_count', 0))
+            for i in range(1, quiz_count + 1):
+                quiz_question = request.form.get(f'quiz_{i}_question')
+                quiz_options = [
+                    request.form.get(f'quiz_{i}_option_1'),
+                    request.form.get(f'quiz_{i}_option_2'),
+                    request.form.get(f'quiz_{i}_option_3'),
+                    request.form.get(f'quiz_{i}_option_4')
+                ]
+                quiz_correct_answer = request.form.get(f'quiz_{i}_correct_answer')
+                if quiz_correct_answer is not None:
+                    quiz_correct_answer = int(quiz_correct_answer)
+                else:
+                    quiz_correct_answer = -1  # Assign a default value to handle missing correct answer
 
-            quizzes.append({
-                'question': quiz_question,
-                'options': quiz_options,
-                'correct_answer': quiz_correct_answer
-            })
+                quizzes.append({
+                    'question': quiz_question,
+                    'options': quiz_options,
+                    'correct_answer': quiz_correct_answer
+                })
+        except Exception:
+            pass
 
         # Save course details to the database
         new_course = Course(
@@ -1076,6 +1103,8 @@ def edit_course(course_id):
             chapter_description = request.form.get(f'chapter_{i}_description')
             chapter_note = request.form.get(f'chapter_{i}_note')
             chapter_meeting_link = request.form.get(f'chapter_{i}_meeting_link')
+            chapter_date = request.form.get(f'chapter_{i}_date')
+            chapter_time = request.form.get(f'chapter_{i}_time')
             chapter_course_link = request.form.get(f'chapter_{i}_course_link')
             chapter_resource_link = request.form.get(f'chapter_{i}_resource_link')
 
@@ -1089,6 +1118,8 @@ def edit_course(course_id):
                 'course_file': existing_chapter.get('course_file', ''),
                 'note': chapter_note,
                 'meeting_link': chapter_meeting_link,
+                'date': chapter_date,
+                'time': chapter_time,
                 'course_link': chapter_course_link,
                 'resource_link': chapter_resource_link if chapter_resource_link else existing_chapter.get('resource_link', '')
             }
