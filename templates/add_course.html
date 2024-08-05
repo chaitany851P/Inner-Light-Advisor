@@ -37,6 +37,8 @@
         input[type="file"],
         input[type="radio"],
         input[type="link"],
+        input[type="date"],
+        input[type="time"],
         select,
         textarea {
             width: 100%;
@@ -57,6 +59,11 @@
         }
         button:hover {
             background-color: #444c63;
+        }
+        input[type="file"] {
+            margin-bottom: 12px;
+            background-color:#fff;
+            border-radius: 50px;   
         }
         .chapter-section, .quiz-section {
             margin-top: 20px;
@@ -113,12 +120,18 @@
         </div>
         
         <label for="mode_of_class">Mode of Class:</label>
-        <select id="mode_of_class" name="mode_of_class" onchange="showClassDetails()">
+        <select id="mode_of_class" name="mode_of_class">
             <option></option>
             <option value="Recorded">Recorded</option>
             <option value="Live">Live</option>
         </select>
         
+    
+            <div id="classDetailsContainer" style="display: none;">
+                
+            </div>
+        
+
         <label for="learner_type">Learner Type:</label>
         <select id="learner_type" name="learner_type" required onchange="toggleChapterFields()">
             <option></option>
@@ -144,8 +157,8 @@
             </div>
         </div>
         
-        <label for="quiz_count">Number of Quizzes:</label>
-        <input type="number" id="quiz_count" name="quiz_count" min="1" max="30" required>
+        <label for="quiz_count">Number of Quizzes [You can add it when your meeting is over]:</label>
+        <input type="number" id="quiz_count" name="quiz_count" min="1" max="30" >
         
         <div id="quizzesContainer">
             <hr>
@@ -216,14 +229,20 @@
                             <label for="chapter_${i}_meeting_link">Meeting Code [If you not create Meetinfg then create with Create button]:</label>
                             <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
                             <a class="btn btn-primary" href="{{ url_for('meeting2') }}" target="_blank">Create Meeting</a><br>
+                            <label for="chapter_${i}_date">Date:</label>
+                            <input type="date" id="chapter_${i}_date" name="chapter_${i}_date">
+                            <label for="chapter_${i}_time">Time:</label>
+                            <input type="time" id="chapter_${i}_time" name="chapter_${i}_time">
+
                         `;
                     } else {
                         mediaFieldHTML = `
                             <label for="chapter_${i}_course_file">Course File:</label>
                             <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="video/*" required>
-
-                            <label for="chapter_${i}_course_link">Course Link:</label>
+                            <label for="chapter_${i}_course_link">Course [Your youtube video-id]:</label>
                             <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link">
+
+
                         `;
                     }
                 } else if (learnerType === 'Auditory') {
@@ -233,14 +252,19 @@
                             <label for="chapter_${i}_meeting_link">Meeting Code [If you not create Meetinfg then create with Create button]:</label>
                             <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link">
                             <a class="btn btn-primary" href="{{ url_for('meeting2') }}" target="_blank">Create Meeting</a><br>
+                            <label for="chapter_${i}_date">Date:</label>
+                            <input type="date" id="chapter_${i}_date" name="chapter_${i}_date">
+                            <label for="chapter_${i}_time">Time:</label>
+                            <input type="time" id="chapter_${i}_time" name="chapter_${i}_time">
                         `;
                     } else {
                         mediaFieldHTML = `
                             <label for="chapter_${i}_course_file">Course File:</label>
                             <input type="file" id="chapter_${i}_course_file" name="chapter_${i}_course_file" accept="audio/*" required>
-
-                            <label for="chapter_${i}_course_link">Course Link:</label>
+                            <label for="chapter_${i}_course_link">Course [Your youtube video-id]:</label>
                             <input type="link" id="chapter_${i}_course_link" name="chapter_${i}_course_link">
+
+
                         `;
                     }
                 
@@ -254,7 +278,7 @@
                         <label for="chapter_${i}_description">Description:</label>
                         <textarea id="chapter_${i}_description" name="chapter_${i}_description" required></textarea>
                         ${mediaFieldHTML}
-                        <label for="chapter_${i}_assignment_file">Assignment File:</label>
+                                                <label for="chapter_${i}_assignment_file">Assignment File:</label>
                         <input type="file" id="chapter_${i}_assignment_file" name="chapter_${i}_assignment_file">
                         <label for="chapter_${i}_resources">Resource Files[ones you sumbit resourse file you can not update it]:</label>
                         <input type="file" id="chapter_${i}_resources" name="chapter_${i}_resources" multiple>

@@ -194,16 +194,6 @@
             </div>
             {% endfor %}
         </div>
-        <hr>
-        <div class="live-class-section">
-            <h2>Live Class Reminder</h2>
-            {% for live_class in live_classes %}
-                <div class="live-class-item">
-                    <div class="live-class-title">{{ live_class.title }}</div>
-                    <div class="live-class-details">Date: {{ live_class.date }} | Time: {{ live_class.time }}</div>
-                </div>
-            {% endfor %}
-        </div>
         {% elif current_user.role == 'teacher' %}
             
 
@@ -238,20 +228,28 @@
                
                 <a href="{{ url_for('add_task') }}" class="btn btn-secondary" style="background-color:#5a627a ;">Add Task</a>
             </div>
-            
+            {% endif %}  
             <hr>
-            <a class="btn btn-primary" href="{{ url_for('meeting2') }}" >Create Meeting</a>
             <!-- Live Class Reminder Section -->
             <div class="live-class-section">
                 <h4>Live Class Reminder</h4>
-                {% for live_class in live_classes %}
-                    <div class="live-class-item">
-                        <div class="live-class-title">{{ live_class.title }}</div>
-                        <div class="live-class-details">Date: {{ live_class.date }} | Time: {{ live_class.time }}</div>
+                
+            {% for live_class in live_classes %}
+            <div class="live-class-item">
+                <!-- add logic for live_class [date and time] is more then current date time  -->
+                 {% if live_class.date  %} 
+                  {% if live_class.time  %}
+                    <div class="live-class-title">{{ live_class.title }}</div>
+                    <div class="live-class-details">Date: {{ live_class.date }} | Time: {{ live_class.time }}</div>
+                    <div class="live-class-details">Class Link: 
+                        <a href="{{ url_for('view_chapter', course_id=live_class.chapter_index+1) }}" class="course-link">Go to Course</a>
                     </div>
-                {% endfor %}
+                    {% endif %}
+                {% endif %}
             </div>
-        {% endif %}
+            {% endfor %}
+            </div>
+        
     </div>
 </body>
 </html>

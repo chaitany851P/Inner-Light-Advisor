@@ -66,7 +66,9 @@
     </style>
 </head>
 <body>
+    <br>
 <div class="container2">
+    
     <h1>Edit Course</h1>
     <form action="{{ url_for('edit_course', course_id=course.id) }}" method="POST" enctype="multipart/form-data">
         <label for="name">Course Name:</label>
@@ -156,7 +158,13 @@
             {% if chapter.meeting_link %}
 
             <label for="chapter_{{ index + 1 }}_meeting_link">Meeting Link:</label>
-            <input type="text" id="chapter_{{ index + 1 }}_meeting_link" name="chapter_{{ index + 1 }}_meeting_link" value="{{ chapter.meeting_link }}"><br>
+            <input type="text" id="chapter_{{ index + 1 }}_meeting_link" name="chapter_{{ index + 1 }}_meeting_link" value="{{ chapter.meeting_link }}">
+            <label for="chapter_{{ index + 1 }}_date">Date:</label>
+            <input type="date" id="chapter_{{ index + 1 }}_date" name="chapter_{{ index + 1 }}_date" value="{{ chapter.date }}">
+            <label for="chapter_{{ index + 1 }}_time">Time:</label>
+            <input type="time" id="chapter_{{ index + 1 }}_time" name="chapter_{{ index + 1 }}_time" value="{{ chapter.time }}">
+
+            <br>
           {% else%}
             <p>No current meeting link</p><br>
             
@@ -266,4 +274,5 @@
 </script>
 </body>
 </html>
+<br>    
 {% endblock %}
