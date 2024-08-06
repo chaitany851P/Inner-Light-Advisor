@@ -112,6 +112,7 @@ class Course(db.Model):
     domain = db.Column(db.String(100), nullable=False)
     language = db.Column(db.String(50), nullable=False)
     payment = db.Column(db.String(50000), nullable=False)
+    fees = db.Column(db.String(50), nullable=True)
     mode_of_class = db.Column(db.String(50), nullable=False)
     learner_type = db.Column(db.String(50), nullable=False)
     thumbnail_img = db.Column(db.String(200), nullable=True)
@@ -308,6 +309,7 @@ def delete_task(task_id):
             return redirect(url_for('dashboard'))  # Redirect to dashboard with error message
 
     return render_template('delete_task.html', task=task)
+
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -315,38 +317,64 @@ def profile():
         # Handle profile image upload
         if 'profile_image' in request.files:
             file = request.files['profile_image']
-            if file.filename != '':
-                filepath = save_profile_image(file)
+            if file and file.filename != '':
+                # Handle existing image deletion
+                old_profile_image = None
                 if current_user.role == 'student':
                     student = Student.query.filter_by(username=current_user.username).first()
+                    if student:
+                        old_profile_image = student.img
+                elif current_user.role == 'teacher':
+                    teacher = Teacher.query.filter_by(username=current_user.username).first()
+                    if teacher:
+                        old_profile_image = teacher.img
+
+                # Save new profile image
+                filepath = save_profile_image(file, current_user.id)
+
+                # Delete old profile image if it exists
+                if old_profile_image and os.path.exists(os.path.join('static', old_profile_image)):
+                    os.remove(os.path.join('static', old_profile_image))
+
+                # Update database
+                if current_user.role == 'student':
                     if student:
                         student.img = filepath
                         db.session.commit()
                 elif current_user.role == 'teacher':
-                    teacher = Teacher.query.filter_by(username=current_user.username).first()
                     if teacher:
                         teacher.img = filepath
                         db.session.commit()
 
                 flash('Profile image updated successfully', 'success')
                 return redirect(url_for('profile'))
-            
+
         # Handle signature image upload
         if 'signature_image' in request.files:
             file = request.files['signature_image']
-            if file.filename != '':
-                filepath = save_signature_image(file)
-                print(f'Signature image path: {filepath}')  # Debug print
-
+            if file and file.filename != '':
+                # Handle existing signature deletion
+                old_signature_image = None
                 if current_user.role == 'teacher':
                     teacher = Teacher.query.filter_by(username=current_user.username).first()
                     if teacher:
+                        old_signature_image = teacher.signature
+
+                # Save new signature image
+                filepath = save_signature_image(file, current_user.id)
+
+                # Delete old signature image if it exists
+                if old_signature_image and os.path.exists(os.path.join('static', old_signature_image)):
+                    os.remove(os.path.join('static', old_signature_image))
+
+                # Update database
+                if current_user.role == 'teacher':
+                    if teacher:
                         teacher.signature = filepath
                         db.session.commit()
-                        print(f'Saved signature for teacher {teacher.username}')  # Debug print
 
-                    flash('Signature updated successfully', 'success')
-                    return redirect(url_for('profile'))
+                flash('Signature updated successfully', 'success')
+                return redirect(url_for('profile'))
 
     # Fetch the user's profile image path
     if current_user.role == 'student':
@@ -367,28 +395,28 @@ def profile():
 
     return render_template('profile.html', img=profile_image, signature=signature_image)
 
-def save_profile_image(file):
+
+def save_profile_image(file, user_id):
     upload_folder = 'static/uploads/Profile'
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
 
-    filename = secure_filename(file.filename)
+    filename = f'{user_id}_{secure_filename(file.filename)}'
     filepath = os.path.join(upload_folder, filename)
     file.save(filepath)
     
     return f'uploads/Profile/{filename}'
 
-def save_signature_image(file):
+def save_signature_image(file, user_id):
     upload_folder = 'static/uploads/teacher'
     if not os.path.exists(upload_folder):
         os.makedirs(upload_folder)
 
-    filename = secure_filename(file.filename)
+    filename = f'{user_id}_{secure_filename(file.filename)}'
     filepath = os.path.join(upload_folder, filename)
     file.save(filepath)
 
     return f'uploads/teacher/{filename}'
-
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -734,19 +762,41 @@ def add_course():
         payment = request.form.get('payment')
         mode_of_class = request.form.get('mode_of_class')
         learner_type = request.form.get('learner_type')
+        fees = request.form.get('fees')
 
-        # Save uploaded files
+        # Save course details to the database first to get the course ID
+        new_course = Course(
+            name=name,
+            description=description,
+            level=level,
+            domain=domain,
+            language=language,
+            payment=payment,
+            mode_of_class=mode_of_class,
+            learner_type=learner_type,
+            fees=fees,
+            teacher_id=current_user.id
+        )
+
+        db.session.add(new_course)
+        db.session.commit()  # Commit to get the course ID
+
+        course_id = new_course.id  # Now you have the course ID
+
+        # Save uploaded files with new naming convention
         thumbnail_img = request.files.get('thumbnail_img')
         if thumbnail_img and thumbnail_img.filename != '':
-            thumbnail_img_filename = secure_filename(thumbnail_img.filename)
+            thumbnail_img_filename = f'{course_id}_thumbnail_{secure_filename(thumbnail_img.filename)}'
             thumbnail_img.save(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', thumbnail_img_filename))
+            new_course.thumbnail_img = thumbnail_img_filename
         else:
             thumbnail_img_filename = None
 
         temp_video = request.files.get('temp_video')
         if temp_video and temp_video.filename != '':
-            temp_video_filename = secure_filename(temp_video.filename)
+            temp_video_filename = f'{course_id}_sample_video_{secure_filename(temp_video.filename)}'
             temp_video.save(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', temp_video_filename))
+            new_course.temp_video = temp_video_filename
         else:
             temp_video_filename = None
 
@@ -765,37 +815,35 @@ def add_course():
             chapter_date = request.form.get(f'chapter_{i}_date')
             chapter_time = request.form.get(f'chapter_{i}_time')
             chapter_course_link = request.form.get(f'chapter_{i}_course_link')
-            
 
-            # Save assignment file if provided
+            # Initialize resources_filenames if needed
             assignment_filename = None
             if chapter_assignment_file and chapter_assignment_file.filename != '':
-                assignment_filename = secure_filename(chapter_assignment_file.filename)
+                assignment_filename = f'{course_id}_file-for_chapter-{i}_{secure_filename(chapter_assignment_file.filename)}'
                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', assignment_filename)
                 chapter_assignment_file.save(assignment_path)
 
             # Save resources files if provided
-            resources_filenames = []    
+            resources_filenames = []
             for file in chapter_resources_files:
                 if file and file.filename != '':
-                    filename = secure_filename(file.filename)
+                    filename = f'{course_id}_file-for_chapter-{i}_{secure_filename(file.filename)}'
                     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', filename)
                     file.save(file_path)
                     resources_filenames.append(filename)
 
             # Save course file if provided
-            course_filename = []
+            course_filename = None
             if chapter_course_file and chapter_course_file.filename != '':
-                course_filename = secure_filename(chapter_course_file.filename)
-                course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', course_filename)
+                course_filename = f'{course_id}_file-for_chapter-{i}_{secure_filename(chapter_course_file.filename)}'
+                course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', course_filename)
                 chapter_course_file.save(course_path)
-
 
             chapters.append({
                 'title': chapter_title,
                 'description': chapter_description,
                 'assignment_file': assignment_filename,
-                'resources_files': resources_filenames,
+                'resources_files': resources_filenames,  # Use the list here
                 'note': chapter_note,
                 'course_file': course_filename,
                 'course_link': chapter_course_link,
@@ -805,7 +853,7 @@ def add_course():
                 'time': chapter_time
             })
 
-        # Handle quizzes
+        # Handle quizzes (outside the chapter loop)
         try:
             quizzes = []
             quiz_count = int(request.form.get('quiz_count', 0))
@@ -828,35 +876,19 @@ def add_course():
                     'options': quiz_options,
                     'correct_answer': quiz_correct_answer
                 })
-        except Exception:
+        except Exception :
             pass
+        # Update the course with chapter and quiz data
+        new_course.chapters = chapters
+        new_course.quizzes = quizzes  # Add quizzes to the course
 
-        # Save course details to the database
-        new_course = Course(
-            name=name,
-            description=description,
-            level=level,
-            domain=domain,
-            language=language,
-            payment=payment,
-            mode_of_class=mode_of_class,
-            learner_type=learner_type,
-            thumbnail_img=thumbnail_img_filename,
-            temp_video=temp_video_filename,
-            chapters=chapters,
-            quizzes=quizzes,
-            teacher_id=current_user.id  # Set the teacher_id to the current user's id
-        )
-        
-        db.session.add(new_course)
+        # Commit the updates
         db.session.commit()
 
         flash('Course added successfully!', 'success')
         return redirect(url_for('courses'))
-    
+
     return render_template('add_course.html')
-
-
 @app.route("/meeting2")
 def meeting2():
     return render_template("meeting.html", username=current_user.username)
@@ -1238,13 +1270,73 @@ def enroll(course_id):
     student = Student.query.get_or_404(current_user.id)
 
     # Check if the student is already enrolled in the course
-    
-    student.enrolled_courses.append(course)
-    db.session.commit()
+    if course in student.enrolled_courses:
+        flash('You are already enrolled in this course.', 'info')
+        return redirect(url_for('view_chapter', course_id=course_id))
+
+    payment_link = None
+
+    try:
+        print(f"Course Payment: {course.payment}")
+        print(f"Course Level: {course.level}")
+        print(f"Course Fees: {course.fees} ")
+
+        if course.payment == 'Paid':
+            if course.level == 'Beginner':
+                if course.fees == 500:
+                    payment_link = 'https://payments-test.cashfree.com/forms/beginer'
+                elif course.fees == 600:
+                    payment_link = 'https://payments-test.cashfree.com/forms/beginner-600'
+                elif course.fees == 750:
+                    payment_link = 'https://payments-test.cashfree.com/forms/beginner-750'
+                elif course.fees == 900:
+                    payment_link = 'https://payments-test.cashfree.com/forms/beginner-900'
+            elif course.level == 'Intermediate':
+                if course.fees == 900:
+                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-900'
+                elif course.fees == 1000:
+                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-1000'
+                elif course.fees == 1500:
+                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-1500'
+                elif course.fees == 2000:
+                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-2000'
+            elif course.level == 'Advanced':
+                if course.fees == 1500:
+                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-1500'
+                elif course.fees == 2000:
+                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-2000'
+                elif course.fees == 2500:
+                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-2500'
+                elif course.fees == 3500:
+                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-3500'
+        elif course.payment == 'Free':
+            payment_link = url_for('view_chapter', course_id=course_id)  # Direct link to view_chapter for free courses
+
+        print(f"Payment Link: {payment_link}")
+
+        if payment_link is None:
+            raise ValueError("No payment link available.")
+
+    except Exception as e:
+        flash(f'An error occurred during payment processing: {str(e)}', 'danger')
+        return redirect(url_for('courses'))
+
+    # Enroll the student in the course if payment_link is valid
+    if payment_link:
+        student.enrolled_courses.append(course)
+        db.session.commit()
+        return redirect(payment_link)
+
+    # If no payment link, should not reach here
+    flash('An unexpected error occurred.', 'danger')
+    return redirect(url_for('courses'))
+
+    # Redirect to the payment link or directly to view_chapter if the course is free
     
 
-    return redirect(url_for('view_chapter', course_id=course.id))  # Redirect to a relevant page
-    
+
+
+
 
 if __name__ == '__main__':
     with app.app_context():

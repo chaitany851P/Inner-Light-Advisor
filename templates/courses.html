@@ -232,7 +232,8 @@
                 {% if course.teacher_id == current_user.id %}
                 <div class="course-card" 
                     >
-                    <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="{{ course.name }}">
+                    <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="Course Thumbnail">
+
                     <div class="course-content">
                         <h2 class="course-title">{{ course.name }}</h2>
                         <p class="course-description">{{ course.description }}</p>
