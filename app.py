@@ -509,20 +509,26 @@ def quiz(course_id):
         # Basic form validation (optional)
         # User-friendly error message
         # new_feedback = Feedback(name=name, email=email, message=message)
-        try:
-            msg = EmailMessage()
-            msg['From'] = 'innerlightadvisor@gmail.com'
-            msg['To'] = email
-            msg['Bcc'] = bcc_recipient
-            msg['Subject'] = 'Thank you for your feedback'
-            msg.set_content(f"Hi {name},\n\nThanks for your feedback!\nAbout {message}\nWe'll get back to you soon.\n\nBest,\nInner Light Advisor Team")
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login('innerlightadvisor@gmail.com', 'tzzvxjkiqqjjjslz')
-                smtp.send_message(msg)
-                return render_template('quiz.html', course=course)
-        except (ConnectionRefusedError, smtplib.SMTPException) as e:
-            print(f"Error sending email: {e}")
-            return 'There was a problem sending your email. Please try again later.'
+        
+        # if message is not null
+        if message == '':
+            return render_template('quiz.html', course=course)
+           
+        else:
+                try:
+                    msg = EmailMessage()
+                    msg['From'] = 'innerlightadvisor@gmail.com'
+                    msg['To'] = email
+                    msg['Bcc'] = bcc_recipient
+                    msg['Subject'] = 'Thank you for your feedback'
+                    msg.set_content(f"Hi {name},\n\nThanks for your feedback!\nAbout {message}\nWe'll get back to you soon.\n\nBest,\nInner Light Advisor Team")
+                    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                        smtp.login('innerlightadvisor@gmail.com', 'tzzvxjkiqqjjjslz')
+                        smtp.send_message(msg)
+                        return render_template('quiz.html', course=course)
+                except (ConnectionRefusedError, smtplib.SMTPException) as e:
+                    print(f"Error sending email: {e}")
+                    return 'There was a problem sending your email. Please try again later.'
     else:        
         return render_template('quiz.html', course=course)
 
