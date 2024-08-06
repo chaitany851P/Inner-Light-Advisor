@@ -131,6 +131,7 @@
             margin-bottom: 5px;
             color: #333;
         } 
+        
         .f2 form textarea[type="text"] {
             width: 40%;
             padding: 10px;
@@ -232,15 +233,14 @@
             {% if chapter.course_file %}
             <div class="video-wrapper">
                 {% if current_user.learning_style == 'Visual' or 'Kinesthetic' %}
-                <video controls>
-                    
-                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="70%" height="50%" type="video/mp4">
+                <video controls style="width: 70%; height: auto;">
+                    <source src="{{ url_for('static', filename='uploads/Course/' + chapter.course_file) }}" type="video/mp4">
                     Your browser does not support the video tag.
                 </video>
                 {% endif %}
                 {% if current_user.learning_style == 'Auditory' %}
                 <audio controls>
-                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/mp4">
+                    <source src="{{ url_for('static', filename='uploads/Course/' + chapter.course_file) }}" type="audio/mp4">
                     Your browser does not support the audio tag.
                 </audio>
                 {% endif %}
@@ -265,13 +265,11 @@
             <p>{{ chapter.description }}</p>
             {% if chapter.assignment_file %}
             <h3>Assignment:</h3>
-            <p>{{ chapter.assignment_file }}</p>
             <p><a href="{{ url_for('static', filename='uploads/Assignment/' + chapter.assignment_file) }}" download>Download Assignment</a></p>
             {% endif %}
             {% if chapter.resources_files %}
             <h3>Resource:</h3>
             <!-- {% for resource in chapter.resources_files %} -->
-            <p>{{ chapter.resources_files }}</p>
             <p><a href="{{ url_for('static', filename='uploads/Resource/' + resource) }}" download>Download Resource</a></p>
             <!-- {% endfor %} -->
             {% endif %}

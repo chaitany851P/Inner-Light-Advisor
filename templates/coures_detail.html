@@ -117,14 +117,19 @@
                     <p>{{ course.description }}</p>
                     <!-- if temp_video -->
                      
-                    <div class="video-wrapper">
-                        <video src="{{ url_for('static', filename='uploads/sample_video/' + course.temp_video) }}" controls></video>
-                    </div>
+                    <video width="320" height="240" controls>
+                        <source src="{{ url_for('static', filename='uploads/sample_video/' + course.temp_video) }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
                     <ul>
                         <li><strong>Level:</strong> {{ course.level }}</li>
                         <li><strong>Domain:</strong> {{ course.domain }}</li>
                         <li><strong>Language:</strong> {{ course.language }}</li>
+                        {% if course.payment == 'Paid' %}
+                        <li><strong>Payment:</strong> {{ course.fees }}</li>
+                        {% else %}
                         <li><strong>Payment:</strong> {{ course.payment }}</li>
+                        {% endif %}
                         <li><strong>Mode of Class:</strong> {{ course.mode_of_class }}</li>
                         <li><strong>Learner Type:</strong> {{ course.learner_type }}</li>
                         <li><strong>Teacher:</strong> {{ course.teacher.name }} </li>
@@ -158,7 +163,7 @@
                                 {% for chapter in course.chapters %}
                                     {% if chapter.assignment_file %}
                                         <li>
-                                            <p>{{ chapter.assignment_file }}</p>
+                                            <strong><p>Yes</p></strong>
                                         </li> 
                                     {% else %}
                                         <strong><p>No Assignment</p> </strong>
@@ -171,7 +176,8 @@
                                 {% for chapter in course.chapters %}
                                     {% if chapter.resources_files %}
                                     <li>{% for resource in chapter.resources_files %}
-                                        <p>{{ resource }}</p></li>
+                                        <strong><p>Yes</p></strong>
+                                        
                                         
                                         {% endfor %}
                                     {% else %}

@@ -130,16 +130,16 @@
             
             <div class="video-wrapper">
                 {% if current_user.learning_style == 'Visual' or 'Kinesthetic' %}
-                <video controls>
-
-                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" width="70%" height="50%" type="video/*">
+                <video controls style="width: 70%; height: auto;">
+                    <source src="{{ url_for('static', filename='uploads/Course/' + chapter.course_file) }}" type="video/mp4">
                     Your browser does not support the video tag.
-                    <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file" accept="video/*"><br>
                 </video>
+                    <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file" accept="video/*"><br>
+                <!-- </video> -->
                 {% endif %}
                 {% if current_user.learning_style == 'Auditory' %}
                 <audio controls>
-                    <source src="{{ url_for('static', filename='uploads/Coures/' + chapter.course_file) }}" type="audio/*">
+                    <source src="{{ url_for('static', filename='uploads/Course/' + chapter.course_file) }}" type="audio/*">
                     Your browser does not support the audio tag.
                     <input type="file" id="chapter_{{ index + 1 }}_course_file" name="chapter_{{ index + 1 }}_course_file" accept="audio/*"><br>
 
