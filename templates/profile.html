@@ -177,6 +177,14 @@
                     {% else %}
                  <p>No signature image found.</p>
                  {% endif %}
+                 {% if current_user.upi_qr %}
+                    
+                        <br>
+                        <strong> UPI QR: </strong> <img src="{{ url_for('static', filename=current_user.upi_qr) }}" alt="UPI QR">
+                    
+                    {% else %}
+                 <p>No QR found.</p>
+                 {% endif %}
 
             {% endif %}
             
@@ -217,6 +225,8 @@
             {% if current_user.role == 'teacher' %}
                 <label for="signature">Signature</label>
                 <input type="file" id="signature_image" name="signature_image" accept="image/*">
+                <label for="upi_qr">UPI QR</label>
+                <input type="file" id="upi_qr_image" name="upi_qr_image" accept="image/*">
             {% endif %}
         
             <button type="submit">Upload</button>

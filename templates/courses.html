@@ -214,19 +214,22 @@
     
     <div class="container" id="course-container">
         {% if current_user.role == 'student' %}
-            {% for course in courses %}
-                {% if course.learner_type == current_user.learning_style %}
-                <div class="course-card" 
-                    >
-                    <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="{{ course.name }}">
-                    <div class="course-content">
-                        <h2 class="course-title">{{ course.name }}</h2>
-                        <p class="course-description">{{ course.description }}</p>
-                        <a href="{{ url_for('course_detail', course_id=course.id) }}"><button class="filter-button">Enroll Now</button></a>
-                    </div>
-                </div>
-                {% endif %}
-            {% endfor %}
+        {% for course in courses %}
+        <!-- Check if the course is not already enrolled by the current user -->
+        {% if course.learner_type == current_user.learning_style %}
+        <div class="course-card">
+            <img src="{{ url_for('static', filename='uploads/thumbnail/' ~ course.thumbnail_img) }}" alt="{{ course.name }}">
+            <div class="course-content">
+                <h2 class="course-title">{{ course.name }}</h2>
+                <p class="course-description">{{ course.description }}</p>
+                <a href="{{ url_for('course_detail', course_id=course.id) }}">
+                    <button class="filter-button">Enroll Now</button>
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+    
         {% elif current_user.role == 'teacher' %}
             {% for course in courses %}
                 {% if course.teacher_id == current_user.id %}
