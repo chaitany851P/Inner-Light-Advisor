@@ -76,7 +76,7 @@
         }
     </style>
 </head>
-
+<div class="container2">
     <h1>Add Course</h1>
     <form action="{{ url_for('add_course') }}" method="post" enctype="multipart/form-data">
         <label for="name">Course Name:</label>
@@ -129,7 +129,7 @@
         
         <label for="learner_type">Learner Type:</label>
         <select id="learner_type" name="learner_type" required>
-            <option value="" disabled selected>Select Learner Type</option>
+            <option value="{{ current_user.lerarner_type }}" disabled selected>/{{ current_user.lerarner_type }}</option>
             <option value="Visual">Visual</option>
             <option value="Auditory">Auditory</option>
             <option value="Kinesthetic">Kinesthetic</option>
@@ -152,7 +152,7 @@
         </div>
         
         <label for="quiz_count">Number of Quizzes [You can add it when your meeting is over]:</label>
-        <input type="number" id="quiz_count" name="quiz_count" min="1" max="30">
+        <input type="number" id="quiz_count" name="quiz_count" min="10" max="30">
 
         <div id="quizzesContainer">
             <hr>
@@ -308,14 +308,14 @@ function addCourseLinkFileToggle(chapterIndex) {
                         <h3>Quiz ${i}</h3>
                         <label for="quiz_${i}_question">Question:</label>
                         <input type="text" id="quiz_${i}_question" name="quiz_${i}_question" required>
-                        <label for="quiz_${i}_option1">Option 1:</label>
-                        <input type="text" id="quiz_${i}_option1" name="quiz_${i}_option1" required>
-                        <label for="quiz_${i}_option2">Option 2:</label>
-                        <input type="text" id="quiz_${i}_option2" name="quiz_${i}_option2" required>
-                        <label for="quiz_${i}_option3">Option 3:</label>
-                        <input type="text" id="quiz_${i}_option3" name="quiz_${i}_option3" required>
-                        <label for="quiz_${i}_option4">Option 4:</label>
-                        <input type="text" id="quiz_${i}_option4" name="quiz_${i}_option4" required>
+                        <label for="quiz_${i}_option_1">Option 1:</label>
+                        <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" required>
+                        <label for="quiz_${i}_option_2">Option 2:</label>
+                        <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" required>
+                        <label for="quiz_${i}_option_3">Option 3:</label>
+                        <input type="text" id="quiz_${i}_option_3" name="quiz_${i}_option_3" required>
+                        <label for="quiz_${i}_option_4">Option 4:</label>
+                        <input type="text" id="quiz_${i}_option_4" name="quiz_${i}_option_4" required>
                         <label for="quiz_${i}_correct_answer">Correct Answer:</label>
                         <select id="quiz_${i}_correct_answer" name="quiz_${i}_correct_answer" required>
                             <option value="" disabled selected>Select Correct Answer</option>
@@ -330,6 +330,7 @@ function addCourseLinkFileToggle(chapterIndex) {
             }
         });
     </script>
+</div>
 </body>
 
 {% endblock %}

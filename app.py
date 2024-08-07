@@ -1,7 +1,9 @@
 from email.message import EmailMessage
 from mailbox import Message
 from multiprocessing import reduction
+import shutil
 import smtplib
+import zipfile
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
 # from flask_mail import Mail, Message
 from flask_sqlalchemy import SQLAlchemy
@@ -16,7 +18,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
 import datetime
-
+from flask import Flask, send_from_directory, abort
 
 
 app = Flask(__name__)
@@ -82,6 +84,7 @@ class Teacher(User):
     courses = db.relationship('Course', backref='teacher', lazy=True)
     tasks = db.relationship('Task', backref='assigned_teacher', lazy=True)
     signature = db.Column(db.String(255), nullable=True) 
+    upi_qr = db.Column(db.String(500), nullable=True)
     __mapper_args__ = {'polymorphic_identity': 'teacher'}
 
     def __init__(self, name, dob, phone, username, email, password, learning_style, education=None, img=None, signature=None):
@@ -150,6 +153,7 @@ def login():
             flash('Login Unsuccessful. Please check your email and password', 'danger')
 
     return render_template('login.html')
+
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -376,6 +380,33 @@ def profile():
                 flash('Signature updated successfully', 'success')
                 return redirect(url_for('profile'))
 
+        # Handle UPI QR image upload
+        if 'upi_qr_image' in request.files:
+            file = request.files['upi_qr_image']
+            if file and file.filename != '':
+                # Handle existing UPI QR image deletion
+                old_upi_qr_image = None
+                if current_user.role == 'teacher':
+                    teacher = Teacher.query.filter_by(username=current_user.username).first()
+                    if teacher:
+                        old_upi_qr_image = teacher.upi_qr
+
+                # Save new UPI QR image
+                filepath = save_upi_qr_image(file, current_user.id)
+
+                # Delete old UPI QR image if it exists
+                if old_upi_qr_image and os.path.exists(os.path.join('static', old_upi_qr_image)):
+                    os.remove(os.path.join('static', old_upi_qr_image))
+
+                # Update database
+                if current_user.role == 'teacher':
+                    if teacher:
+                        teacher.upi_qr = filepath
+                        db.session.commit()
+
+                flash('UPI QR code updated successfully', 'success')
+                return redirect(url_for('profile'))
+
     # Fetch the user's profile image path
     if current_user.role == 'student':
         user = Student.query.filter_by(username=current_user.username).first()
@@ -390,10 +421,12 @@ def profile():
     if current_user.role == 'teacher':
         user = Teacher.query.filter_by(username=current_user.username).first()
         signature_image = user.signature if user else None
+        upi_qr_image = user.upi_qr if user else None
     else:
         signature_image = None
+        upi_qr_image = None
 
-    return render_template('profile.html', img=profile_image, signature=signature_image)
+    return render_template('profile.html', img=profile_image, signature=signature_image, upi_qr=upi_qr_image)
 
 
 def save_profile_image(file, user_id):
@@ -417,6 +450,18 @@ def save_signature_image(file, user_id):
     file.save(filepath)
 
     return f'uploads/teacher/{filename}'
+
+def save_upi_qr_image(file, user_id):
+    upload_folder = 'static/uploads/upi_qr'
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+
+    filename = f'{user_id}_{secure_filename(file.filename)}'
+    filepath = os.path.join(upload_folder, filename)
+    file.save(filepath)
+
+    return f'uploads/upi_qr/{filename}'
+
 
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
@@ -1107,12 +1152,13 @@ def edit_course(course_id):
         course.payment = request.form['payment']
         course.mode_of_class = request.form['mode_of_class']
         course.learner_type = request.form['learner_type']
+        course.fees = request.form['fees']
 
         # Handle thumbnail image update
         thumbnail_img = request.files.get('thumbnail_img')
         if thumbnail_img and thumbnail_img.filename != '':
             old_thumbnail_img = course.thumbnail_img
-            thumbnail_img_filename = secure_filename(thumbnail_img.filename)
+            thumbnail_img_filename = f'{course_id}_thumbnail_{secure_filename(thumbnail_img.filename)}'
             thumbnail_img.save(os.path.join(app.config['UPLOAD_FOLDER'], 'thumbnail', thumbnail_img_filename))
             course.thumbnail_img = thumbnail_img_filename
 
@@ -1124,7 +1170,7 @@ def edit_course(course_id):
         temp_video = request.files.get('temp_video')
         if temp_video and temp_video.filename != '':
             old_temp_video = course.temp_video
-            temp_video_filename = secure_filename(temp_video.filename)
+            temp_video_filename = f'{course_id}_temp_video_{secure_filename(temp_video.filename)}'
             temp_video.save(os.path.join(app.config['UPLOAD_FOLDER'], 'sample_video', temp_video_filename))
             course.temp_video = temp_video_filename
 
@@ -1166,7 +1212,7 @@ def edit_course(course_id):
             chapter_assignment_file = request.files.get(f'chapter_{i}_assignment_file')
             if chapter_assignment_file and chapter_assignment_file.filename != '':
                 old_assignment_file = existing_chapter.get('assignment_file', '')
-                assignment_filename = secure_filename(chapter_assignment_file.filename)
+                assignment_filename = f'{course_id}_chapter_{i}_assignment_{secure_filename(chapter_assignment_file.filename)}'
                 assignment_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Assignment', assignment_filename)
                 chapter_assignment_file.save(assignment_path)
                 chapter['assignment_file'] = assignment_filename
@@ -1180,15 +1226,15 @@ def edit_course(course_id):
                 chapter_course_file = request.files.get(f'chapter_{i}_course_file')
                 if chapter_course_file and chapter_course_file.filename != '':
                     old_course_file = existing_chapter.get('course_file', '')
-                    course_filename = secure_filename(chapter_course_file.filename)
-                    course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', course_filename)
+                    course_filename = f'{course_id}_chapter_{i}_course_{secure_filename(chapter_course_file.filename)}'
+                    course_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Course', course_filename)
                     try:
                         chapter_course_file.save(course_path)
                         chapter['course_file'] = course_filename
 
                         # Delete old course file if it exists
                         if old_course_file and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], 'Course', old_course_file)):
-                            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'Coures', old_course_file))
+                            os.remove(os.path.join(app.config['UPLOAD_FOLDER'], 'Course', old_course_file))
                     except FileNotFoundError as e:
                         flash(f'Error saving course file: {e}', 'danger')
                         return redirect(url_for('edit_course', course_id=course_id))
@@ -1196,12 +1242,11 @@ def edit_course(course_id):
                     chapter['course_file'] = existing_chapter.get('course_file', '')
 
             # Handle resources files update
-            # Handle resources file update
             chapter_resource_file = request.files.get(f'chapter_{i}_resource_file')
             old_resource_file = existing_chapter.get('resources_files', '')
 
             if chapter_resource_file and chapter_resource_file.filename != '':
-                resource_filename = secure_filename(chapter_resource_file.filename)
+                resource_filename = f'{course_id}_chapter_{i}_resource_{secure_filename(chapter_resource_file.filename)}'
                 resource_path = os.path.join(app.config['UPLOAD_FOLDER'], 'Resource', resource_filename)
                 
                 try:
@@ -1250,7 +1295,8 @@ def edit_course(course_id):
         flash('Course updated successfully!', 'success')
         return redirect(url_for('courses'))
 
-    return render_template('edit_course.html', course=course)    
+    return render_template('edit_course.html', course=course)
+    
 # @app.route('/view_chapter/<int:course_id>/', defaults={'chapter_index': 0})
 # @app.route('/view_chapter/<int:course_id>/<int:chapter_index>')
 # @login_required
@@ -1270,47 +1316,52 @@ def enroll(course_id):
     student = Student.query.get_or_404(current_user.id)
 
     # Check if the student is already enrolled in the course
-    if course in student.enrolled_courses:
+    if course in student.enrolled_courses or student.courses_completed:
         flash('You are already enrolled in this course.', 'info')
         return redirect(url_for('view_chapter', course_id=course_id))
 
     payment_link = None
 
     try:
+        # Debugging: Print course details
         print(f"Course Payment: {course.payment}")
         print(f"Course Level: {course.level}")
-        print(f"Course Fees: {course.fees} ")
+        print(f"Course Fees: {course.fees}")
 
+        # Ensure fees is an integer
+        if isinstance(course.fees, str):
+            course.fees = int(course.fees)
+        
+        # Determine the payment link based on course payment status, level, and fees
         if course.payment == 'Paid':
             if course.level == 'Beginner':
-                if course.fees == 500:
-                    payment_link = 'https://payments-test.cashfree.com/forms/beginer'
-                elif course.fees == 600:
-                    payment_link = 'https://payments-test.cashfree.com/forms/beginner-600'
-                elif course.fees == 750:
-                    payment_link = 'https://payments-test.cashfree.com/forms/beginner-750'
-                elif course.fees == 900:
-                    payment_link = 'https://payments-test.cashfree.com/forms/beginner-900'
+                payment_links = {
+                    500: 'https://payments-test.cashfree.com/forms/beginer',
+                    600: 'https://payments-test.cashfree.com/forms/beginner-600',
+                    750: 'https://payments-test.cashfree.com/forms/beginner-750',
+                    900: 'https://payments-test.cashfree.com/forms/beginner-900'
+                }
             elif course.level == 'Intermediate':
-                if course.fees == 900:
-                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-900'
-                elif course.fees == 1000:
-                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-1000'
-                elif course.fees == 1500:
-                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-1500'
-                elif course.fees == 2000:
-                    payment_link = 'https://payments-test.cashfree.com/forms/intermediate-2000'
+                payment_links = {
+                    900: 'https://payments-test.cashfree.com/forms/intermediate-900',
+                    1000: 'https://payments-test.cashfree.com/forms/intermediate-1000',
+                    1500: 'https://payments-test.cashfree.com/forms/intermediate-1500',
+                    2000: 'https://payments-test.cashfree.com/forms/intermediate-2000'
+                }
             elif course.level == 'Advanced':
-                if course.fees == 1500:
-                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-1500'
-                elif course.fees == 2000:
-                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-2000'
-                elif course.fees == 2500:
-                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-2500'
-                elif course.fees == 3500:
-                    payment_link = 'https://payments-test.cashfree.com/forms/advanced-3500'
+                payment_links = {
+                    1500: 'https://payments-test.cashfree.com/forms/advanced-1500',
+                    2000: 'https://payments-test.cashfree.com/forms/advanced-2000',
+                    2500: 'https://payments-test.cashfree.com/forms/advanced-2500',
+                    3500: 'https://payments-test.cashfree.com/forms/advanced-3500'
+                }
+            else:
+                raise ValueError("Invalid course level.")
+            
+            payment_link = payment_links.get(course.fees, None)
+        
         elif course.payment == 'Free':
-            payment_link = url_for('view_chapter', course_id=course_id)  # Direct link to view_chapter for free courses
+            payment_link = url_for('view_chapter', course_id=course_id)
 
         print(f"Payment Link: {payment_link}")
 
@@ -1323,19 +1374,64 @@ def enroll(course_id):
 
     # Enroll the student in the course if payment_link is valid
     if payment_link:
-        student.enrolled_courses.append(course)
-        db.session.commit()
-        return redirect(payment_link)
+        # if it's in completed coures table then do not add in enrolled coures table
+        if db.session.query(student_courses_completed).filter_by(course_id=course_id, student_id=current_user.id):
+            student.enrolled_courses.append(course)
+            db.session.commit()
+            return redirect(payment_link)
 
     # If no payment link, should not reach here
     flash('An unexpected error occurred.', 'danger')
     return redirect(url_for('courses'))
 
     # Redirect to the payment link or directly to view_chapter if the course is free
-    
+
+@app.route('/admin')
+def admin():
+    return render_template('admin.html')
 
 
 
+@app.route('/download/<filename>')
+def download_file(filename):
+    # Define the path to your instance folder
+    directory = os.path.join(app.instance_path)  # Replace 'your_folder' with the appropriate folder name
+
+    try:
+        # Send the file from the directory
+        return send_from_directory(directory, filename, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
+
+def zip_directory(directory_path, zip_filename):
+    """Create a zip file from a directory and return the zip file path."""
+    shutil.make_archive(zip_filename, 'zip', directory_path)
+    return f'{zip_filename}.zip'
+
+@app.route('/download-directory')
+def download_directory():
+    # Define the directory to be zipped
+    directory = os.path.join(app.static_folder, 'uploads')
+    zip_filename = 'uploads_directory.zip'
+    zip_filepath = os.path.join(app.static_folder, zip_filename)
+
+    # Create the zip file
+    with zipfile.ZipFile(zip_filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(directory):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, directory)
+                zipf.write(file_path, arcname)
+
+    # Serve the zip file
+    try:
+        return send_from_directory(app.static_folder, zip_filename, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
+    finally:
+        # Ensure the zip file is removed after serving
+        if os.path.exists(zip_filepath):
+            os.remove(zip_filepath)
 
 
 if __name__ == '__main__':
