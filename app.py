@@ -6,6 +6,7 @@ import smtplib
 import zipfile
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
 # from flask_mail import Mail, Message
+from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user 
@@ -19,19 +20,20 @@ from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
 import datetime
 from flask import Flask, send_from_directory, abort
-
+from dotenv import load_dotenv # type: ignore
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
 app.config['SECRET_KEY'] = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'uploads')  # Define upload folder
 app.config['MAIL_USERNAME'] = 'innerlightadvisor@gmail.com'
-app.config['MAIL_PASSWORD'] = 'tzzvxjkiqqjjjslz'
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
 db = SQLAlchemy(app)
-# mail = Mail(app)
+mail = Mail(app)
 
 # Flask-Login configuration
 login_manager = LoginManager()
@@ -596,7 +598,7 @@ def quiz(course_id):
                     msg['Subject'] = 'Thank you for your feedback'
                     msg.set_content(f"Hi {name},\n\nThanks for your feedback!\nAbout {message}\nWe'll get back to you soon.\n\nBest,\nInner Light Advisor Team")
                     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                        smtp.login('innerlightadvisor@gmail.com', 'tzzvxjkiqqjjjslz')
+                        smtp.login('innerlightadvisor@gmail.com', app.config['MAIL_PASSWORD'])
                         smtp.send_message(msg)
                         return render_template('quiz.html', course=course)
                 except (ConnectionRefusedError, smtplib.SMTPException) as e:
@@ -773,7 +775,7 @@ def contact():
             msg.set_content(f"Hi {name},\n\nThanks for your message!\nAbout {message}\nWe'll get back to you soon.\n\nBest,\nInner Light Advisor Team")
 
             with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login('innerlightadvisor@gmail.com', 'tzzvxjkiqqjjjslz')
+                smtp.login('innerlightadvisor@gmail.com', app.config['MAIL_PASSWORD'])
                 smtp.send_message(msg)
                 return render_template('contect.html')
         except (ConnectionRefusedError, smtplib.SMTPException) as e:
