@@ -47,8 +47,3 @@ pip install -r requirement.txt
    ```bash
    python app.py
    ```
-
-
-
-
-# Certificate(responsive),Quiz(min),Resoures(update)
