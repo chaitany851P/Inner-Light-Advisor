@@ -5,8 +5,7 @@ import shutil
 import smtplib
 import zipfile
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
-# from flask_mail import Mail, Message
-from flask_mail import Mail
+
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user 
@@ -19,9 +18,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.types import JSON
 import datetime
-from flask import Flask, send_from_directory, abort
-from dotenv import load_dotenv # type: ignore
-load_dotenv()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///user.db'
@@ -33,7 +29,7 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 
 db = SQLAlchemy(app)
-mail = Mail(app)
+# mail = Mail(app)
 
 # Flask-Login configuration
 login_manager = LoginManager()
@@ -530,8 +526,11 @@ def update_password():
 @app.route('/course/<int:course_id>')
 def course_detail(course_id):
     course = Course.query.get(course_id)
+    # pass course if it's not in current_user.enrolled_courses
+    if course in current_user.enrolled_courses or course in current_user.completed_courses:
+        return render_template('dashboard.html')
+    
     return render_template('coures_detail.html', course=course)
-
 
 @app.route('/coures_video')
 def coures_video():
