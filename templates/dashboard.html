@@ -172,7 +172,7 @@
             <div class="course-card">
                 <img src="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}" alt="Course Image" class="img-thumbnail" style="width: 150px;">
                 <div class="course-content">
-                    <h3 class="course-title">{{ course.title }}</h3>
+                    <h3 class="course-title">{{ course.name }}</h3>
                     <p class="course-description">{{ course.description }}</p>
                     <a href="{{ url_for('view_chapter', course_id=course.id) }}" class="course-link">Go to Course</a>
                 </div>

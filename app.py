@@ -5,7 +5,8 @@ import shutil
 import smtplib
 import zipfile
 from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
-
+# from flask_mail import Mail, Message
+# from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_required, login_user, current_user, logout_user 
@@ -528,7 +529,8 @@ def course_detail(course_id):
     course = Course.query.get(course_id)
     # pass course if it's not in current_user.enrolled_courses
     if course in current_user.enrolled_courses or course in current_user.completed_courses:
-        return render_template('dashboard.html')
+        return render_template('coures_detail.html', course=course)
+        
     
     return render_template('coures_detail.html', course=course)
 
@@ -538,17 +540,15 @@ def coures_video():
 
 @app.route('/courses', methods=['GET', 'POST'])
 def courses():
+    courses_query = Course.query
+
     if request.method == 'POST':
         # Get form data with default to None
-        language = request.form['language']
-        payment = request.form['payment']
-        domain = request.form['domain']
-        level = request.form['level']
-        mode_of_class = request.form['mode_of_class']
-        payment_details = request.form.get('payment_details', None)
-
-        # Build the query
-        courses_query = Course.query
+        language = request.form.get('language', None)
+        payment = request.form.get('payment', None)
+        domain = request.form.get('domain', None)
+        level = request.form.get('level', None)
+        mode_of_class = request.form.get('mode_of_class', None)
 
         # Apply filters if they are not empty
         if language:
@@ -562,12 +562,28 @@ def courses():
         if mode_of_class:
             courses_query = courses_query.filter_by(mode_of_class=mode_of_class)
 
-        courses = courses_query.all()
-    else:
-        # If not a POST request, show all courses
-        courses = Course.query.all()
+    courses = courses_query.all()  # Retrieve filtered or all courses
 
-    return render_template('courses.html', courses=courses)
+    if current_user.role == 'student':
+        # Filter out courses based on enrollment and completion
+        available_courses = [
+            course for course in courses
+            if course not in current_user.enrolled_courses and
+               course not in current_user.completed_courses and
+               course.learner_type == current_user.learning_style
+        ]
+        return render_template('courses.html', courses=available_courses)
+    
+    elif current_user.role == 'teacher':
+        # Filter courses created by the current teacher
+        teacher_courses = [
+            course for course in courses
+            if course.teacher_id == current_user.id
+        ]
+        return render_template('courses.html', courses=teacher_courses)
+
+    # Redirect to home if role is not recognized
+    return redirect(url_for('home'))
 
 @app.route('/quiz/<int:course_id>', methods=['POST'])
 @login_required
