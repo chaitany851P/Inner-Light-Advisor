@@ -3,8 +3,9 @@ from mailbox import Message
 from multiprocessing import reduction
 import shutil
 import smtplib
+import tempfile
 import zipfile
-from flask import Flask, jsonify, render_template, request, redirect, url_for, flash , send_file
+from flask import Flask, abort, after_this_request, jsonify, render_template, request, redirect, send_from_directory, url_for, flash , send_file
 # from flask_mail import Mail, Message
 # from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
@@ -230,6 +231,7 @@ def dashboard():
                                 "title": chapter.get('title'),
                                 "date": chapter.get('date'),
                                 "time": chapter.get('time'),
+                                "course_id": course.id,
                                 "chapter_index": index  # Include chapter index
                             })
         return render_template('dashboard.html', enrolled_courses=enrolled_courses, completed_courses=completed_courses, live_classes=live_classes)
@@ -248,6 +250,7 @@ def dashboard():
                                     "title": chapter.get('title'),
                                     "date": chapter.get('date'),
                                     "time": chapter.get('time'),
+                                    "course_id": course.id,
                                     "chapter_index": index  # Include chapter index
                                 })
         return render_template('dashboard.html', upcoming_tasks=upcoming_tasks, live_classes=live_classes)
@@ -1429,28 +1432,33 @@ def zip_directory(directory_path, zip_filename):
 def download_directory():
     # Define the directory to be zipped
     directory = os.path.join(app.static_folder, 'uploads')
+    
+    # Define the path for the zip file in the uploads folder
     zip_filename = 'uploads_directory.zip'
-    zip_filepath = os.path.join(app.static_folder, zip_filename)
+    zip_filepath = os.path.join(app.static_folder, 'uploads', zip_filename)
 
-    # Create the zip file
-    with zipfile.ZipFile(zip_filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(directory):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, directory)
-                zipf.write(file_path, arcname)
-
-    # Serve the zip file
     try:
-        return send_from_directory(app.static_folder, zip_filename, as_attachment=True)
+        # Create the zip file in the uploads folder
+        with zipfile.ZipFile(zip_filepath, 'w', zipfile.ZIP_DEFLATED) as zipf:
+            for root, dirs, files in os.walk(directory):
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    arcname = os.path.relpath(file_path, directory)
+                    zipf.write(file_path, arcname)
+
+        @after_this_request
+        def remove_file(response):
+            try:
+                os.remove(zip_filepath)
+            except Exception as e:
+                print(f"Error removing file: {e}")
+            return response
+
+        # Serve the zip file
+        return send_file(zip_filepath, as_attachment=True)
+
     except FileNotFoundError:
         abort(404)
-    finally:
-        # Ensure the zip file is removed after serving
-        if os.path.exists(zip_filepath):
-            os.remove(zip_filepath)
-
-
 if __name__ == '__main__':
     with app.app_context():
             db.create_all()  # Create database tables based on the models

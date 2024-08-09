@@ -242,7 +242,7 @@
                     <div class="live-class-title">{{ live_class.title }}</div>
                     <div class="live-class-details">Date: {{ live_class.date }} | Time: {{ live_class.time }}</div>
                     <div class="live-class-details">Class Link: 
-                        <a href="{{ url_for('view_chapter', course_id=live_class.chapter_index+1) }}" class="course-link">Go to Course</a>
+                        <a href="{{ url_for('view_chapter', course_id=live_class.course_id, chapter_index= live_class.chapter_index) }}" class="course-link">Go to Course</a>
                     </div>
                     {% endif %}
                 {% endif %}
