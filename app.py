@@ -583,10 +583,11 @@ def courses():
             course for course in courses
             if course.teacher_id == current_user.id
         ]
+        
         return render_template('courses.html', courses=teacher_courses)
 
     # Redirect to home if role is not recognized
-    return redirect(url_for('home'))
+    return redirect(url_for('index'))
 
 @app.route('/quiz/<int:course_id>', methods=['POST'])
 @login_required
