@@ -62,6 +62,7 @@
             font-size: 15px;
             line-height: 24px;
             color: #737373;
+            
         }
         
         .site-footer hr {
@@ -481,10 +482,10 @@
             <a href="{{ url_for ('courses')}}">Courses</a>
             <a href="{{ url_for ('about')}}">About</a>
             <a href="{{url_for('contact')}}">Contact</a>
-            {% if current_user.role == 'teacher' %}
+            <!-- {% if current_user.role == 'teacher' %}
             <a href="{{ url_for ('chatbot')}}">Research with AI</a>
             
-            {% endif %}
+            {% endif %} -->
             <a href="{{ url_for('FAQs')}}">FAQs</a>
             <nav class="navbar2">
                 <a href="{{ url_for ('profile')}}">Profile</a>
@@ -520,9 +521,9 @@
                 <li><a href="{{ url_for ('about')}}">About Us</a></li>
                 <li><a href="{{url_for('contact')}}">Contact Us</a></li>
                 <li><a href="{{ url_for('FAQs')}}">FAQs</a></li>
-                {% if current_user.role == 'teacher' %}
+                <!-- {% if current_user.role == 'teacher' %}
                 <li><a href="{{ url_for ('chatbot')}}">Research with AI</a></li>
-                {% endif %}
+                {% endif %} -->
                 <!-- <li><a href="http://scanfcode.com/privacy-policy/">Privacy Policy</a></li>
                 <li><a href="http://scanfcode.com/sitemap/">Sitemap</a></li> -->
               </ul>
@@ -533,7 +534,7 @@
         <div class="container">
           <div class="row">
             <div class="col-md-8 col-sm-6 col-xs-12">
-              <p class="copyright-text">Copyright &copy; 2017 All Rights Reserved  
+              <p class="copyright-text">Copyright &copy; Inner Light Advisor 
            
               </p>
             </div>
