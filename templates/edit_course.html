@@ -433,8 +433,14 @@
             <input type="text" id="quiz_${quizCount}_option_3" name="quiz_${quizCount}_option_3" required><br>
             <label for="quiz_${quizCount}_option_4">Option 4:</label>
             <input type="text" id="quiz_${quizCount}_option_4" name="quiz_${quizCount}_option_4" required><br>
-            <label for="quiz_${quizCount}_correct_option">Correct Option:</label>
-            <input type="number" id="quiz_${quizCount}_correct_option" name="quiz_${quizCount}_correct_option" min="1" max="4" required><br>
+            <label for="quiz_${quizCount}_correct_answer">Correct Answer:</label>
+                        <select id="quiz_${quizCount}_correct_answer" name="quiz_${quizCount}_correct_answer" required>
+                            <option value="" disabled selected>Select Correct Answer</option>
+                            <option value="1">Option 1</option>
+                            <option value="2">Option 2</option>
+                            <option value="3">Option 3</option>
+                            <option value="4">Option 4</option>
+                        </select>
             <button type="button" class="remove-quiz" data-quiz-id="${quizCount}">Remove Quiz</button>
         `;
         quizzesContainer.appendChild(quizDiv);
