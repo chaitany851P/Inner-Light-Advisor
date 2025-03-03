@@ -6,250 +6,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body {
-    font-family: Arial, sans-serif;
-    color: #333;
-    background-color: #fff;
-    margin: 0;
-    padding: 0;
-}
-
-.header {
-    background-color: #5a627a;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
-}
-
-.container {
-    width: 90%;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px 0;
-}
-
-.course-card {
-    display: flex;
-    flex-direction: column;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    overflow: hidden;
-}
-
-.course-card img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
-}
-
-.course-content {
-    padding: 20px;
-    flex: 1;
-}
-
-.course-title {
-    font-size: 1.5em;
-    margin: 0 0 10px;
-}
-
-.course-description {
-    margin: 0 0 10px;
-}
-
-.course-link {
-    color: #5a627a;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.course-link:hover {
-    text-decoration: underline;
-}
-
-.tasks-section {
-    margin-top: 40px;
-}
-
-.task-item {
-    padding: 10px;
-    margin-bottom: 20px;
-    margin-top: 20px;
-}
-
-.task-title {
-    font-weight: bold;
-    margin-bottom: 5px;
-}
-
-.update {
-    background-color: #5a7a69;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 1em;
-    margin-top: 20px;
-    display: inline-block;
-}
-
-.task-details {
-    font-size: 0.9em;
-    color: #666;
-}
-
-.live-class-section {
-    margin-top: 40px;
-}
-
-.live-class-item {
-    background-color: #e1f5fe;
-    border: 1px solid #03a9f4;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-}
-
-.live-class-title {
-    font-weight: bold;
-    margin-bottom: 5px;
-    color: #03a9f4;
-}
-
-.live-class-details {
-    font-size: 0.9em;
-    color: #666;
-}
-
-.add-task-button {
-    background-color: #5a627a;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 1em;
-    margin-top: 20px;
-    display: inline-block;
-}
-
-.add-task-button:hover {
-    background-color: #444c63;
-}
-
-@media (min-width: 768px) {
-    .course-card {
-        flex-direction: row;
-    }
-
-    .course-card img {
-        width: 200px;
-        height: 150px;
-    }
-
-    .course-content {
-        padding: 20px;
-    }
-}
-
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="header">
-        <h1>Welcome {{ current_user.username }}!</h1>
+<body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 text-white min-h-screen font-sans">
+    <div class="header bg-gray-900 py-4 text-center">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Welcome {{ current_user.username }}!</h1>
     </div>
 
-    <div class="container">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {% if current_user.role == 'student' %}
-        <h2>Enrolled Courses</h2>   
-        <div class="course-list">
+        <h2 class="text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6">Enrolled Courses</h2>   
+        <div class="course-list space-y-6">
             {% for course in enrolled_courses %}
-            <div class="course-card">
-                <img src="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}" alt="Course Image" class="img-thumbnail" style="width: 150px;">
-                <div class="course-content">
-                    <h3 class="course-title">{{ course.name }}</h3>
-                    <p class="course-description">{{ course.description }}</p>
-                    <a href="{{ url_for('view_chapter', course_id=course.id) }}" class="course-link">Go to Course</a>
+            <div class="course-card flex flex-col sm:flex-row bg-white text-gray-900 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition duration-300 max-w-full sm:max-w-4xl mx-auto">
+                <img src="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}" alt="Course Image" class="w-full sm:w-40 md:w-48 h-36 sm:h-32 md:h-40 object-cover">
+                <div class="course-content p-4 sm:p-6 flex-1">
+                    <h3 class="course-title text-base sm:text-lg md:text-xl font-bold mb-2 text-indigo-900">{{ course.name }}</h3>
+                    <p class="course-description text-gray-700 text-sm sm:text-base mb-4">{{ course.description }}</p>
+                    <a href="{{ url_for('view_chapter', course_id=course.id) }}" 
+                       class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 sm:focus:ring-4 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">
+                        <i class="bi bi-arrow-right-circle mr-1 sm:mr-2"></i> Go to Course
+                    </a>
                 </div>
             </div>
             {% endfor %}
         </div>
-        <hr>
-        <h2>Completed Courses</h2>
-        <div class="course-list">
+        <hr class="border-gray-700 my-6 sm:my-8">
+        <h2 class="text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6">Completed Courses</h2>
+        <div class="course-list space-y-6">
             {% for course in completed_courses %}
-            <div class="course-card">
-                <img src="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}" alt="Course Image" class="img-thumbnail" style="width: 150px;">
-                <div class="course-content">
-                    <h3 class="course-title">{{ course.title }}</h3>
-                    <p class="course-description">{{ course.description }}</p>
-                    <a href="{{ url_for('certificate', course_id=course.id) }}" class="course-link">Get-Certificate</a>
-
-                                    </div>
+            <div class="course-card flex flex-col sm:flex-row bg-white text-gray-900 rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition duration-300 max-w-full sm:max-w-4xl mx-auto">
+                <img src="{{ url_for('static', filename='uploads/thumbnail/' + course.thumbnail_img) }}" alt="Course Image" class="w-full sm:w-40 md:w-48 h-36 sm:h-32 md:h-40 object-cover">
+                <div class="course-content p-4 sm:p-6 flex-1">
+                    <h3 class="course-title text-base sm:text-lg md:text-xl font-bold mb-2 text-indigo-900">{{ course.title }}</h3>
+                    <p class="course-description text-gray-700 text-sm sm:text-base mb-4">{{ course.description }}</p>
+                    <a href="{{ url_for('certificate', course_id=course.id) }}" 
+                       class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-green-500 to-green-700 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-green-600 hover:to-green-800 focus:ring-2 sm:focus:ring-4 focus:ring-green-300 transform hover:-translate-y-1 transition-all duration-200">
+                        <i class="bi bi-award mr-1 sm:mr-2"></i> Get Certificate
+                    </a>
+                </div>
             </div>
             {% endfor %}
         </div>
         {% elif current_user.role == 'teacher' %}
-            
-
             <!-- Tasks Section -->
-            <div class="tasks-section">
-                <h4>Upcoming Tasks</h4>
-                <!-- if condistion  -->
-                 {% if current_user.tasks %}
+            <div class="tasks-section mt-8 sm:mt-12">
+                <h4 class="text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6 tracking-tight">Upcoming Tasks</h4>
+                {% if current_user.tasks %}
                 {% for task in current_user.tasks %}
-                <div class="task-item">
-                        <div class="task-title"><h4>{{ task.title }}</h4></div>
-                        <div class="task-details"><p>Description: {{ task.description }}</p></div>
-                        <div class="task-details"><p>Due Date: {{ task.due_date }}</p></div>
-                        <div class="task-details"><p>Status: {{ task.status }}</p></div>
-
-                        <a href="{{ url_for('edit_task', task_id=task.id) }}" class="btn btn-outline-warning" ><i class="bi bi-pencil-square"></i></a> 
-                        
-                    <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" style="display: inline-block;">
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this task?')"><i class="bi bi-trash3-fill"></i></button>
-
+                <div class="task-item bg-white text-gray-900 rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 max-w-full sm:max-w-3xl mx-auto transform hover:shadow-xl transition-shadow duration-300">
+                    <div class="task-title font-bold text-base sm:text-lg md:text-xl text-indigo-900 mb-2 sm:mb-3">{{ task.title }}</div>
+                    <div class="task-details text-gray-700 text-sm sm:text-base mb-1">Description: {{ task.description }}</div>
+                    <div class="task-details text-gray-700 text-sm sm:text-base mb-1">Due Date: {{ task.due_date }}</div>
+                    <div class="task-details text-gray-700 text-sm sm:text-base mb-3 sm:mb-4">Status: {{ task.status }}</div>
+                    <div class="mt-4 flex flex-wrap gap-3 sm:gap-4">
+                        <!-- Edit Button -->
+                        <a href="{{ url_for('edit_task', task_id=task.id) }}" 
+                           class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-yellow-500 hover:to-yellow-700 focus:ring-2 sm:focus:ring-4 focus:ring-yellow-300 focus:outline-none transform hover:-translate-y-1 transition-all duration-200">
+                            <i class="bi bi-pencil-square mr-1 sm:mr-2"></i> Edit Task
+                        </a>
+                        <!-- Delete Button -->
+                        <form method="post" action="{{ url_for('delete_task', task_id=task.id) }}" class="inline-block">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" 
+                                    class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-red-500 to-red-700 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-red-600 hover:to-red-800 focus:ring-2 sm:focus:ring-4 focus:ring-red-300 focus:outline-none transform hover:-translate-y-1 transition-all duration-200" 
+                                    onclick="return confirm('Are you sure you want to delete this task?')">
+                                <i class="bi bi-trash3-fill mr-1 sm:mr-2"></i> Delete Task
+                            </button>
+                        </form>
                     </div>
-                    
-                                        </form>
-                                        
+                </div>
                 {% endfor %}
                 {% else %}
-                <ol>
-                <p>No tasks found.</p>
-            </ol>
-                {% endif %} 
-               
-                <a href="{{ url_for('add_task') }}" class="btn btn-secondary" style="background-color:#5a627a ;">Add Task</a>
+                <p class="text-gray-300 text-base sm:text-lg">No tasks found.</p>
+                {% endif %}
+                <a href="{{ url_for('add_task') }}" 
+                   class="add-task-button inline-flex items-center mt-4 sm:mt-6 px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 sm:focus:ring-4 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">
+                    <i class="bi bi-plus-circle mr-1 sm:mr-2"></i> Add New Task
+                </a>
             </div>
-            {% endif %}  
-            <hr>
+            <hr class="border-gray-700 my-6 sm:my-8">
             <!-- Live Class Reminder Section -->
-            <div class="live-class-section">
-                <h4>Live Class Reminder</h4>
-                
-            {% for live_class in live_classes %}
-            <div class="live-class-item">
-                <!-- add logic for live_class [date and time] is more then current date time  -->
-                 {% if live_class.date  %} 
-                  {% if live_class.time  %}
-                    <div class="live-class-title">{{ live_class.title }}</div>
-                    <div class="live-class-details">Date: {{ live_class.date }} | Time: {{ live_class.time }}</div>
-                    <div class="live-class-details">Class Link: 
-                        <a href="{{ url_for('view_chapter', course_id=live_class.course_id, chapter_index= live_class.chapter_index) }}" class="course-link">Go to Course</a>
+            <div class="live-class-section mt-8 sm:mt-10">
+                <h4 class="text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6 tracking-tight">Live Class Reminder</h4>
+                {% for live_class in live_classes %}
+                <div class="live-class-item bg-indigo-100 text-gray-900 rounded-lg shadow-md p-4 sm:p-6 mb-4 max-w-full sm:max-w-3xl mx-auto">
+                    {% if live_class.date and live_class.time %}
+                    <div class="live-class-title font-bold text-base sm:text-lg text-indigo-600 mb-2">{{ live_class.title }}</div>
+                    <div class="live-class-details text-gray-600 text-sm sm:text-base">Date: {{ live_class.date }} | Time: {{ live_class.time }}</div>
+                    <div class="live-class-details text-gray-600 text-sm sm:text-base mt-2">Class Link: 
+                        <a href="{{ url_for('view_chapter', course_id=live_class.course_id, chapter_index=live_class.chapter_index) }}" 
+                           class="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 sm:focus:ring-4 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">
+                            <i class="bi bi-camera-video mr-1 sm:mr-2"></i> Join Class
+                        </a>
                     </div>
                     {% endif %}
-                {% endif %}
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-            </div>
-        
+        {% endif %}
     </div>
 </body>
 </html>
