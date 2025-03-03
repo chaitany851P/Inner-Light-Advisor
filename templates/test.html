@@ -1,206 +1,160 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learning Style Test</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        
-
-        body {
-            color: #fff;
-            background-color: #222121; /* Optional: Dark background for better visibility */
-        }
-
-        .question {
-            margin-bottom: 20px;
-        }
-
-        .results {
-            margin-top: 20px;
-            color: #fff;
-        }
-
-        input {
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-        }
-
-        .test {
-            font-family: cursive;
-            padding: 10px;
-        }
-
-        .dis {
-            font-family: 'Times New Roman', Times, serif;
-        }
-
-        strong {
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
-        }
-
-        button {
-            background-color: #5a627a; /* Dark button background */
-            color: white; /* Button text color */
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 10%;
-        }
-        .tem{
-            margin: 20px;
-        }
-        .ans{
-            margin: 20px;
-        }
-        /* reponsive */
-        @media screen and (max-width: 600px) {
-            .tem{
-                margin: 10px;
-                }
-                .ans{
-                    margin: 10px;
-                    }
-                    }
-                        
-    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    
-        <div class="tem">
-            <h1>Learning Style Test</h1>
-            <p>Read the following story and choose the option that best describes how you would prefer to handle each situation. At the end of the story, your learning style will be revealed based on your selections.</p>
+<body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 text-white min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center py-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white drop-shadow-md">Learning Style Test</h1>
+            <p class="text-lg md:text-xl text-gray-200 mt-4 font-light">Answer these questions to discover your learning style!</p>
+        </header>
 
-            <h2>Story: The Adventure of the Lost Artifact</h2>
-
-            <p class="dis"><strong>Part 1: The Discovery</strong><br>
-            You are part of an archaeological team that has discovered an ancient artifact buried in a remote jungle. As you approach the artifact, you need to document your findings.</p>
-
-            <form id="learningStyleForm" action="{{ url_for('submit') }}" method="post">
-                <div class="question">
-                    <p class="test">1. How do you document the artifact?</p>
-                    <div class="ans">
-                        <input type="radio" name="q1" value="A"> Take detailed notes and sketches<br>
-                        <input type="radio" name="q1" value="B"> Record a video describing the artifact and its surroundings<br>
-                        <input type="radio" name="q1" value="C"> Create a 3D model of the artifact using materials you find around you<br>
+        <section class="max-w-4xl mx-auto bg-white text-gray-900 rounded-2xl shadow-xl p-6 md:p-8">
+            <form id="learningStyleForm" class="space-y-8">
+                <!-- Question 1 -->
+                <div class="quiz-question bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300">
+                    <h3 class="text-xl font-semibold text-indigo-900 mb-4">Question 1</h3>
+                    <h4 class="text-lg text-gray-800 mb-6">You’re learning a new skill at work. How do you prefer to start?</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <input type="radio" id="q1_option_A" name="q1" value="A" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q1_option_A" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. Watch a tutorial video or read a guide.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q1_option_B" name="q1" value="B" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q1_option_B" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. Listen to someone explain it step-by-step.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q1_option_C" name="q1" value="C" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q1_option_C" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. Try it out hands-on and figure it out as I go.</label>
+                        </div>
                     </div>
                 </div>
 
-                <p class="dis"><strong>Part 2: The Puzzle</strong><br>
-                You find that the artifact is locked in a chest with a complex puzzle. To open it, you need to solve the puzzle.</p>
-
-                <div class="question">
-                    <p class="test">2. How do you approach solving the puzzle?</p>
-                    <div class="ans">
-                        <input type="radio" name="q2" value="A"> Read the instructions carefully and think through the solution<br>
-                        <input type="radio" name="q2" value="B"> Discuss possible solutions with your team and brainstorm ideas<br>
-                        <input type="radio" name="q2" value="C"> Manipulate the puzzle pieces physically, trying different combinations until it opens<br>
-                    </div>
-                </div>  
-
-                <p class="dis"><strong>Part 3: The Map</strong><br>
-                Inside the chest, you find a map leading to another part of the jungle where more artifacts are hidden. The map is old and difficult to read.</p>
-
-                <div class="question">
-                    <p class="test">3. How do you interpret the map?</p>
-                    <div class="ans">
-                        <input type="radio" name="q3" value="A"> Study the map thoroughly, noting every detail<br>
-                        <input type="radio" name="q3" value="B"> Listen to the team leader's interpretation of the map and follow their directions<br>
-                        <input type="radio" name="q3" value="C"> Use a combination of landmarks and physical exploration to navigate<br>
+                <!-- Question 2 -->
+                <div class="quiz-question bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300">
+                    <h3 class="text-xl font-semibold text-indigo-900 mb-4">Question 2</h3>
+                    <h4 class="text-lg text-gray-800 mb-6">You’re studying for an exam. What’s your go-to method?</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <input type="radio" id="q2_option_A" name="q2" value="A" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q2_option_A" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. Make flashcards or read notes.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q2_option_B" name="q2" value="B" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q2_option_B" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. Discuss the material with a friend or listen to a podcast.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q2_option_C" name="q2" value="C" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q2_option_C" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. Practice problems or build something to test my knowledge.</label>
+                        </div>
                     </div>
                 </div>
 
-                <p class="dis"><strong>Part 4: The Obstacle</strong><br>
-                On your way to the next site, you encounter a river that you need to cross.</p>
-
-                <div class="question">
-                    <p class="test">4. How do you cross the river?</p>
-                    <div class="ans">
-                        <input type="radio" name="q4" value="A"> Look for a bridge or a safe place to wade across<br>
-                        <input type="radio" name="q4" value="B"> Discuss with your team to come up with the safest crossing strategy<br>
-                        <input type="radio" name="q4" value="C"> Build a makeshift raft or use a rope to swing across<br>
+                <!-- Question 3 -->
+                <div class="quiz-question bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300">
+                    <h3 class="text-xl font-semibold text-indigo-900 mb-4">Question 3</h3>
+                    <h4 class="text-lg text-gray-800 mb-6">You’re assembling a piece of furniture. How do you proceed?</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <input type="radio" id="q3_option_A" name="q3" value="A" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q3_option_A" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. Follow the picture instructions carefully.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q3_option_B" name="q3" value="B" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q3_option_B" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. Ask someone to explain the steps to me.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q3_option_C" name="q3" value="C" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q3_option_C" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. Start putting it together and adjust as I go.</label>
+                        </div>
                     </div>
                 </div>
 
-                <p class="dis"><strong>Part 5: The Artifact Room</strong><br>
-                You finally reach a hidden room filled with artifacts. You need to catalog all the items quickly.</p>
-
-                <div class="question">
-                    <p class="test">5. How do you catalog the items?</p>
-                    <div class="ans">
-                        <input type="radio" name="q5" value="A"> Write detailed descriptions and take photos<br>
-                        <input type="radio" name="q5" value="B"> Record a video tour of the room, explaining each artifact<br>
-                        <input type="radio" name="q5" value="C"> Arrange the artifacts in groups based on their type and take measurements<br>
+                <!-- Question 4 -->
+                <div class="quiz-question bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300">
+                    <h3 class="text-xl font-semibold text-indigo-900 mb-4">Question 4</h3>
+                    <h4 class="text-lg text-gray-800 mb-6">You’re learning a new language. What helps you most?</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <input type="radio" id="q4_option_A" name="q4" value="A" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q4_option_A" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. Reading vocabulary lists and grammar rules.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q4_option_B" name="q4" value="B" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q4_option_B" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. Listening to native speakers or audio lessons.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q4_option_C" name="q4" value="C" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q4_option_C" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. Practicing speaking and writing sentences myself.</label>
+                        </div>
                     </div>
                 </div>
 
-                <p class="dis"><strong>Part 6: The Excavation</strong><br>
-                One of the artifacts is buried deep underground and needs to be excavated carefully.</p>
-
-                <div class="question">
-                    <p class="test">6. How do you handle the excavation?</p>
-                    <div class="ans">
-                        <input type="radio" name="q6" value="A"> Study the excavation manual and follow the procedures meticulously<br>
-                        <input type="radio" name="q6" value="B"> Discuss the best excavation methods with your team<br>
-                        <input type="radio" name="q6" value="C"> Start digging carefully, feeling your way through the soil and adjusting your technique as needed<br>
+                <!-- Question 5 -->
+                <div class="quiz-question bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300">
+                    <h3 class="text-xl font-semibold text-indigo-900 mb-4">Question 5</h3>
+                    <h4 class="text-lg text-gray-800 mb-6">You’re planning a trip. How do you prepare?</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <input type="radio" id="q5_option_A" name="q5" value="A" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q5_option_A" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. Look at maps and read travel guides.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q5_option_B" name="q5" value="B" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q5_option_B" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. Talk to friends who’ve been there for tips.</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="q5_option_C" name="q5" value="C" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="q5_option_C" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. Explore travel apps or start packing to visualize it.</label>
+                        </div>
                     </div>
                 </div>
 
-                <p class="dis"><strong>Part 7: The Analysis</strong><br>
-                You need to analyze the materials used in the artifacts to determine their origin.</p>
-
-                <div class="question">
-                    <p class="test">7. How do you conduct the analysis?</p>
-                    <div class="ans">
-                        <input type="radio" name="q7" value="A"> Use a microscope and reference books to study the materials<br>
-                        <input type="radio" name="q7" value="B"> Listen to an expert’s lecture on similar artifacts and materials<br>
-                        <input type="radio" name="q7" value="C"> Perform hands-on experiments to test the properties of the materials<br>
-                    </div>
-                </div>
-
-                <p class="dis"><strong>Part 8: The Preservation</strong><br>
-                The artifacts need to be preserved for transport back to your research facility.</p>
-
-                <div class="question">
-                    <p class="test">8. How do you preserve the artifacts?</p>
-                    <div class="ans">
-                        <input type="radio" name="q8" value="A"> Wrap them carefully in protective materials and label each one<br>
-                        <input type="radio" name="q8" value="B"> Record a detailed video guide on how to handle and preserve the artifacts<br>
-                        <input type="radio" name="q8" value="C"> Build custom storage boxes to fit each artifact snugly and safely<br>
-                    </div>
-                </div>
-
-                <p class="dis"><strong>Part 9: The Presentation</strong><br>
-                You are tasked with presenting your findings to a group of scholars.</p>
-
-                <div class="question">
-                    <p class="test">9. How do you prepare your presentation?</p>
-                    <div class="ans">
-                        <input type="radio" name="q9" value="A"> Create detailed slides with images and text<br>
-                        <input type="radio" name="q9" value="B"> Practice your speech and present your findings verbally<br>
-                        <input type="radio" name="q9" value="C"> Bring replicas or models of the artifacts to demonstrate your findings<br>
-                    </div>
-                </div>
-
-                <p class="dis"><strong>Part 10: The Reflection</strong><br>
-                After the expedition, you reflect on what you learned and how you can improve.</p>
-
-                <div class="question">
-                    <p class="test">10. How do you reflect on your experience?</p>
-                    <div class="ans">
-                        <input type="radio" name="q10" value="A"> Write a detailed report summarizing the expedition<br>
-                        <input type="radio" name="q10" value="B"> Discuss the experience with your team and get their feedback<br>
-                        <input type="radio" name="q10" value="C"> Recreate key moments from the expedition to understand what worked and what didn’t<br>
-                    </div>
-                </div>
-
-                <button type="submit">Submit</button>
+                <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-semibold text-lg rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-300">Submit Test</button>
             </form>
+        </section>
+    </div>
 
-            <div class="results" id="results"></div>
-        </div>
-    
+    <script>
+        $(document).ready(function() {
+            $('#learningStyleForm').on('submit', function(event) {
+                event.preventDefault();
+                
+                console.log("Form submitted");
+                const formData = $(this).serialize();
+                console.log("Form data:", formData);
+
+                // Calculate learner type client-side
+                const counts = {
+                    'A': (formData.match(/A/g) || []).length,
+                    'B': (formData.match(/B/g) || []).length,
+                    'C': (formData.match(/C/g) || []).length
+                };
+                let learnerType = "Unknown";
+                if (counts.A >= counts.B && counts.A >= counts.C) {
+                    learnerType = "Visual";
+                } else if (counts.B >= counts.A && counts.B >= counts.C) {
+                    learnerType = "Auditory";
+                } else {
+                    learnerType = "Kinesthetic";
+                }
+
+                // Show learner type to user
+                alert(`Your learning style is: ${learnerType}!`);
+                window.location.href = "{{ url_for('courses') }}";
+            });
+        });
+    </script>
 </body>
 </html>
+
 {% endblock %}
