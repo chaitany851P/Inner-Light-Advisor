@@ -1,318 +1,119 @@
 {% extends 'base.html' %}
 {% block content %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Information</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: white;
-            margin: 0;
-            padding: 0;
-        }
-        .container2 {
-            width: 50%;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #f0f0f0;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: left;
-            color: #333;
-            display: inline-block;
-            margin-right: 50px;
-            margin-bottom: 20px; /* Added margin-bottom for spacing */
-        }
-        form {
-            margin-bottom: 20px;
-        }
-        form label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #333;
-        }
-        form input[type="email"],
-        form input[type="password"],
-        form input[type="text"],
-        form input[type="date"],
-        form input[type="number"],
-        form input[type="file"] { /* Added file input type */
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #5a627a;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        form button:hover {
-            background-color: #444c5e;
-        }
-        .logout-button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #f44336;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        .logout-button:hover {
-            background-color: #e53935;
-        }
-        .user-info {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .user-info p {
-            margin: 10px 0;
-            font-size: 1.2em;
-        }
-        .edit-button {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: #5a627a;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .edit-button:hover {
-            background-color: #444c5e;
-        }
-        .education-list {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        .education-item {
-            margin-bottom: 10px;
-            position: relative;
-        }
-        .education-item .edit-button {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #5a627a;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        .education-item .edit-button:hover {
-            background-color: #444c5e;
-        }
-        
-        img {
-            width: 180px;
-            aspect-ratio: auto 32 / 32;
-            height: 70px;
-            border-radius: 0%;
-        }
-        .img img{
-            vertical-align: middle;
-            width: 110px;
-            height: 110px;
-            border-radius: 50%
-        }
-        /* responsiv every style and button */
-        @media (max-width: 768px) {
-            .container2 {
-                width: 90%;
-                padding: 15px;
-            }
-
-            .img img {
-                width: 100px;
-                height: 40px;
-            }
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="container2">
-        <!-- User information display -->
-        <h1>{{ current_user.username }}'s Information</h1>
-        
-        <div class="user-info">
-        
-            {% if current_user.img %}
-            <div class="img">
-                <br>
-                <strong> Profile : </strong> <img src="{{ url_for('static', filename=current_user.img) }}" alt="Profile Image" >
+<body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 text-white min-h-screen font-sans">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Header -->
+        <header class="flex flex-col sm:flex-row items-center justify-between py-6">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white drop-shadow-md mb-4 sm:mb-0">{{ current_user.username }}'s Information</h1>
+            <a href="{{ url_for('logout') }}" class="inline-block px-6 py-2 bg-red-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:bg-red-700 focus:ring-4 focus:ring-red-300 transition duration-200">Logout</a>
+        </header>
+
+        <!-- User Information -->
+        <div class="bg-white text-gray-900 rounded-2xl shadow-xl p-6 sm:p-8 mt-6 relative">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                <div class="flex-shrink-0">
+                    <img src="{{ url_for('static', filename=current_user.img) }}" alt="Profile Image" class="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover shadow-md">
+                </div>
+                <div class="flex-1">
+                    <div><strong class="text-indigo-900">Signature:</strong> <img src="{{ url_for('static', filename=current_user.signature) }}" alt="Signature Image" class="mt-2 w-32 sm:w-40 h-auto"></div>
+                    <div><strong class="text-indigo-900">UPI QR:</strong> <img src="{{ url_for('static', filename=current_user.upi_qr) }}" alt="UPI QR" class="mt-2 w-32 sm:w-40 h-auto"></div>
+                    <p class="mt-4 text-sm sm:text-base"><strong class="text-indigo-900">Name:</strong> {{ current_user.name }}</p>
+                    <p class="mt-2 text-sm sm:text-base"><strong class="text-indigo-900">Date of Birth:</strong> {{ current_user.dob }}</p>
+                    <p class="mt-2 text-sm sm:text-base"><strong class="text-indigo-900">Learner Type:</strong> {{ current_user.learning_style }} <a href="{{ url_for('test') }}" class="text-indigo-600 hover:underline">test</a></p>
+                    <p class="mt-2 text-sm sm:text-base"><strong class="text-indigo-900">Role:</strong> {{ current_user.role }}</p>
+                    <p class="mt-2 text-sm sm:text-base"><strong class="text-indigo-900">Email:</strong> {{ current_user.email }}</p>
+                </div>
             </div>
-            {% else %}
-         <p>No Profile  image found.</p>
-         {% endif %}    
-               
-            {% if current_user.role == 'teacher' %}
-                
-                {% if current_user.signature %}
-                    
-                        <br>
-                        <strong> Signature: </strong> <img src="{{ url_for('static', filename=current_user.signature) }}" alt="Signature Image">
-                    
-                    {% else %}
-                 <p>No signature image found.</p>
-                 {% endif %}
-                 {% if current_user.upi_qr %}
-                    
-                        <br>
-                        <strong> UPI QR: </strong> <img src="{{ url_for('static', filename=current_user.upi_qr) }}" alt="UPI QR">
-                    
-                    {% else %}
-                 <p>No QR found.</p>
-                 {% endif %}
 
-            {% endif %}
-            
-            <p><strong>Name:</strong> {{ current_user.name }}</p>
-            <p><strong>Date of Birth:</strong> {{ current_user.dob }}</p>
-            
-            <!-- if lerner type is not define -->
-             {% if current_user.learning_style == 'Unassigned' %}
-             <p><strong>Learner Type:</strong> No Learner Type define, Give <a href="{{url_for('test')}}" class="btn btn-primary">test</a></p> 
-             {% else %}
-                <p><strong>Learner Type:</strong> {{ current_user.learning_style }}</p>
-             {% endif %}
-            <p><strong>Role:</strong> {{ current_user.role }}</p>
-            <p><strong>Email:</strong> {{ current_user.email }}</p>
-
-            
-            <form id="edit-user-info-form" style="display: none;" action="{{ url_for('update_user_info') }}" method="post">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
-                <label for="dob">Date of Birth:</label>
-                <input type="date" id="dob" name="dob" value="{{ current_user.dob }}" required>
-                
-                <label for="email">Update Email:</label>
-                <input type="email" id="email" name="email" value="{{ current_user.email }}" required>
-                <button type="submit">Save Changes</button>
+            <!-- Edit User Info Form -->
+            <form id="edit-user-info-form" action="{{ url_for('update_user_info') }}" method="post" class="mt-6 hidden space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Name:</label>
+                    <input type="text" id="name" name="name" value="{{ current_user.name }}" required class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800">
+                </div>
+                <div>
+                    <label for="dob" class="block text-sm font-medium text-gray-700">Date of Birth:</label>
+                    <input type="date" id="dob" name="dob" value="{{ current_user.dob }}" required class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800">
+                </div>
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
+                    <input type="email" id="email" name="email" value="{{ current_user.email }}" required class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800">
+                </div>
+                <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200">Save Changes</button>
             </form>
 
-            <button class="edit-button" onclick="showEditUserInfoForm()">Update Profile</button>
+            <button class="absolute top-4 right-4 px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200" onclick="showEditUserInfoForm()">Update Profile</button>
         </div>
 
-        <!-- Form for editing user information -->
-
-        <div class="user-info">
-        <form method="POST" enctype="multipart/form-data">
-            <label for="profile_image">Profile Image</label>
-            <input type="file" id="profile_image" name="profile_image" accept="image/*">
-            
-            {% if current_user.role == 'teacher' %}
-                <label for="signature">Signature</label>
-                <input type="file" id="signature_image" name="signature_image" accept="image/*">
-                <label for="upi_qr">UPI QR</label>
-                <input type="file" id="upi_qr_image" name="upi_qr_image" accept="image/*">
-            {% endif %}
-        
-            <button type="submit">Upload</button>
-        </form>
-    </div>
-        <!-- Form for updating email -->
-        
-
-        <!-- Form for updating password -->
-        <!-- <form action="{{ url_for('update_password') }}" method="post">
-            <label for="password">Update Password:</label>
-            <input type="password" id="password" name="password" required>
-            <button type="submit">Update Password</button>
-        </form> -->
-
-        <!-- Education details section -->
-        {% if current_user.role == 'teacher' %}
-            <h2>Educational Details</h2>
-            <div class="education-list">
-                {% if current_user.education %}
-                {% for edu in current_user.education %}
-                
-                <div class="education-item">
-                    <p><strong>Degree:</strong> {{ edu['degree'] }}</p>
-                    <p><strong>University:</strong> {{ edu['university'] }}</p>
-                    <p><strong>Year of Completion:</strong> {{ edu['year'] }}</p>
-                
-                        <form action="{{ url_for('delete_education') }}" method="post">
-                            <input type="hidden" name="index" value="{{ loop.index }}">
-                            <input type="hidden" name="user_id" value="{{ current_user.id }}">
-                            <button type="submit" class="btn btn-danger">Delete</button>
-                        </form>
-                    </div>
-
-                    
-                              
-                {% endfor %}
-                {% else %}
-                <strong>No education details add yet</strong>
-                {% endif %}
-            </div>
-            <!-- Add education hide and revile on click -->
-             
-            <button class="add-education-button" type="button" onclick="showAddEducationForm()">Add Education</button>
-            <form id="add-education-form" class="add-education-form" action="{{ url_for('add_education') }}" method="post" style="display: none;">
-            <!-- Form for adding new education -->
-             <br>
-            <h2>Add Your Education</h2>
-            
-                <label for="degree">Degree:</label>
-                <input type="text" id="degree" name="degree" required>
-                <label for="university">University:</label>
-                <input type="text" id="university" name="university" required>
-                <label for="year">Year of Completion:</label>
-                <input type="number" id="year" name="year" required><br>
-                <button type="submit">Add Education</button>
+        <!-- Image Upload Form -->
+        <div class="bg-white text-gray-900 rounded-2xl shadow-xl p-6 sm:p-8 mt-6">
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                <div>
+                    <label for="profile_image" class="block text-sm font-medium text-gray-700">Profile Image:</label>
+                    <input type="file" id="profile_image" name="profile_image" accept="image/*" class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg bg-gray-50 text-gray-800">
+                </div>
+                <div>
+                    <label for="signature_image" class="block text-sm font-medium text-gray-700">Signature:</label>
+                    <input type="file" id="signature_image" name="signature_image" accept="image/*" class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg bg-gray-50 text-gray-800">
+                </div>
+                <div>
+                    <label for="upi_qr_image" class="block text-sm font-medium text-gray-700">UPI QR:</label>
+                    <input type="file" id="upi_qr_image" name="upi_qr_image" accept="image/*" class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg bg-gray-50 text-gray-800">
+                </div>
+                <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200">Upload</button>
             </form>
-        {% endif %}
+        </div>
+
+        <div class="bg-white text-gray-900 rounded-2xl shadow-xl p-6 sm:p-8 mt-6">
+            <h2 class="text-xl sm:text-2xl font-semibold text-indigo-900 mb-4">Educational Details</h2>
+            <div class="space-y-4">
+                <div class="relative bg-gray-50 p-4 rounded-lg shadow-sm">
+                    <p class="text-sm sm:text-base"><strong class="text-indigo-900">Degree:</strong> {{ current_user.education[0]['degree'] }}</p>
+                    <p class="text-sm sm:text-base"><strong class="text-indigo-900">University:</strong> {{ current_user.education[0]['university'] }}</p>
+                    <p class="text-sm sm:text-base"><strong class="text-indigo-900">Year of Completion:</strong> {{ current_user.education[0]['year'] }}</p>
+                    <form action="{{ url_for('delete_education') }}" method="post" class="absolute top-2 right-2">
+                        <input type="hidden" name="index" value="1">
+                        <input type="hidden" name="user_id" value="{{ current_user.id }}">
+                        <button type="submit" class="px-3 py-1 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition duration-200">Delete</button>
+                    </form>
+                </div>
+            </div>
+            <button class="mt-4 px-6 py-2 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200" onclick="showAddEducationForm()">Add Education</button>
+            <form id="add-education-form" action="{{ url_for('add_education') }}" method="post" class="mt-4 hidden space-y-4">
+                <div>
+                    <label for="degree" class="block text-sm font-medium text-gray-700">Degree:</label>
+                    <input type="text" id="degree" name="degree" required class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800">
+                </div>
+                <div>
+                    <label for="university" class="block text-sm font-medium text-gray-700">University:</label>
+                    <input type="text" id="university" name="university" required class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800">
+                </div>
+                <div>
+                    <label for="year" class="block text-sm font-medium text-gray-700">Year of Completion:</label>
+                    <input type="number" id="year" name="year" required class="w-full p-2 sm:p-3 mt-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800">
+                </div>
+                <button type="submit" class="w-full sm:w-auto px-6 py-2 bg-indigo-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-200">Add Education</button>
+            </form>
+        </div>
     </div>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
-        function showAddEducationForm() {
-            document.getElementById("add-education-form").style.display = "block";
-            }
-            
-        // JavaScript functions for showing/hiding edit forms
         function showEditUserInfoForm() {
-            document.getElementById('edit-user-info-form').style.display = 'block';
+            document.getElementById('edit-user-info-form').classList.toggle('hidden');
         }
-        
-        // JavaScript function for showing/hiding edit forms
-        function showEditEducationForm(index) {
-    // Hide all edit forms
-    var editForms = document.getElementsByClassName('edit-education-form');
-    for (var i = 0; i < editForms.length; i++) {
-        editForms[i].style.display = 'none';
-    }
 
-    // Show the selected edit form
-    var editForm = document.getElementById('edit-education-form-' + index);
-    if (editForm) {
-        editForm.style.display = 'block';
-    }
-}
-    
-
+        function showAddEducationForm() {
+            document.getElementById('add-education-form').classList.toggle('hidden');
+        }
     </script>
 </body>
 </html>
