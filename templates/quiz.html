@@ -7,137 +7,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ course.name }} - Quiz</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container2 {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        p {
-            text-align: center;
-            color: #555;
-            font-size: 1.1em;
-            margin-bottom: 20px;
-        }
-
-        .quiz-question {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #fafafa;
-            border-radius: 6px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-
-        .quiz-question h3 {
-            color: #444;
-            margin-bottom: 10px;
-        }
-
-        .quiz-question p {
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-
-        .quiz-question input[type="radio"] {
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-        label {
-            cursor: pointer;
-        }
-
-        button[type="submit"] {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #5a627a;
-            color: #fff;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #444c63;
-        }
-
-        /* Responsive styling */
-        @media (max-width: 600px) {
-            .container {
-                width: 90%;
-                padding: 15px;
-            }
-
-            button[type="submit"] {
-                font-size: 1em;
-            }
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <br>
-    <div class="container2">
-        <h1>{{ course.name }} - Quiz</h1>
-        <p>
-            To pass and receive a certificate, you must score a minimum of 60%.
-        </p>
-        
-        <!-- Quiz form -->
-        <form id="quizForm">
-            {% for quiz in course.quizzes %}
-            <div class="quiz-question">
-                <h3>Question {{ loop.index }}:</h3>
-                <h4>{{ quiz.question }}</h4>
-                
-                <!-- list in abcd -->
-                <input type="radio" id="quiz_{{ loop.index }}_option_0" name="question{{ loop.index }}" value="1" required>
-                <label for="quiz_{{ loop.index }}_option_0">A. {{ quiz.options[0] }}</label><br>
-                <input type="radio" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="2" required>
-                <label for="quiz_{{ loop.index }}_option_1">B. {{ quiz.options[1] }}</label><br>
-                <input type="radio" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="3" required>
-                <label for="quiz_{{ loop.index }}_option_2">C. {{ quiz.options[2] }}</label><br>
-                <input type="radio" id="quiz_{{ loop.index }}_option_3" name="question{{ loop.index }}" value="4" required>
-                <label for="quiz_{{ loop.index }}_option_3">D. {{ quiz.options[3] }}</label><br>
-            </div>
-            {% endfor %}
-            
-            <button type="submit">Submit Quiz</button>
-        </form>
+<body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 text-white min-h-screen font-sans">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center py-10">
+            <h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white drop-shadow-md">{{ course.name }} - Quiz</h1>
+            <p class="text-lg md:text-xl text-gray-200 mt-4 font-light">Score at least 60% to earn your certificate!</p>
+        </header>
+
+        <section class="max-w-4xl mx-auto bg-white text-gray-900 rounded-2xl shadow-xl p-6 md:p-8">
+            <form id="quizForm" class="space-y-8">
+                {% for quiz in course.quizzes %}
+                <div class="quiz-question bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300">
+                    <h3 class="text-xl font-semibold text-indigo-900 mb-4">Question {{ loop.index }}</h3>
+                    <h4 class="text-lg text-gray-800 mb-6">{{ quiz.question }}</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center">
+                            <input type="radio" id="quiz_{{ loop.index }}_option_0" name="question{{ loop.index }}" value="1" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="quiz_{{ loop.index }}_option_0" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. {{ quiz.options[0] }}</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="2" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="quiz_{{ loop.index }}_option_1" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. {{ quiz.options[1] }}</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="3" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="quiz_{{ loop.index }}_option_2" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. {{ quiz.options[2] }}</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="quiz_{{ loop.index }}_option_3" name="question{{ loop.index }}" value="4" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
+                            <label for="quiz_{{ loop.index }}_option_3" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">D. {{ quiz.options[3] }}</label>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-semibold text-lg rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-300">Submit Quiz</button>
+            </form>
+        </section>
     </div>
-    
+
     <script>
         $(document).ready(function() {
             $('#quizForm').on('submit', function(event) {
                 event.preventDefault();
                 
-                console.log("Form submitted"); // Debug statement
+                console.log("Form submitted");
                 const formData = $(this).serialize();
-                console.log("Form data:", formData); // Debug statement
+                console.log("Form data:", formData);
 
                 $.post(`/submit_quiz/{{ course.id }}`, formData, function(response) {
-                    console.log("Response:", response); // Debug statement
+                    console.log("Response:", response);
                     if (response.passed) {
                         alert(response.message);
                         window.location.href = `/certificate/${response.course_id}`;
@@ -145,12 +66,12 @@
                         alert(response.message);
                     }
                 }).fail(function(jqXHR, textStatus, errorThrown) {
-                    console.log("Request failed:", textStatus, errorThrown); // Debug statement
+                    console.log("Request failed:", textStatus, errorThrown);
                 });
             });
         });
     </script>
 </body>
 </html>
-<br>
+
 {% endblock %}
