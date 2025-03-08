@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<script src="https://cdn.tailwindcss.com"></script>
+
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
     <!-- Flashed Messages -->
     {% with messages = get_flashed_messages() %}
@@ -10,9 +11,31 @@
             </div>
         {% endif %}
     {% endwith %}
-    <body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 text-white font-sans min-h-screen flex flex-col">
+
+    <!-- Learning Style Section -->
+    <div class="bg-gray-900 py-6 text-center rounded-lg shadow-md mb-6">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            Welcome {{ current_user.name }} !!!
+        </h1>
+        <h2 class="text-xl sm:text-2xl font-semibold mt-2">
+            Learning Style: <strong class="text-indigo-400">{{ current_user.learning_style }}</strong>
+        </h2>
+        {% if current_user.learning_style == "Visual" %}
+            <p class="text-gray-300 mt-2">You learn best through images, charts, and videos.</p>
+        {% elif current_user.learning_style == "Auditory" %}
+            <p class="text-gray-300 mt-2">You learn best through listening to explanations and discussions.</p>
+        {% elif current_user.learning_style == "Kinesthetic" %}
+            <p class="text-gray-300 mt-2">You learn best through hands-on activities and practical experience.</p>
+        {% else %}
+            <p class="text-gray-300 mt-2">Your learning style is currently unassigned. Please take the test to determine it.</p>
+        {% endif %}
+        <a href="{{ url_for('test') }}" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+            Take the Learning Style Test
+        </a>
+    </div>
+
     <!-- Header -->
-    <div class="bg-gray-900 py-4 text-center">
+    <div class="bg-gray-900 py-4 text-center rounded-lg shadow-md mb-6">
         {% if current_user.role == 'student' %}
             {% if current_user.learning_style == 'Visual' %}
                 <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">Visual Learner Courses</h1>
@@ -22,7 +45,9 @@
                 <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">Kinesthetic Learner Courses</h1>
             {% else %}
                 <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">Learner Type Not Defined</h1>
-                <h1 class="mt-2"><a href="{{ url_for('test') }}" class="text-gray-300 hover:text-indigo-400 transition duration-200">Retest</a></h1>
+                <p class="mt-2">
+                    <a href="{{ url_for('test') }}" class="text-gray-300 hover:text-indigo-400 transition duration-200">Retest</a>
+                </p>
             {% endif %}
         {% elif current_user.role == 'teacher' %}
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">Course List</h1>
@@ -34,43 +59,34 @@
         <div class="filters bg-gray-100 p-4 sm:p-6 rounded-lg shadow-md mb-6 max-w-4xl mx-auto flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 sm:gap-6">
             <div class="flex items-center">
                 <label for="level" class="text-gray-700 font-semibold text-sm sm:text-base mr-2">Level:</label>
-                <select id="level" name="level" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base">
-                    <option value=""></option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
+                <select id="level" name="level" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
+                    <option value="" class="text-black"></option>
+                    <option value="Beginner" class="text-black">Beginner</option>
+                    <option value="Intermediate" class="text-black">Intermediate</option>
+                    <option value="Advanced" class="text-black">Advanced</option>
                 </select>
             </div>
             <div class="flex items-center">
                 <label for="domain" class="text-gray-700 font-semibold text-sm sm:text-base mr-2">Domain:</label>
-                <select name="domain" id="domain" onchange="showDomainInput()" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base">
-                    <option value=""></option>
-                    <option value="Programming">Programming</option>
-                    <option value=""></option>
+                <select name="domain" id="domain" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
+                    <option value="" class="text-black"></option>
+                    <option value="Programming" class="text-black">Programming</option>
                 </select>
             </div>
             <div class="flex items-center">
                 <label for="language" class="text-gray-700 font-semibold text-sm sm:text-base mr-2">Language:</label>
-                <select id="language" name="language" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base">
-                    <option value=""></option>
-                    <option value="Hindi">Hindi</option>
-                    <option value="English">English</option>
+                <select id="language" name="language" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
+                    <option value="" class="text-black"></option>
+                    <option value="Hindi" class="text-black">Hindi</option>
+                    <option value="English" class="text-black">English</option>
                 </select>
             </div>
             <div class="flex items-center">
                 <label for="payment" class="text-gray-700 font-semibold text-sm sm:text-base mr-2">Payment:</label>
-                <select id="payment" name="payment" onchange="showPaymentDetails()" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base">
-                    <option value=""></option>
-                    <option value="Free">Free</option>
-                    <option value="Paid">Paid</option>
-                </select>
-            </div>
-            <div class="flex items-center">
-                <label for="mode_of_class" class="text-gray-700 font-semibold text-sm sm:text-base mr-2">Mode of Class:</label>
-                <select id="mode_of_class" name="mode_of_class" onchange="showClassDetails()" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm sm:text-base">
-                    <option value=""></option>
-                    <option value="Recorded">Recorded</option>
-                    <option value="Live">Live</option>
+                <select id="payment" name="payment" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
+                    <option value="" class="text-black"></option>
+                    <option value="Free" class="text-black">Free</option>
+                    <option value="Paid" class="text-black">Paid</option>
                 </select>
             </div>
             <button type="submit" class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 sm:focus:ring-4 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">Apply Filters</button>
@@ -119,7 +135,7 @@
                                         <i class="bi bi-chevron-double-up mr-2"></i> Update Course
                                     </button>
                                 </a>
-                                <a href="{{ url_for('view_chapter', course_id=course.id) }}">
+                                <a href="{{ url_for('view_chapter', course_id=course.id, chapter_index=0) }}">
                                     <button class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 sm:focus:ring-4 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">
                                         <i class="bi bi-box-arrow-in-right mr-2"></i> Chapters
                                     </button>
@@ -137,65 +153,25 @@
         {% endif %}
     </div>
 
-    <!-- JavaScript -->
+    <!-- Custom CSS for Black Filter Options -->
+    <style>
+        select {
+            color: black !important; /* Ensure select text is black */
+        }
+        select option {
+            color: black !important; /* Ensure dropdown options are black */
+        }
+    </style>
+
+    <!-- JavaScript for Debugging -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            function showPaymentDetails() {
-                const paymentSelect = document.getElementById('payment');
-                const paymentDetailsContainer = document.getElementById('paymentDetailsContainer');
-                if (paymentSelect.value === 'Paid' && paymentDetailsContainer) {
-                    paymentDetailsContainer.style.display = 'block';
-                } else if (paymentDetailsContainer) {
-                    paymentDetailsContainer.style.display = 'none';
-                }
-            }
-
-            function showDomainInput() {
-                const domainSelect = document.getElementById('domain');
-                const domainInputContainer = document.getElementById('domainInputContainer');
-                if (domainSelect.value && domainInputContainer) {
-                    domainInputContainer.style.display = 'block';
-                } else if (domainInputContainer) {
-                    domainInputContainer.style.display = 'none';
-                }
-            }
-
-            function showLevelInput() {
-                const levelSelect = document.getElementById('level');
-                const levelInputContainer = document.getElementById('levelInputContainer');
-                if (levelSelect.value && levelInputContainer) {
-                    levelInputContainer.style.display = 'block';
-                } else if (levelInputContainer) {
-                    levelInputContainer.style.display = 'none';
-                }
-            }
-
-            function showClassDetails() {
-                const modeSelect = document.getElementById('mode_of_class');
-                const classDetailsContainer = document.getElementById('classDetailsContainer');
-                if (modeSelect.value === 'Live' && classDetailsContainer) {
-                    classDetailsContainer.style.display = 'block';
-                } else if (classDetailsContainer) {
-                    classDetailsContainer.style.display = 'none';
-                }
-            }
-
-            const paymentSelect = document.getElementById('payment');
-            paymentSelect.addEventListener('change', showPaymentDetails);
-
-            const modeSelect = document.getElementById('mode_of_class');
-            modeSelect.addEventListener('change', showClassDetails);
-
-            const domainSelect = document.getElementById('domain');
-            domainSelect.addEventListener('change', showDomainInput);
-
-            const levelSelect = document.getElementById('level');
-            levelSelect.addEventListener('change', showLevelInput);
-
-            showPaymentDetails();
-            showDomainInput();
-            showLevelInput();
-            showClassDetails();
+            const dropdowns = ['level', 'domain', 'language', 'payment'];
+            dropdowns.forEach(id => {
+                const element = document.getElementById(id);
+                console.log(`${id} Dropdown:`, element);
+                if (!element) console.error(`${id} dropdown not found.`);
+            });
         });
     </script>
 </div>
