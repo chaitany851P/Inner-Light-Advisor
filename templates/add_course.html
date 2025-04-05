@@ -50,7 +50,7 @@
                 <!-- Domain -->
                 <div class="mb-4">
                     <label for="domain" class="block text-sm sm:text-base font-medium text-gray-700 mb-1">Domain</label>
-                    <select name="domain" id="domain" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <select name="domain" id="domain" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
                         <option value="" disabled selected>Select Domain</option>
                         {% for domain in domains %}
                             <option value="{{ domain.name }}">{{ domain.name }}</option>
@@ -82,7 +82,7 @@
                 <!-- Payment -->
                 <div class="mb-4">
                     <label for="payment" class="block text-sm sm:text-base font-medium text-gray-700 mb-1">Payment</label>
-                    <select id="payment" name="payment" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <select id="payment" name="payment" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
                         <option value="" disabled selected>Select Payment Type</option>
                         <option value="Free">Free</option>
                         <option value="Paid">Paid</option>
@@ -98,11 +98,20 @@
                 <!-- Mode of Class -->
                 <div class="mb-4">
                     <label for="mode_of_class" class="block text-sm sm:text-base font-medium text-gray-700 mb-1">Mode of Class</label>
-                    <select id="mode_of_class" name="mode_of_class" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <select id="mode_of_class" name="mode_of_class" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
                         <option value="" disabled selected>Select Mode</option>
                         <option value="Recorded">Recorded</option>
                         <option value="Live">Live</option>
                     </select>
+                </div>
+
+                <!-- Meeting Link (for Live Courses) -->
+                <div id="meetingLinkContainer" class="mb-4 hidden">
+                    <label for="room_id" class="block text-sm sm:text-base font-medium text-gray-700 mb-1">Meeting Room ID</label>
+                    <input type="text" id="room_id" name="room_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-100" readonly>
+                    <label for="meeting_link" class="block text-sm sm:text-base font-medium text-gray-700 mt-4 mb-1">Meeting Link</label>
+                    <input type="text" id="meeting_link" name="meeting_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-100" readonly>
+                    <button type="button" id="generateMeetingLink" class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Generate Meeting Link</button>
                 </div>
 
                 <!-- Learner Type -->
@@ -152,12 +161,8 @@
         </div>
     </div>
 
-    <!-- JavaScript remains unchanged -->
     <script>
-        document.querySelector('form').addEventListener('submit', function(e) {
-            console.log('Form submitting...');
-        });
-
+        // Handle domain/language selection
         document.getElementById('domain').addEventListener('change', function() {
             const domain = this.value;
             const newDomainContainer = document.getElementById('newDomainContainer');
@@ -170,12 +175,39 @@
             newLanguageContainer.classList.toggle('hidden', language !== 'Add New');
         });
 
+        // Handle payment type selection
         document.getElementById('payment').addEventListener('change', function() {
             const paymentType = this.value;
             const paymentDetailsContainer = document.getElementById('paymentDetailsContainer');
             paymentDetailsContainer.classList.toggle('hidden', paymentType !== 'Paid');
         });
 
+        // Handle mode of class selection for meeting link
+        document.getElementById('mode_of_class').addEventListener('change', function() {
+            const mode = this.value;
+            const meetingLinkContainer = document.getElementById('meetingLinkContainer');
+            meetingLinkContainer.classList.toggle('hidden', mode !== 'Live');
+            generateChapters(); // Regenerate chapters based on mode
+        });
+
+        // Generate meeting link on button click
+        document.getElementById('generateMeetingLink').addEventListener('click', function() {
+            const roomId = generateRoomId(8);
+            const meetingLink = `https://your-meeting-service.com/room/${roomId}`; // Match backend base URL
+            document.getElementById('room_id').value = roomId;
+            document.getElementById('meeting_link').value = meetingLink;
+        });
+
+        function generateRoomId(length) {
+            const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            return result;
+        }
+
+        // Generate chapter fields
         document.getElementById('chapter_count').addEventListener('input', generateChapters);
         document.getElementById('learner_type').addEventListener('change', generateChapters);
         document.getElementById('mode_of_class').addEventListener('change', generateChapters);
@@ -192,9 +224,6 @@
                 if (learnerType === 'Visual' || learnerType === 'Kinesthetic') {
                     if (mode_of_class === 'Live') {
                         mediaFieldHTML = `
-                            <label for="chapter_${i}_meeting_link" class="block text-sm font-medium text-gray-700 mb-1">Meeting Code</label>
-                            <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                            <a href="{{ url_for('meeting2') }}" target="_blank" class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Create Meeting</a>
                             <label for="chapter_${i}_date" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Date</label>
                             <input type="date" id="chapter_${i}_date" name="chapter_${i}_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
                             <label for="chapter_${i}_time" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Time</label>
@@ -203,15 +232,12 @@
                     } else {
                         mediaFieldHTML = `
                             <label for="chapter_${i}_course_link" class="block text-sm font-medium text-gray-700 mb-1">Course Video (Unlisted YouTube Video Link)</label>
-                            <input type="text" id="chapter_${i}_course_link" name="chapter_${i}_course_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="e.g., https://youtu.be/VIDEO_ID" required>
+                            <input type="text" id="chapter_${i}_course_link" name="chapter_${i}_course_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="e.g., https://youtu.be/VIDEO_ID">
                         `;
                     }
                 } else if (learnerType === 'Auditory') {
                     if (mode_of_class === 'Live') {
                         mediaFieldHTML = `
-                            <label for="chapter_${i}_meeting_link" class="block text-sm font-medium text-gray-700 mb-1">Meeting Code</label>
-                            <input type="text" id="chapter_${i}_meeting_link" name="chapter_${i}_meeting_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                            <a href="{{ url_for('meeting2') }}" target="_blank" class="inline-block mt-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Create Meeting</a>
                             <label for="chapter_${i}_date" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Date</label>
                             <input type="date" id="chapter_${i}_date" name="chapter_${i}_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
                             <label for="chapter_${i}_time" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Time</label>
@@ -220,7 +246,7 @@
                     } else {
                         mediaFieldHTML = `
                             <label for="chapter_${i}_course_link" class="block text-sm font-medium text-gray-700 mb-1">Course Audio (Unlisted YouTube Video Link)</label>
-                            <input type="text" id="chapter_${i}_course_link" name="chapter_${i}_course_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="e.g., https://youtu.be/VIDEO_ID" required>
+                            <input type="text" id="chapter_${i}_course_link" name="chapter_${i}_course_link" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="e.g., https://youtu.be/VIDEO_ID">
                         `;
                     }
                 }
@@ -242,13 +268,14 @@
                         <label for="chapter_${i}_resources_name" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Resource Name</label>
                         <input type="text" id="chapter_${i}_resources_name" name="chapter_${i}_resources_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" placeholder="e.g., Chapter ${i} Resources">
                         <label for="chapter_${i}_note" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Note</label>
-                        <textarea id="chapter_${i}_note" name="chapter_${i}_note" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required></textarea>
+                        <textarea id="chapter_${i}_note" name="chapter_${i}_note" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 resize-y focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"></textarea>
                     </div>
                 `;
                 chaptersContainer.insertAdjacentHTML('beforeend', chapterHTML);
             }
         }
 
+        // Generate quiz fields
         document.getElementById('quiz_count').addEventListener('input', function() {
             const quizCount = parseInt(this.value) || 0;
             const quizzesContainer = document.getElementById('quizzes');
@@ -260,114 +287,130 @@
                         <h3 class="text-lg font-semibold text-indigo-900 mb-4">Quiz ${i}</h3>
                         <label for="quiz_${i}_type" class="block text-sm font-medium text-gray-700 mb-1">Quiz Type</label>
                         <select id="quiz_${i}_type" name="quiz_${i}_type" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                            <option value="MCQ">Multiple Choice (MCQ)</option>
-                            <option value="Multiple Choices">Multiple Choices</option>
+                            <option value="" disabled selected>Select Quiz Type</option>
+                            <option value="MCQ">Single Correct Answer</option>
+                            <option value="Multiple Choices">Multiple Correct Answers</option>
                             <option value="True/False">True/False</option>
                         </select>
                         <label for="quiz_${i}_question" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Question</label>
                         <input type="text" id="quiz_${i}_question" name="quiz_${i}_question" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                        <div id="quiz_${i}_options" class="mt-4">
-                            <label for="quiz_${i}_option_1" class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
-                            <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                            <label for="quiz_${i}_option_2" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 2</label>
-                            <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                            <label for="quiz_${i}_option_3" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 3</label>
-                            <input type="text" id="quiz_${i}_option_3" name="quiz_${i}_option_3" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                            <label for="quiz_${i}_option_4" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 4</label>
-                            <input type="text" id="quiz_${i}_option_4" name="quiz_${i}_option_4" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                        </div>
-                        <div id="quiz_${i}_correct_answer" class="mt-4">
-                            <label for="quiz_${i}_correct_answer" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-                            <select id="quiz_${i}_correct_answer" name="quiz_${i}_correct_answer" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                                <option value="" disabled selected>Select Correct Answer</option>
-                                <option value="1">Option 1</option>
-                                <option value="2">Option 2</option>
-                                <option value="3">Option 3</option>
-                                <option value="4">Option 4</option>
-                            </select>
-                        </div>
-                        <div id="quiz_${i}_multiple_correct" class="mt-4 hidden">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Select Multiple Correct Answers</label>
-                            <div id="quiz_${i}_correct_count" class="text-sm text-gray-600 mb-2">Selected: 0</div>
-                            <label><input type="checkbox" name="quiz_${i}_correct_answers" value="1" class="quiz_${i}_checkbox"> Option 1</label><br>
-                            <label><input type="checkbox" name="quiz_${i}_correct_answers" value="2" class="quiz_${i}_checkbox"> Option 2</label><br>
-                            <label><input type="checkbox" name="quiz_${i}_correct_answers" value="3" class="quiz_${i}_checkbox"> Option 3</label><br>
-                            <label><input type="checkbox" name="quiz_${i}_correct_answers" value="4" class="quiz_${i}_checkbox"> Option 4</label>
-                        </div>
+                        <div id="quiz_${i}_options_container" class="mt-4"></div>
+                        <div id="quiz_${i}_answer_container" class="mt-4"></div>
                     </div>
                 `;
                 quizzesContainer.insertAdjacentHTML('beforeend', quizHTML);
 
                 document.getElementById(`quiz_${i}_type`).addEventListener('change', function() {
-                    const type = this.value;
-                    const optionsDiv = document.getElementById(`quiz_${i}_options`);
-                    const correctAnswerDiv = document.getElementById(`quiz_${i}_correct_answer`);
-                    const multipleCorrectDiv = document.getElementById(`quiz_${i}_multiple_correct`);
-
-                    if (type === 'True/False') {
-                        optionsDiv.innerHTML = `
-                            <label for="quiz_${i}_option_1" class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
-                            <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" value="True" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-100">
-                            <label for="quiz_${i}_option_2" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 2</label>
-                            <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" value="False" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-100">
-                        `;
-                        correctAnswerDiv.innerHTML = `
-                            <label for="quiz_${i}_correct_answer" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-                            <select id="quiz_${i}_correct_answer" name="quiz_${i}_correct_answer" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                                <option value="" disabled selected>Select Correct Answer</option>
-                                <option value="1">True</option>
-                                <option value="2">False</option>
-                            </select>
-                        `;
-                        multipleCorrectDiv.classList.add('hidden');
-                    } else if (type === 'Multiple Choices') {
-                        optionsDiv.innerHTML = `
-                            <label for="quiz_${i}_option_1" class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
-                            <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                            <label for="quiz_${i}_option_2" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 2</label>
-                            <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                            <label for="quiz_${i}_option_3" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 3</label>
-                            <input type="text" id="quiz_${i}_option_3" name="quiz_${i}_option_3" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                            <label for="quiz_${i}_option_4" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 4</label>
-                            <input type="text" id="quiz_${i}_option_4" name="quiz_${i}_option_4" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                        `;
-                        correctAnswerDiv.classList.add('hidden');
-                        multipleCorrectDiv.classList.remove('hidden');
-                        const checkboxes = document.getElementsByClassName(`quiz_${i}_checkbox`);
-                        const countDiv = document.getElementById(`quiz_${i}_correct_count`);
-                        for (let checkbox of checkboxes) {
-                            checkbox.addEventListener('change', function() {
-                                const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
-                                countDiv.textContent = `Selected: ${selectedCount}`;
-                            });
-                        }
-                    } else { // MCQ
-                        optionsDiv.innerHTML = `
-                            <label for="quiz_${i}_option_1" class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
-                            <input type="text" id="quiz_${i}_option_1" name="quiz_${i}_option_1" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                            <label for="quiz_${i}_option_2" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 2</label>
-                            <input type="text" id="quiz_${i}_option_2" name="quiz_${i}_option_2" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                            <label for="quiz_${i}_option_3" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 3</label>
-                            <input type="text" id="quiz_${i}_option_3" name="quiz_${i}_option_3" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                            <label for="quiz_${i}_option_4" class="block text-sm font-medium text-gray-700 mt-4 mb-1">Option 4</label>
-                            <input type="text" id="quiz_${i}_option_4" name="quiz_${i}_option_4" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                        `;
-                        correctAnswerDiv.innerHTML = `
-                            <label for="quiz_${i}_correct_answer" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-                            <select id="quiz_${i}_correct_answer" name="quiz_${i}_correct_answer" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
-                                <option value="" disabled selected>Select Correct Answer</option>
-                                <option value="1">Option 1</option>
-                                <option value="2">Option 2</option>
-                                <option value="3">Option 3</option>
-                                <option value="4">Option 4</option>
-                            </select>
-                        `;
-                        correctAnswerDiv.classList.remove('hidden');
-                        multipleCorrectDiv.classList.add('hidden');
-                    }
+                    updateQuizFields(i);
                 });
+                updateQuizFields(i);
             }
         });
+
+        function updateQuizFields(quizNum) {
+            const type = document.getElementById(`quiz_${quizNum}_type`).value;
+            const optionsContainer = document.getElementById(`quiz_${quizNum}_options_container`);
+            const answerContainer = document.getElementById(`quiz_${quizNum}_answer_container`);
+            optionsContainer.innerHTML = '';
+            answerContainer.innerHTML = '';
+
+            if (type === 'True/False') {
+                optionsContainer.innerHTML = `
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
+                            <input type="text" name="quiz_${quizNum}_option_1" value="True" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-100">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 2</label>
+                            <input type="text" name="quiz_${quizNum}_option_2" value="False" readonly class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 bg-gray-100">
+                        </div>
+                    </div>
+                `;
+                answerContainer.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                    <select name="quiz_${quizNum}_correct_answer" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
+                        <option value="" disabled selected>Select Correct Answer</option>
+                        <option value="1">True</option>
+                        <option value="2">False</option>
+                    </select>
+                `;
+            } else if (type === 'Multiple Choices') {
+                optionsContainer.innerHTML = `
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
+                            <input type="text" name="quiz_${quizNum}_option_1" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 2</label>
+                            <input type="text" name="quiz_${quizNum}_option_2" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 3 (Optional)</label>
+                            <input type="text" name="quiz_${quizNum}_option_3" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 4 (Optional)</label>
+                            <input type="text" name="quiz_${quizNum}_option_4" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                        </div>
+                    </div>
+                `;
+                answerContainer.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Correct Answers</label>
+                    <div class="text-sm text-gray-600 mb-2">Select at least one correct answer</div>
+                    <div class="space-y-2">
+                        <div class="flex items-center">
+                            <input type="checkbox" id="quiz_${quizNum}_correct_1" name="quiz_${quizNum}_correct_answers" value="1" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="quiz_${quizNum}_correct_1" class="ml-2 block text-sm text-gray-900">Option 1</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="quiz_${quizNum}_correct_2" name="quiz_${quizNum}_correct_answers" value="2" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="quiz_${quizNum}_correct_2" class="ml-2 block text-sm text-gray-900">Option 2</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="quiz_${quizNum}_correct_3" name="quiz_${quizNum}_correct_answers" value="3" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="quiz_${quizNum}_correct_3" class="ml-2 block text-sm text-gray-900">Option 3</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="quiz_${quizNum}_correct_4" name="quiz_${quizNum}_correct_answers" value="4" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                            <label for="quiz_${quizNum}_correct_4" class="ml-2 block text-sm text-gray-900">Option 4</label>
+                        </div>
+                    </div>
+                `;
+            } else { // Default to Single Correct Answer (MCQ)
+                optionsContainer.innerHTML = `
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
+                            <input type="text" name="quiz_${quizNum}_option_1" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 2</label>
+                            <input type="text" name="quiz_${quizNum}_option_2" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 3 (Optional)</label>
+                            <input type="text" name="quiz_${quizNum}_option_3" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 4 (Optional)</label>
+                            <input type="text" name="quiz_${quizNum}_option_4" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                        </div>
+                    </div>
+                `;
+                answerContainer.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                    <select name="quiz_${quizNum}_correct_answer" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none" required>
+                        <option value="" disabled selected>Select Correct Answer</option>
+                        <option value="1">Option 1</option>
+                        <option value="2">Option 2</option>
+                        <option value="3">Option 3</option>
+                        <option value="4">Option 4</option>
+                    </select>
+                `;
+            }
+        }
     </script>
 </body>
 </html>
