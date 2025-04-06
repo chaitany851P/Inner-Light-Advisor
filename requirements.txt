@@ -12,3 +12,5 @@ pytz==2023.3
 
 # Production server for Render
 gunicorn==20.1.0
+
+characters
