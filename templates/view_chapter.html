@@ -42,19 +42,11 @@
             <hr class="border-gray-300 mb-6">
 
             <!-- Meeting Link -->
-<<<<<<< HEAD
             {% if room_id %}
                 <h2 class="text-lg sm:text-xl font-bold text-indigo-900 mb-4">Join Meeting</h2>
                 <div class="text-center mb-6 bg-indigo-50 p-4 rounded-lg">
                     <form method="POST" action="{{ url_for('join', course_id=course.id, chapter_index=chapter_index) }}" class="mt-4 flex flex-col sm:flex-row justify-center items-center gap-4" id="joinForm">
                         <input type="text" placeholder="Room ID" class="w-full sm:w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800 placeholder-gray-400 text-sm sm:text-base" id="roomID" name="roomID" value="{{ room_id }}" required>
-=======
-            {% if chapter.meeting_link %}
-                <h2 class="text-lg sm:text-xl font-bold text-indigo-900 mb-4">Join Meeting</h2>
-                <div class="text-center mb-6 bg-indigo-50 p-4 rounded-lg">
-                    <form method="POST" action="{{ url_for('join', course_id=course.id, chapter_index=chapter_index) }}" class="mt-4 flex flex-col sm:flex-row justify-center items-center gap-4" id="joinForm">
-                        <input type="text" placeholder="Room ID" class="w-full sm:w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800 placeholder-gray-400 text-sm sm:text-base" id="roomID" name="roomID" value="{{ chapter.meeting_link }}" required>
->>>>>>> a691ab995b7857ae2761c222c869d79b14ac8c65
                         <button type="submit" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 sm:focus:ring-4 focus:ring-indigo-300 transition-all duration-200">Join</button>
                     </form>
                     <div id="root" class="w-full max-w-4xl h-[50vh] sm:h-[60vh] lg:h-[70vh] mt-6 mx-auto rounded-lg overflow-hidden shadow-md bg-gray-200"></div>
