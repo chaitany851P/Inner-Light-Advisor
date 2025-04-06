@@ -1222,18 +1222,14 @@ def quiz(course_id):
                         correct_count += 1
                     app.logger.debug(
                         f"Q{i} Multiple Choices - Submitted: {submitted_answers}, Correct: {correct_answers}")
-                else:  # MCQ or True/False
+                else:  # MCQ or True/False (single answer type)
                     question_key = f"question{i}"
-                    submitted_answer = request.form.get(question_key)  # e.g., "True" or "False"
-                    correct_answer = quiz.get('correct_answer')  # e.g., "1"
-                    options = quiz.get('options', {})  # e.g., {"1": "True", "2": "False"}
-
-                    # Find the key corresponding to the submitted answer
-                    submitted_key = next((k for k, v in options.items() if v == submitted_answer), None)
+                    submitted_key = request.form.get(question_key)  # directly gets the key
+                    correct_answer = quiz.get('correct_answer')     # key like "1", "4", etc.
                     if submitted_key == correct_answer:
                         correct_count += 1
                     app.logger.debug(
-                        f"Q{i} {quiz_type} - Submitted: {submitted_answer} (Key: {submitted_key}), Correct: {correct_answer}")
+                        f"Q{i} {quiz_type} - Submitted key: {submitted_key}, Correct: {correct_answer}")
 
             score = (correct_count / total_questions) * 100 if total_questions > 0 else 0
             passed = score >= 60
