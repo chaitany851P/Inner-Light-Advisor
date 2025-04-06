@@ -512,8 +512,6 @@ def add_course():
                 'rating_count': 0,
                 'enrollment_count': 0,
                 'room_id': room_id,  # Store room ID at root
-                'meeting_link': meeting_link  # Store full meeting link at root
-
             }
 
             if course_data['payment'] == 'Paid':
@@ -611,9 +609,6 @@ def add_course():
                 body=f"""Dear {current_user.name},
 Your course, {request.form['name']}, has been submitted for review.
 It will be available to students once approved.
-
-Meeting Link (for Live courses): {meeting_link or 'N/A'}
-
 Best,
 The Inner Light Advisor Team"""
             )
@@ -980,17 +975,14 @@ ZEGO_APP_ID = os.getenv('ZEGO_APP_ID', '1801082928')  # Default for testing, rep
 ZEGO_SERVER_SECRET = os.getenv('ZEGO_SERVER_SECRET',
                                '0d03fcf2fc1cf09f3198751083b06d2f')  # Default for testing, replace with your actual secret
 
-
 app.config['ZEGO_APP_ID'] = ZEGO_APP_ID
 app.config['ZEGO_SERVER_SECRET'] = ZEGO_SERVER_SECRET
-
 
 @app.route('/view_chapter/<course_id>/', defaults={'chapter_index': 0})
 @app.route('/view_chapter/<course_id>/<int:chapter_index>')
 @login_required
 def view_chapter(course_id, chapter_index):
     try:
-
         # Fetch the course from Firestore
         course_ref = db.collection('courses').document(course_id)
         course_doc = course_ref.get()
@@ -1017,29 +1009,6 @@ def view_chapter(course_id, chapter_index):
         # Handle enrollment and progress for students
         if current_user.role == 'student':
             enrollment_ref = db.collection('enrollments').where('user_id', '==', current_user.id).where('course_id', '==', course_id).limit(1).stream()
- 
-        course_ref = db.collection('courses').document(course_id)
-        course_doc = course_ref.get()
-        current_app.logger.info(f"Course ID: {course_id}, Exists: {course_doc.exists}")
-        if not course_doc.exists:
-            flash("🚀 Course not found!", "error")
-            return redirect(url_for('courses'))
-
-        course = course_doc.to_dict()
-        course['id'] = course_id
-
-        if 'chapters' not in course or chapter_index < 0 or chapter_index >= len(course['chapters']):
-            flash("📖 Invalid chapter!", "warning")
-            return redirect(url_for('course_detail', course_id=course_id))
-
-        chapter = course['chapters'][chapter_index]
-
-        if current_user.role == 'student':
-            enrollment_ref = db.collection('enrollments').where('user_id', '==', current_user.id).where('course_id',
-                                                                                                        '==',
-                                                                                                        course_id).limit(
-                1).stream()
-
             enrollment = next(enrollment_ref, None)
             if enrollment:
                 enrollment_data = enrollment.to_dict()
@@ -1051,7 +1020,6 @@ def view_chapter(course_id, chapter_index):
                         'progress': int((len(completed_chapters) / len(course['chapters'])) * 100),
                         'last_accessed': firestore.SERVER_TIMESTAMP
                     })
-
                     current_app.logger.info(
                         f"Updated enrollment for user {current_user.id}: Progress {int((len(completed_chapters) / len(course['chapters'])) * 100)}%")
 
@@ -1083,14 +1051,6 @@ def view_chapter(course_id, chapter_index):
                 f"Zego App ID: {app.config['ZEGO_APP_ID']}, Server Secret: {app.config['ZEGO_SERVER_SECRET']}")
 
         # Render the template with all necessary data
-
-
-        room_id = request.args.get('roomID')
-        if room_id:
-            current_app.logger.info(f"Room ID from URL: {room_id}")
-
-        xp_earned = 10 * (chapter_index + 1) + (5 if 'quiz' in chapter else 0)
-
         return render_template(
             'view_chapter.html',
             course=course,
@@ -1099,7 +1059,6 @@ def view_chapter(course_id, chapter_index):
             chapter_index=chapter_index,
             xp_earned=xp_earned,
             total_chapters=len(course['chapters']),
-             
             room_id=room_id,  # Pass room_id for JavaScript fallback
             zego_app_id=app.config['ZEGO_APP_ID'],
             zego_server_secret=app.config['ZEGO_SERVER_SECRET']
@@ -1130,7 +1089,6 @@ def join(course_id, chapter_index):
         room_id = request.form.get('roomID')
 
         if not room_id:
-    
             # If no roomID is provided in the form, fallback to chapter.meeting_link
             if 'meeting_link' in chapter:
                 room_id = chapter['meeting_link']
@@ -1138,10 +1096,6 @@ def join(course_id, chapter_index):
             else:
                 flash("🔑 Room ID is required!", "error")
                 return redirect(url_for('view_chapter', course_id=course_id, chapter_index=chapter_index))
- 
-            flash("🔑 Room ID is required!", "error")
-            return redirect(url_for('view_chapter', course_id=course_id, chapter_index=chapter_index))
- 
 
         current_app.logger.info(f"Joining meeting with Room ID: {room_id}")
         return redirect(
