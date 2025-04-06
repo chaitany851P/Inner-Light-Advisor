@@ -41,26 +41,8 @@ app.config['MAIL_DEFAULT_SENDER'] = 'innerlightadvisor@gmail.com'
 mail = Mail(app)
 
 # Initialize Firebase
-creds = os.getenv('FIREBASE_CREDENTIALS')
-logger.info(f"Retrieved FIREBASE_CREDENTIALS: {creds[:100]}...")  # Log first 100 characters to avoid flooding logs
-
-if not creds:
-    logger.error("FIREBASE_CREDENTIALS not set in environment variables")
-    raise ValueError("FIREBASE_CREDENTIALS not set")
-
-try:
-    # Parse the JSON string
-    cred_dict = json.loads(creds)
-    cred = credentials.Certificate(cred_dict)
-    initialize_app(cred)
-    logger.info("Firebase initialized successfully")
-except json.JSONDecodeError as e:
-    logger.error(f"Invalid JSON in FIREBASE_CREDENTIALS: {str(e)}")
-    raise
-except Exception as e:
-    logger.error(f"Failed to initialize Firebase: {str(e)}")
-    raise
-
+cred = credentials.Certificate("firebase_config.json")
+firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Flask-Login setup
