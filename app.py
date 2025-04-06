@@ -22,6 +22,7 @@ from datetime import datetime, timedelta, date, timezone
 import re
 from functools import wraps
 import json
+from firebase_admin import credentials
 
 # Initialize Flask App
 app = Flask(__name__)
@@ -41,7 +42,9 @@ app.config['MAIL_DEFAULT_SENDER'] = 'innerlightadvisor@gmail.com'
 mail = Mail(app)
 
 # Initialize Firebase
-cred = credentials.Certificate("firebase_config.json")
+cred_json = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS_JSON')
+cred_dict = json.loads(cred_json)
+cred = credentials.Certificate(cred_dict)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
