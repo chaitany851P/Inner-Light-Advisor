@@ -261,18 +261,23 @@ def load_user(user_id):
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form['username']
         email = request.form['email']
+        username = request.form['username']
         password = request.form['password']
         role = request.form['role']
         collection_name = "students" if role == "student" else "teachers"
         users_ref = db.collection(collection_name)
-        existing_user = users_ref.where("username", "==", username).stream()
-        existing_email = users_ref.where("email", "==", email).stream()
-        if any(existing_user) or any(existing_email):
-            flash('Username or Email already exists!', 'danger')
+        
+        # Check if email already exists in either students or teachers collection
+        existing_email_students = db.collection("students").where("email", "==", email).stream()
+        existing_email_teachers = db.collection("teachers").where("email", "==", email).stream()
+        
+        if any(existing_email_students) or any(existing_email_teachers):
+            flash('Email already exists!', 'danger')
             return redirect(url_for('signup'))
+            
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        
         if role == "teacher":
             user_data = {
                 "username": username,
@@ -297,13 +302,15 @@ def signup():
                 "courses_enrolled": [],
                 "courses_completed": []
             }
-        users_ref.document(username).set(user_data)
-        session['username'] = username
+            
+        # Use email as document ID instead of username
+        users_ref.document(email).set(user_data)
+        session['email'] = email  # Store email in session instead of username
         session['role'] = role
         flash('Signup successful!', 'success')
-        return redirect(url_for('test'))
+        return redirect(url_for('learning_style_test'))
+    
     return render_template('signup.html')
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
