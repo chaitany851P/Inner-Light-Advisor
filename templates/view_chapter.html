@@ -42,14 +42,18 @@
             <hr class="border-gray-300 mb-6">
 
             <!-- Meeting Link -->
-            {% if room_id %}
+            {% if chapter.meeting_link %}
                 <h2 class="text-lg sm:text-xl font-bold text-indigo-900 mb-4">Join Meeting</h2>
-                <div class="text-center mb-6 bg-indigo-50 p-4 rounded-lg">
+                <div class="text-center mb-6 bg-indigo-50 p-4 rounded-lg relative">
                     <form method="POST" action="{{ url_for('join', course_id=course.id, chapter_index=chapter_index) }}" class="mt-4 flex flex-col sm:flex-row justify-center items-center gap-4" id="joinForm">
-                        <input type="text" placeholder="Room ID" class="w-full sm:w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800 placeholder-gray-400 text-sm sm:text-base" id="roomID" name="roomID" value="{{ room_id }}" required>
+                        <input type="text" placeholder="Room ID" class="w-full sm:w-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 text-gray-800 placeholder-gray-400 text-sm sm:text-base" id="roomID" name="roomID" value="{{ chapter.meeting_link }}" required>
                         <button type="submit" class="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 sm:focus:ring-4 focus:ring-indigo-300 transition-all duration-200">Join</button>
                     </form>
-                    <div id="root" class="w-full max-w-4xl h-[50vh] sm:h-[60vh] lg:h-[70vh] mt-6 mx-auto rounded-lg overflow-hidden shadow-md bg-gray-200"></div>
+                    <div id="root" class="w-full max-w-4xl h-[50vh] sm:h-[60vh] lg:h-[70vh] mt-6 mx-auto rounded-lg overflow-hidden shadow-md bg-gray-200 relative">
+                        <button id="fullscreen-btn" class="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition duration-200" title="Toggle Fullscreen">
+                            <i class="bi bi-arrows-fullscreen text-gray-700"></i>
+                        </button>
+                    </div>
                 </div>
             {% endif %}
 
@@ -141,7 +145,10 @@
         const sidebar = document.getElementById('sidebar');
         const toggleButton = document.getElementById('toggle-sidebar');
         const sidebarIcon = document.getElementById('sidebar-icon');
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        const meetingContainer = document.getElementById('root');
 
+        // Sidebar toggle
         toggleButton.addEventListener('click', () => {
             sidebar.classList.toggle('hidden');
             if (sidebar.classList.contains('hidden')) {
@@ -157,7 +164,26 @@
             }
         });
 
-        // Zego meeting logic
+        // Fullscreen toggle for meeting
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    meetingContainer.requestFullscreen().then(() => {
+                        fullscreenBtn.querySelector('i').classList.remove('bi-arrows-fullscreen');
+                        fullscreenBtn.querySelector('i').classList.add('bi-fullscreen-exit');
+                    }).catch(err => {
+                        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen().then(() => {
+                        fullscreenBtn.querySelector('i').classList.remove('bi-fullscreen-exit');
+                        fullscreenBtn.querySelector('i').classList.add('bi-arrows-fullscreen');
+                    });
+                }
+            });
+        }
+
+        // Zego meeting logic with auto-fullscreen
         const roomID = "{{ room_id | safe }}" || "{{ chapter.get('meeting_link', '') }}";
         if (roomID) {
             document.getElementById("joinForm").style.display = "none";
@@ -189,12 +215,20 @@
 
             const zp = ZegoUIKitPrebuilt.create(kitToken);
             zp.joinRoom({
-                container: document.querySelector("#root"),
+                container: meetingContainer,
                 scenario: { 
                     mode: ZegoUIKitPrebuilt.LiveStreaming, 
                     config: { role } 
                 },
                 ...config
+            });
+
+            // Automatically enter fullscreen after joining
+            meetingContainer.requestFullscreen().then(() => {
+                fullscreenBtn.querySelector('i').classList.remove('bi-arrows-fullscreen');
+                fullscreenBtn.querySelector('i').classList.add('bi-fullscreen-exit');
+            }).catch(err => {
+                console.error(`Error attempting to enable fullscreen: ${err.message}`);
             });
         } else {
             console.log("No roomID provided, meeting not started.");
