@@ -12,7 +12,7 @@ google-cloud-firestore==2.11.1
 pyOpenSSL==23.2.0  # For secure email sending with smtplib if needed
 
 # HTML to PDF generation (from /certificate route)
-html2pdf==0.0.2  # Note: This might not be the exact package; see note below
+html2pdf  # Note: This might not be the exact package; see note below
 
 # Development tools (optional, uncomment if needed)
 # gunicorn==20.1.0  # For production deployment
