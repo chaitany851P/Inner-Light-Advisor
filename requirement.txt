@@ -16,3 +16,5 @@ html2pdf  # Note: This might not be the exact package; see note below
 
 # Development tools (optional, uncomment if needed)
 # gunicorn==20.1.0  # For production deployment
+characters 
+length
