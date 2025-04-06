@@ -4,18 +4,11 @@ Werkzeug==2.3.7
 Flask-Login==0.6.2
 Flask-Mail==0.9.1
 
-# Firebase and Google Cloud Firestore
+# Firebase for Firestore
 firebase-admin==6.2.0
-google-cloud-firestore==2.11.1
 
-# Security and utilities
-pyOpenSSL==23.2.0  # For secure email sending with smtplib if needed
+# Timezone handling
+pytz==2023.3
 
-# HTML to PDF generation (from /certificate route)
-html2pdf  # Note: This might not be the exact package; see note below
-
-# Development tools (optional, uncomment if needed)
-gunicorn  # For production deployment
-characters 
-length
-pytz
+# Production server for Render
+gunicorn==20.1.0
