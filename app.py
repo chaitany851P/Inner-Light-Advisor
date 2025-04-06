@@ -1099,7 +1099,7 @@ def view_chapter(course_id, chapter_index):
             chapter_index=chapter_index,
             xp_earned=xp_earned,
             total_chapters=len(course['chapters']),
- 
+             
             room_id=room_id,  # Pass room_id for JavaScript fallback
             zego_app_id=app.config['ZEGO_APP_ID'],
             zego_server_secret=app.config['ZEGO_SERVER_SECRET']
@@ -1108,16 +1108,6 @@ def view_chapter(course_id, chapter_index):
     except Exception as e:
         current_app.logger.error(f"Chapter view error: {str(e)}", exc_info=True)
         flash("😢 Oops! Something went wrong while loading the chapter.", "error")
- 
-            room_id=room_id,
-            zego_app_id=ZEGO_APP_ID,  # Pass appID to template
-            zego_server_secret=ZEGO_SERVER_SECRET  # Pass serverSecret to template
-        )
-
-    except Exception as e:
-        current_app.logger.error(f"Chapter view error: {str(e)}")
-        flash("😢 Oops! Something went wrong.", "error")
- 
         return redirect(url_for('course_detail', course_id=course_id))
 
 
