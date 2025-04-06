@@ -42,11 +42,18 @@ mail = Mail(app)
 
 # Initialize Firebase
 if not firebase_admin._apps:
-    creds = os.getenv('FIREBASE_CREDENTIALS')  # Gets JSON string from Render
+    creds = os.getenv('FIREBASE_CREDENTIALS')
+    app.logger.info(f"Loaded FIREBASE_CREDENTIALS: {creds[:50] if creds else 'None'}...")  # Log first 50 chars
     if not creds:
+        app.logger.error("FIREBASE_CREDENTIALS not set")
         raise ValueError("FIREBASE_CREDENTIALS not set")
-    cred = credentials.Certificate(json.loads(creds))  # Parses string to dict
-    firebase_admin.initialize_app(cred)
+    try:
+        cred = credentials.Certificate(json.loads(creds))
+        firebase_admin.initialize_app(cred)
+        app.logger.info("Firebase initialized successfully")
+    except Exception as e:
+        app.logger.error(f"Failed to initialize Firebase: {str(e)}")
+        raise
 db = firestore.client()
 
 # Flask-Login setup
