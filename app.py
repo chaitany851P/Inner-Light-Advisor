@@ -1782,25 +1782,32 @@ def certificate(course_id):
         flash(f"An error occurred: {str(e)}", "error")
         return redirect(url_for('courses'))
 
+from datetime import datetime
+from flask import Flask, render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
+import logging
+
+app = Flask(__name__)
+app.logger.setLevel(logging.DEBUG)
+
+# Assuming db is your Firestore database instance
+# from google.cloud import firestore
+# db = firestore.Client()
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
     try:
         if current_user.role == 'admin':
-            # [Admin section unchanged]
             total_courses = len(list(db.collection("courses").stream()))
             pending_courses_count = len(list(db.collection("courses").where("status", "==", "pending").stream()))
-
             total_teachers = len(list(db.collection("teachers").stream()))
             active_teachers = len(list(db.collection("teachers").where("status", "==", "active").stream()))
-
             total_students = len(list(db.collection("students").stream()))
             active_students = len(list(db.collection("students").where("status", "==", "active").stream()))
 
             pending_courses_ref = db.collection("courses").where("status", "==", "pending").stream()
             pending_courses = []
-
             for course in pending_courses_ref:
                 course_data = course.to_dict()
                 teacher_ref = db.collection("teachers").document(course_data["teacher_id"]).get()
@@ -1811,89 +1818,72 @@ def dashboard():
                         "teacher": {
                             "username": teacher_data.get("username", "Unknown"),
                             "email": teacher_data.get("email", "")
-                        }
+                        },
+                        "thumbnail_url": course_data.get('thumbnail_img', {}).get('data', url_for('static', filename='img/default_thumbnail.jpg')) if isinstance(course_data.get('thumbnail_img'), dict) else url_for('static', filename='img/default_thumbnail.jpg')
                     })
-
-                    if 'thumbnail_img' in course_data and course_data['thumbnail_img']:
-                        if isinstance(course_data['thumbnail_img'], dict):
-                            course_data[
-                                'thumbnail_url'] = f"data:{course_data['thumbnail_img']['content_type']};base64,{course_data['thumbnail_img']['data']}"
-                        else:
-                            course_data['thumbnail_url'] = url_for('static', filename='img/default_thumbnail.jpg')
-                    else:
-                        course_data['thumbnail_url'] = url_for('static', filename='img/default_thumbnail.jpg')
-
-                    course_data['chapter_info'] = [
-                        {'title': ch.get('title'),
-                         'description': ch.get('description')[:50] + '...' if ch.get('description') else ''}
-                        for ch in course_data.get('chapters', [])
-                    ]
-
                     pending_courses.append(course_data)
 
             return render_template('dashboard.html',
-                                   stats={
-                                       'total_courses': total_courses,
-                                       'pending_courses': pending_courses_count,
-                                       'total_teachers': total_teachers,
-                                       'active_teachers': active_teachers,
-                                       'total_students': total_students,
-                                       'active_students': active_students
-                                   },
-                                   pending_courses=pending_courses)
+                                 stats={
+                                     'total_courses': total_courses,
+                                     'pending_courses': pending_courses_count,
+                                     'total_teachers': total_teachers,
+                                     'active_teachers': active_teachers,
+                                     'total_students': total_students,
+                                     'active_students': active_students
+                                 },
+                                 pending_courses=pending_courses)
 
         elif current_user.role == 'teacher':
-            # [Teacher section unchanged]
             courses_ref = db.collection("courses").where("teacher_id", "==", current_user.id).stream()
             courses_list = []
+            live_classes = []
+            tasks = []
 
+            # Fetch courses
             for course in courses_ref:
                 course_data = course.to_dict()
                 course_data['id'] = course.id
-
-                if 'thumbnail_img' in course_data and course_data['thumbnail_img']:
-                    if isinstance(course_data['thumbnail_img'], dict):
-                        course_data[
-                            'thumbnail_url'] = f"data:{course_data['thumbnail_img']['content_type']};base64,{course_data['thumbnail_img']['data']}"
-                    else:
-                        course_data['thumbnail_url'] = url_for('static', filename='img/default_thumbnail.jpg')
-                else:
-                    course_data['thumbnail_url'] = url_for('static', filename='img/default_thumbnail.jpg')
-
+                course_data['thumbnail_url'] = course_data.get('thumbnail_img', {}).get('data', url_for('static', filename='img/default_thumbnail.jpg')) if isinstance(course_data.get('thumbnail_img'), dict) else url_for('static', filename='img/default_thumbnail.jpg')
                 course_data.update({
-                    'chapter_count': len(course_data.get('chapters', [])),
-                    'quiz_count': len(course_data.get('quizzes', [])),
-                    'enrollment_count': course_data.get('enrollment_count', 0),
                     'students': course_data.get('enrollment_count', 0),
                     'status': course_data.get('status', 'pending')
                 })
-
                 courses_list.append(course_data)
 
-            live_classes = []
-            for course in courses_list:
-                if course.get('mode_of_class') == 'Live':
-                    for chapter in course.get('chapters', []):
-                        if 'date' in chapter and 'time' in chapter:
-                            live_classes.append({
-                                'course_id': course['id'],
-                                'course_name': course['name'],
-                                'chapter_title': chapter.get('title', 'Untitled Chapter'),
-                                'date': chapter.get('date'),
-                                'time': chapter.get('time'),
-                                'meeting_link': chapter.get('meeting_link', '#')
-                            })
+                # Fetch live classes
+                if course_data.get('mode_of_class') == 'Live':
+                    for index, chapter in enumerate(course_data.get('chapters', [])):
+                        if 'date' in chapter and 'time' in chapter and 'meeting_link' in chapter:
+                            try:
+                                meeting_date = datetime.strptime(chapter['date'], '%Y-%m-%d')
+                                live_classes.append({
+                                    'course_id': course.id,
+                                    'course_name': course_data['name'],
+                                    'chapter_title': chapter.get('title', 'Untitled'),
+                                    'chapter_index': index,
+                                    'date': chapter['date'],
+                                    'time': chapter['time'],
+                                    'meeting_link': chapter['meeting_link']
+                                })
+                            except ValueError:
+                                app.logger.warning(f"Invalid date format in course {course.id}")
+
+            # Fetch tasks (assuming a tasks collection)
+            tasks_ref = db.collection("tasks").where("teacher_id", "==", current_user.id).stream()
+            for task in tasks_ref:
+                task_data = task.to_dict()
+                task_data['id'] = task.id
+                tasks.append(task_data)
 
             return render_template('dashboard.html',
-                                   courses=courses_list,
-                                   live_classes=live_classes,
-                                   stats={
-                                       'total_courses': len(courses_list),
-                                       'active_courses': len([c for c in courses_list if c.get('status') == 'active']),
-                                       'pending_courses': len(
-                                           [c for c in courses_list if c.get('status') == 'pending']),
-                                       'total_enrollments': sum(c.get('enrollment_count', 0) for c in courses_list)
-                                   })
+                                 courses=courses_list,
+                                 live_classes=live_classes,
+                                 upcoming_tasks=tasks,
+                                 stats={
+                                     'total_courses': len(courses_list),
+                                     'total_enrollments': sum(c.get('enrollment_count', 0) for c in courses_list)
+                                 })
 
         elif current_user.role == 'student':
             student_ref = db.collection("students").document(current_user.id).get()
@@ -1902,25 +1892,19 @@ def dashboard():
                 return redirect(url_for('logout'))
 
             student_data = student_ref.to_dict()
-            completed_course_ids = student_data.get("completed_courses", [])
             enrolled_course_ids = student_data.get("courses_enrolled", [])
-            app.logger.debug(f"Student {current_user.id} enrolled in: {enrolled_course_ids}")
+            completed_course_ids = student_data.get("completed_courses", [])
 
             enrolled_courses = []
             completed_courses = []
+            live_classes = []
+
             for course_id in enrolled_course_ids:
                 course_ref = db.collection("courses").document(course_id).get()
                 if course_ref.exists:
                     course_data = course_ref.to_dict()
-                    course_status = course_data.get('status', 'active')
-                    if course_status == 'pending':
-                        continue
                     course_data['id'] = course_id
-                    course_data['thumbnail_url'] = (
-                        f"data:{course_data['thumbnail_img']['content_type']};base64,{course_data['thumbnail_img']['data']}"
-                        if course_data.get('thumbnail_img') and isinstance(course_data['thumbnail_img'], dict)
-                        else url_for('static', filename='img/default_thumbnail.jpg')
-                    )
+                    course_data['thumbnail_url'] = course_data.get('thumbnail_img', {}).get('data', url_for('static', filename='img/default_thumbnail.jpg')) if isinstance(course_data.get('thumbnail_img'), dict) else url_for('static', filename='img/default_thumbnail.jpg')
                     progress = student_data.get('course_progress', {}).get(course_id, {})
                     total_chapters = len(course_data.get('chapters', []))
                     completed_chapters = len(progress.get('completed_chapters', []))
@@ -1935,77 +1919,32 @@ def dashboard():
                     else:
                         enrolled_courses.append(course_data)
 
-            # Fetch upcoming live classes
-            live_classes = []
-            if enrolled_course_ids:
-                now = datetime.now(timezone.utc)
-                app.logger.debug(f"Current time (UTC): {now}")
-                live_classes_ref = db.collection("live_classes").where("course_id", "in", enrolled_course_ids).where(
-                    "status", "==", "scheduled").stream()
-                live_classes_raw = list(live_classes_ref)
-                app.logger.debug(f"Raw live classes fetched: {[lc.to_dict() for lc in live_classes_raw]}")
-                for live_class in live_classes_raw:
-                    live_class_data = live_class.to_dict()
-                    scheduled_time = live_class_data.get('scheduled_time')
-                    # Convert Firestore Timestamp to UTC datetime if necessary
-                    if isinstance(scheduled_time, firestore.Timestamp):
-                        scheduled_time = scheduled_time.to_datetime().replace(tzinfo=utc)
-                    app.logger.debug(f"Scheduled time for {live_class_data.get('title')}: {scheduled_time}")
-                    if scheduled_time and scheduled_time > now:
-                        course_ref = db.collection("courses").document(live_class_data['course_id']).get()
-                        course_name = course_ref.to_dict().get('name',
-                                                               'Unknown Course') if course_ref.exists else 'Unknown Course'
-                        live_classes.append({
-                            'course_id': live_class_data['course_id'],
-                            'course_name': course_name,
-                            'title': live_class_data.get('title', 'Untitled Live Class'),
-                            'scheduled_time': scheduled_time.strftime('%Y-%m-%d %H:%M UTC'),
-                            'meeting_link': live_class_data.get('meeting_link', '#'),
-                            'duration': live_class_data.get('duration', 'N/A')
-                        })
-            else:
-                app.logger.debug(f"No enrolled courses for student {current_user.id}, skipping live classes query")
-
-            # Fetch recommended courses
-            enrolled_domains = list(set([c.get('domain') for c in enrolled_courses if c.get('domain')]))
-            recommended_courses = []
-            if enrolled_domains:
-                for domain in enrolled_domains:
-                    domain_courses = db.collection("courses") \
-                        .where("domain", "==", domain) \
-                        .where("status", "==", "active") \
-                        .limit(3) \
-                        .stream()
-                    for course in domain_courses:
-                        if course.id not in enrolled_course_ids:
-                            course_data = course.to_dict()
-                            course_data['id'] = course.id
-                            if 'thumbnail_img' in course_data and course_data['thumbnail_img']:
-                                if isinstance(course_data['thumbnail_img'], dict):
-                                    course_data[
-                                        'thumbnail_url'] = f"data:{course_data['thumbnail_img']['content_type']};base64,{course_data['thumbnail_img']['data']}"
-                                else:
-                                    course_data['thumbnail_url'] = url_for('static', filename='img/default_thumbnail.jpg')
-                            else:
-                                course_data['thumbnail_url'] = url_for('static', filename='img/default_thumbnail.jpg')
-                            recommended_courses.append(course_data)
-
-            app.logger.debug(f"Completed courses: {[c['id'] for c in completed_courses]}")
-            app.logger.debug(f"Enrolled courses: {[c['id'] for c in enrolled_courses]}")
-            app.logger.debug(f"Recommended courses: {[c['id'] for c in recommended_courses]}")
-            app.logger.debug(f"Upcoming live classes: {[lc['title'] for lc in live_classes]}")
+                    # Fetch live classes for enrolled courses
+                    if course_data.get('mode_of_class') == 'Live':
+                        for index, chapter in enumerate(course_data.get('chapters', [])):
+                            if 'date' in chapter and 'time' in chapter and 'meeting_link' in chapter:
+                                try:
+                                    meeting_date = datetime.strptime(chapter['date'], '%Y-%m-%d')
+                                    live_classes.append({
+                                        'course_id': course_id,
+                                        'course_name': course_data['name'],
+                                        'chapter_title': chapter.get('title', 'Untitled'),
+                                        'chapter_index': index,
+                                        'date': chapter['date'],
+                                        'time': chapter['time'],
+                                        'meeting_link': chapter['meeting_link']
+                                    })
+                                except ValueError:
+                                    app.logger.warning(f"Invalid date format in course {course_id}")
 
             return render_template('dashboard.html',
-                                   enrolled_courses=enrolled_courses,
-                                   completed_courses=completed_courses,
-                                   recommended_courses=recommended_courses[:3],
-                                   live_classes=live_classes,
-                                   stats={
-                                       'enrolled_courses': len(enrolled_courses),
-                                       'completed_courses': len(completed_courses),
-                                       'active_learning': len([c for c in enrolled_courses if
-                                                               c.get('progress', {}).get('percentage', 0) < 100])
-                                   })
+                                 enrolled_courses=enrolled_courses,
+                                 completed_courses=completed_courses,
+                                 live_classes=live_classes,
+                                 stats={
+                                     'enrolled_courses': len(enrolled_courses),
+                                     'completed_courses': len(completed_courses)
+                                 })
 
     except Exception as e:
         app.logger.error(f"Dashboard error: {str(e)}", exc_info=True)
@@ -2014,6 +1953,8 @@ def dashboard():
 
     flash("You are not authorized to access this page!", "danger")
     return redirect(url_for('login'))
+
+
 
 @app.route('/add_task', methods=['GET', 'POST'])
 @login_required
