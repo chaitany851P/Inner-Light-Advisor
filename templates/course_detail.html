@@ -74,19 +74,7 @@
         <p class="text-gray-700 text-sm sm:text-base mb-6">{{ course.description }}</p>
 
         <!-- Sample Video -->
-        {% if course.sample_video %}
-    <div class="relative w-full h-0 pb-[56.25%] mb-6 rounded-lg overflow-hidden shadow-md">
         
-            <!-- Fallback - Show link to video -->
-            <div class="absolute inset-0 bg-gray-900 flex items-center justify-center">
-                <a href="https://youtu.be/{{ course.sample_video }}" target="_blank" class="text-white hover:text-indigo-300 text-lg font-semibold">
-                    <i class="fab fa-youtube mr-2"></i> Watch Introductry Video on YouTube
-                </a>
-            </div>
-        
-    </div>
-{% endif %}
-
         <!-- Course Metadata and Rating -->
         <div class="flex flex-col lg:flex-row gap-6 mb-6">
             <ul class="space-y-2 text-sm sm:text-base text-gray-700 flex-1">
