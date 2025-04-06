@@ -10,7 +10,7 @@ import characters
 import firebase_admin
 import length
 from pytz import utc
-from firebase_admin import credentials, firestore ,, initialize_app
+from firebase_admin import credentials, firestore , initialize_app
 from flask import Flask, flash, render_template, request, redirect, url_for, session, jsonify, current_app, logging
 from flask_mail import Mail, Message
 from werkzeug.security import generate_password_hash, check_password_hash
