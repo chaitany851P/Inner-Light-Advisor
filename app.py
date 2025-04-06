@@ -512,10 +512,8 @@ def add_course():
                 'rating_count': 0,
                 'enrollment_count': 0,
                 'room_id': room_id,  # Store room ID at root
-<<<<<<< HEAD
-=======
                 'meeting_link': meeting_link  # Store full meeting link at root
->>>>>>> a691ab995b7857ae2761c222c869d79b14ac8c65
+
             }
 
             if course_data['payment'] == 'Paid':
