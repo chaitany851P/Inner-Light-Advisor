@@ -19,11 +19,3 @@ html2pdf  # Note: This might not be the exact package; see note below
 characters 
 length
 pytz
-
-Werkzeug==2.3.7
-gunicorn==20.1.0
-pyrebase
-requests
-python-dotenv
-google-auth
-google-api-python-client
