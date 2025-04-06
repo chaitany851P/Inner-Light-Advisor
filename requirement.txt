@@ -26,6 +26,4 @@ pyrebase
 requests
 python-dotenv
 google-auth
-google-api-python-client==2.104.0
-PyJWT
-cryptography
+google-api-python-client
