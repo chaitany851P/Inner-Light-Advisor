@@ -2,214 +2,258 @@
 {% block content %}
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}">
-                {{ message | safe }}
-            </div>
-        {% endfor %}
+        <div class="max-w-4xl mx-auto mb-6">
+            {% for category, message in messages %}
+                <div class="alert p-4 rounded-lg shadow-lg text-center text-sm sm:text-base 
+                    {% if category == 'success' %}bg-green-600 text-white
+                    {% elif category == 'error' %}bg-red-600 text-white
+                    {% else %}bg-yellow-600 text-white{% endif %}">
+                    {{ message | safe }}
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
 {% endwith %}
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Course</title>
+    <title>Edit Course - {{ course.name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
-    <div class="w-full max-w-5xl mx-auto">
-        <form method="POST" action="{{ url_for('edit_course', course_id=course_id) }}" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 transform transition-all duration-300 hover:shadow-2xl">
+<body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 min-h-screen p-4 sm:p-6 lg:p-8">
+    <div class="w-full max-w-4xl mx-auto">
+        <form method="POST" action="{{ url_for('edit_course', course_id=course.id or request.view_args.course_id) }}" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-xl p-6 sm:p-8 transform transition-all duration-300 hover:shadow-2xl">
+
             <h2 class="text-2xl sm:text-3xl font-extrabold text-indigo-900 text-center mb-8 tracking-tight">Edit Course: {{ course.name }}</h2>
 
-            <!-- Basic Course Details -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Course Name</label>
-                    <input type="text" id="name" name="name" value="{{ course.name }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
-                </div>
-                <div>
-                    <label for="level" class="block text-sm font-medium text-gray-700 mb-2">Level</label>
-                    <select id="level" name="level" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
-                        <option value="Beginner" {% if course.level == 'Beginner' %}selected{% endif %}>Beginner</option>
-                        <option value="Intermediate" {% if course.level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
-                        <option value="Advanced" {% if course.level == 'Advanced' %}selected{% endif %}>Advanced</option>
-                    </select>
-                </div>
-                <div class="md:col-span-2">
-                    <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                    <textarea id="description" name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 resize-y focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>{{ course.description }}</textarea>
-                </div>
-                <div>
-                    <label for="domain" class="block text-sm font-medium text-gray-700 mb-2">Domain</label>
-                    <select name="domain" id="domain" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
-                        <option value="" disabled>Select Domain</option>
-                        {% for domain in domains %}
-                            <option value="{{ domain.name }}" {% if course.domain == domain.name %}selected{% endif %}>{{ domain.name }}</option>
-                        {% endfor %}
-                        <option value="Add New">Add New Domain</option>
-                    </select>
-                    <div id="newDomainContainer" class="mt-2 hidden">
-                        <input type="text" id="new_domain" name="new_domain" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" placeholder="Enter new domain">
-                    </div>
-                </div>
-                <div>
-                    <label for="language" class="block text-sm font-medium text-gray-700 mb-2">Language</label>
-                    <select id="language" name="language" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
-                        <option value="" disabled>Select Language</option>
-                        {% for language in languages %}
-                            <option value="{{ language.name }}" {% if course.language == language.name %}selected{% endif %}>{{ language.name }}</option>
-                        {% endfor %}
-                        <option value="Add New">Add New Language</option>
-                    </select>
-                    <div id="newLanguageContainer" class="mt-2 hidden">
-                        <input type="text" id="new_language" name="new_language" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" placeholder="Enter new language">
-                    </div>
-                </div>
-                <div>
-                    <label for="payment" class="block text-sm font-medium text-gray-700 mb-2">Payment</label>
-                    <select id="payment" name="payment" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
-                        <option value="Free" {% if course.payment == 'Free' %}selected{% endif %}>Free</option>
-                        <option value="Paid" {% if course.payment == 'Paid' %}selected{% endif %}>Paid</option>
-                    </select>
-                </div>
-                <div id="paymentDetailsContainer" class="mb-5 {% if course.payment != 'Paid' %}hidden{% endif %}">
-                    <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Price (₹)</label>
-                    <input type="number" id="price" name="price" min="0" step="1" value="{{ course.price if course.payment == 'Paid' else '' }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" {% if course.payment == 'Paid' %}required{% endif %}>
-                </div>
-                <div>
-                    <label for="mode_of_class" class="block text-sm font-medium text-gray-700 mb-2">Mode of Class</label>
-                    <select id="mode_of_class" name="mode_of_class" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
-                        <option value="Recorded" {% if course.mode_of_class == 'Recorded' %}selected{% endif %}>Recorded</option>
-                        <option value="Live" {% if course.mode_of_class == 'Live' %}selected{% endif %}>Live</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="learner_type" class="block text-sm font-medium text-gray-700 mb-2">Learner Type</label>
-                    <select id="learner_type" name="learner_type" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
-                        <option value="Visual" {% if course.learner_type == 'Visual' %}selected{% endif %}>Visual</option>
-                        <option value="Auditory" {% if course.learner_type == 'Auditory' %}selected{% endif %}>Auditory</option>
-                        <option value="Kinesthetic" {% if course.learner_type == 'Kinesthetic' %}selected{% endif %}>Kinesthetic</option>
-                    </select>
-                </div>
+            <!-- Course Name -->
+            <div class="mb-5">
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Course Name</label>
+                <input type="text" id="name" name="name" value="{{ course.name }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
             </div>
 
-            <!-- Thumbnail and Sample Video -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div>
-                    <label for="thumbnail_img" class="block text-sm font-medium text-gray-700 mb-2">Thumbnail Image</label>
-                    <input type="file" id="thumbnail_img" name="thumbnail_img" accept="image/*" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white">
-                    {% if course.thumbnail_img and course.thumbnail_img.name %}
-                        <p class="text-xs text-gray-500 mt-1">Current: {{ course.thumbnail_img.name }}</p>
-                    {% endif %}
-                </div>
-                <div>
-                    <label for="sample_video" class="block text-sm font-medium text-gray-700 mb-2">Sample Video (YouTube Link)</label>
-                    <input type="text" id="sample_video" name="sample_video" value="{{ course.sample_video or '' }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" placeholder="e.g., https://www.youtube.com/watch?v=xyz">
-                </div>
+            <!-- Description -->
+            <div class="mb-5">
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea id="description" name="description" rows="3" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 resize-y focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>{{ course.description }}</textarea>
+            </div>
+
+            <!-- Level -->
+            <div class="mb-5">
+                <label for="level" class="block text-sm font-medium text-gray-700 mb-2">Level</label>
+                <select id="level" name="level" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
+                    <option value="Beginner" {% if course.level == 'Beginner' %}selected{% endif %}>Beginner</option>
+                    <option value="Intermediate" {% if course.level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                    <option value="Advanced" {% if course.level == 'Advanced' %}selected{% endif %}>Advanced</option>
+                </select>
+            </div>
+
+            <!-- Domain -->
+            {% set domain_names = domains | map(attribute='name') | list %}
+            <div class="mb-5">
+                <label for="domain" class="block text-sm font-medium text-gray-700 mb-2">Domain</label>
+                <select name="domain" id="domain" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
+                    <option value="" disabled>Select Domain</option>
+                    {% for domain in domains %}
+                        <option value="{{ domain.name }}" {% if course.domain == domain.name %}selected{% endif %}>{{ domain.name }}</option>
+                    {% endfor %}
+                    <option value="Add New">Add New Domain</option>
+                </select>
+            </div>
+            <div id="newDomainContainer" class="mb-5 {% if course.domain not in domain_names %}block{% else %}hidden{% endif %}">
+                <label for="new_domain" class="block text-sm font-medium text-gray-700 mb-2">New Domain</label>
+                <input type="text" id="new_domain" name="new_domain" value="{{ course.domain if course.domain not in domain_names else '' }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" placeholder="Enter new domain">
+            </div>
+
+            <!-- Language -->
+            {% set language_names = languages | map(attribute='name') | list %}
+            <div class="mb-5">
+                <label for="language" class="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                <select id="language" name="language" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
+                    <option value="" disabled>Select Language</option>
+                    {% for language in languages %}
+                        <option value="{{ language.name }}" {% if course.language == language.name %}selected{% endif %}>{{ language.name }}</option>
+                    {% endfor %}
+                    <option value="Add New">Add New Language</option>
+                </select>
+            </div>
+            <div id="newLanguageContainer" class="mb-5 {% if course.language not in language_names %}block{% else %}hidden{% endif %}">
+                <label for="new_language" class="block text-sm font-medium text-gray-700 mb-2">New Language</label>
+                <input type="text" id="new_language" name="new_language" value="{{ course.language if course.language not in language_names else '' }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" placeholder="Enter new language">
+            </div>
+
+            <!-- Payment -->
+            <div class="mb-5">
+                <label for="payment" class="block text-sm font-medium text-gray-700 mb-2">Payment</label>
+                <select id="payment" name="payment" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
+                    <option value="Free" {% if course.payment == 'Free' %}selected{% endif %}>Free</option>
+                    <option value="Paid" {% if course.payment == 'Paid' %}selected{% endif %}>Paid</option>
+                </select>
+            </div>
+
+            <!-- Price -->
+            <div id="paymentDetailsContainer" class="mb-5 {% if course.payment != 'Paid' %}hidden{% endif %}">
+                <label for="price" class="block text-sm font-medium text-gray-700 mb-2">Price (₹) [You will receive 70%-80%]</label>
+                <input type="number" id="price" name="price" min="0" step="1" value="{{ course.price if course.payment == 'Paid' else '' }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" {% if course.payment == 'Paid' %}required{% endif %}>
+            </div>
+
+            <!-- Mode of Class -->
+            <div class="mb-5">
+                <label for="mode_of_class" class="block text-sm font-medium text-gray-700 mb-2">Mode of Class</label>
+                <select id="mode_of_class" name="mode_of_class" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
+                    <option value="Recorded" {% if course.mode_of_class == 'Recorded' %}selected{% endif %}>Recorded</option>
+                    <option value="Live" {% if course.mode_of_class == 'Live' %}selected{% endif %}>Live</option>
+                </select>
+            </div>
+
+            <!-- Learner Type -->
+            <div class="mb-5">
+                <label for="learner_type" class="block text-sm font-medium text-gray-700 mb-2">Learner Type</label>
+                <select id="learner_type" name="learner_type" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" required>
+                    <option value="Visual" {% if course.learner_type == 'Visual' %}selected{% endif %}>Visual</option>
+                    <option value="Auditory" {% if course.learner_type == 'Auditory' %}selected{% endif %}>Auditory</option>
+                    <option value="Kinesthetic" {% if course.learner_type == 'Kinesthetic' %}selected{% endif %}>Kinesthetic</option>
+                </select>
+            </div>
+
+            <!-- Thumbnail Image -->
+            <div class="mb-5">
+                <label for="thumbnail_img" class="block text-sm font-medium text-gray-700 mb-2">Thumbnail Image (Leave blank to keep current)</label>
+                <input type="file" id="thumbnail_img" name="thumbnail_img" accept="image/*" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white">
+                {% if course.thumbnail_img and course.thumbnail_img.name %}
+                    <p class="text-xs text-gray-500 mt-1">Current: {{ course.thumbnail_img.name }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Sample Video -->
+            <div class="mb-5">
+                <label for="temp_video" class="block text-sm font-medium text-gray-700 mb-2">Sample Video URL (Leave blank to keep current)</label>
+                <input type="url" id="temp_video" name="temp_video" value="{{ 'https://www.youtube.com/watch?v=' + course.sample_video if course.sample_video else '' }}" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-gray-50 hover:bg-white" placeholder="Enter YouTube URL">
+                {% if course.sample_video %}
+                    <p class="text-xs text-gray-500 mt-1">Current: {{ course.sample_video }}</p>
+                {% endif %}
             </div>
 
             <!-- Chapters -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-indigo-900 mb-4">Chapters</h3>
-                <div id="chapters-container">
-                    {% for chapter in course.chapters|default([]) %}
-                        <div class="chapter-entry mb-6 p-6 border border-gray-300 rounded-lg bg-gray-100 shadow-sm">
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="text-md font-medium text-gray-800">Chapter {{ loop.index }}</h4>
-                                <button type="button" class="remove-chapter text-red-500 hover:text-red-700" title="Remove Chapter"><i class="fas fa-trash fa-lg"></i></button>
+            <div class="mb-5">
+                <h3 class="text-lg font-semibold text-indigo-900 mb-2">Chapters</h3>
+                <div id="chapters_container" class="space-y-4">
+                    {% for chapter in course.chapters %}
+                        <div class="chapter bg-gray-50 p-4 rounded-lg relative">
+                            <button type="button" class="remove-chapter absolute top-2 right-2 text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                            <h4 class="text-md font-medium text-indigo-900 mb-2">Chapter {{ loop.index }}</h4>
+                            <div class="mb-3">
+                                <label for="chapter_{{ loop.index }}_title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                                <input type="text" id="chapter_{{ loop.index }}_title" name="chapter_{{ loop.index }}_title" value="{{ chapter.title }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
                             </div>
-                            <div class="grid grid-cols-1 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                                    <input type="text" name="chapter_{{ loop.index }}_title" value="{{ chapter.title }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Chapter Title" required>
+                            <div class="mb-3">
+                                <label for="chapter_{{ loop.index }}_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                                <textarea id="chapter_{{ loop.index }}_description" name="chapter_{{ loop.index }}_description" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 resize-y focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>{{ chapter.description }}</textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="chapter_{{ loop.index }}_note" class="block text-sm font-medium text-gray-700 mb-1">Note (Optional)</label>
+                                <input type="text" id="chapter_{{ loop.index }}_note" name="chapter_{{ loop.index }}_note" value="{{ chapter.note }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+                            </div>
+                            {% if course.mode_of_class == 'Live' %}
+                                <div class="mb-3">
+                                    <label for="chapter_{{ loop.index }}_meeting_link" class="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
+                                    <input type="url" id="chapter_{{ loop.index }}_meeting_link" name="chapter_{{ loop.index }}_meeting_link" value="{{ chapter.meeting_link }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                                    <textarea name="chapter_{{ loop.index }}_description" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 resize-y focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Chapter Description" required>{{ chapter.description }}</textarea>
+                                <div class="mb-3">
+                                    <label for="chapter_{{ loop.index }}_date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                    <input type="date" id="chapter_{{ loop.index }}_date" name="chapter_{{ loop.index }}_date" value="{{ chapter.date }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
                                 </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Duration (e.g., 1:30)</label>
-                                    <input type="text" name="chapter_{{ loop.index }}_duration" value="{{ chapter.duration or '0:00' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Duration (e.g., 1:30)" required>
+                                <div class="mb-3">
+                                    <label for="chapter_{{ loop.index }}_time" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                                    <input type="time" id="chapter_{{ loop.index }}_time" name="chapter_{{ loop.index }}_time" value="{{ chapter.time }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
                                 </div>
+                            {% else %}
+                                <div class="mb-3">
+                                    <label for="chapter_{{ loop.index }}_course_link" class="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                                    <input type="url" id="chapter_{{ loop.index }}_course_link" name="chapter_{{ loop.index }}_course_link" value="{{ 'https://www.youtube.com/watch?v=' + chapter.video_id if chapter.video_id else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" placeholder="Enter YouTube URL">
+                                </div>
+                            {% endif %}
+                            <div class="mb-3">
+                                <label for="chapter_{{ loop.index }}_assignment_link" class="block text-sm font-medium text-gray-700 mb-1">Assignment Link (Optional)</label>
+                                <input type="url" id="chapter_{{ loop.index }}_assignment_link" name="chapter_{{ loop.index }}_assignment_link" value="{{ chapter.assignment.link if chapter.assignment else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+                            </div>
+                            <div class="mb-3">
+                                <label for="chapter_{{ loop.index }}_assignment_name" class="block text-sm font-medium text-gray-700 mb-1">Assignment Name</label>
+                                <input type="text" id="chapter_{{ loop.index }}_assignment_name" name="chapter_{{ loop.index }}_assignment_name" value="{{ chapter.assignment.name if chapter.assignment else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+                            </div>
+                            <div class="mb-3">
+                                <label for="chapter_{{ loop.index }}_resources_link" class="block text-sm font-medium text-gray-700 mb-1">Resources Link (Optional)</label>
+                                <input type="url" id="chapter_{{ loop.index }}_resources_link" name="chapter_{{ loop.index }}_resources_link" value="{{ chapter.resources.link if chapter.resources else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+                            </div>
+                            <div class="mb-3">
+                                <label for="chapter_{{ loop.index }}_resources_name" class="block text-sm font-medium text-gray-700 mb-1">Resources Name</label>
+                                <input type="text" id="chapter_{{ loop.index }}_resources_name" name="chapter_{{ loop.index }}_resources_name" value="{{ chapter.resources.name if chapter.resources else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-                <button type="button" id="add-chapter" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 ease-in-out"><i class="fas fa-plus mr-2"></i>Add New Chapter</button>
+                <button type="button" id="add_chapter" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><i class="fas fa-plus mr-2"></i>Add Chapter</button>
             </div>
 
             <!-- Quizzes -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-indigo-900 mb-4">Quizzes</h3>
-                <div id="quizzes-container">
-                    {% for quiz in course.quizzes|default([]) %}
-                        <div class="quiz-entry mb-6 p-6 border border-gray-300 rounded-lg bg-gray-100 shadow-sm">
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="text-md font-medium text-gray-800">Quiz {{ loop.index }}</h4>
-                                <button type="button" class="remove-quiz text-red-500 hover:text-red-700" title="Remove Quiz"><i class="fas fa-trash fa-lg"></i></button>
+            <div class="mb-5">
+                <h3 class="text-lg font-semibold text-indigo-900 mb-2">Quizzes</h3>
+                <div id="quizzes_container" class="space-y-4">
+                    {% for quiz in course.quizzes %}
+                        <div class="quiz bg-gray-50 p-4 rounded-lg relative">
+                            <button type="button" class="remove-quiz absolute top-2 right-2 text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                            <h4 class="text-md font-medium text-indigo-900 mb-2">Quiz {{ loop.index }}</h4>
+                            <div class="mb-3">
+                                <label for="quiz_{{ loop.index }}_type" class="block text-sm font-medium text-gray-700 mb-1">Quiz Type</label>
+                                <select id="quiz_{{ loop.index }}_type" name="quiz_{{ loop.index }}_type" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+                                    <option value="True/False" {% if quiz.type == 'True/False' %}selected{% endif %}>True/False</option>
+                                    <option value="MCQ" {% if quiz.type == 'MCQ' %}selected{% endif %}>Multiple Choice (Single Answer)</option>
+                                    <option value="Multiple Choices" {% if quiz.type == 'Multiple Choices' %}selected{% endif %}>Multiple Choices (Multiple Answers)</option>
+                                </select>
                             </div>
-                            <div class="grid grid-cols-1 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                                    <select name="quiz_{{ loop.index }}_type" class="quiz-type w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" required>
-                                        <option value="Multiple Choice" {% if quiz.type == 'Multiple Choice' %}selected{% endif %}>Multiple Choice</option>
-                                        <option value="True/False" {% if quiz.type == 'True/False' %}selected{% endif %}>True/False</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
-                                    <input type="text" name="quiz_{{ loop.index }}_question" value="{{ quiz.question }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Quiz Question" required>
-                                </div>
-                                {% if quiz.type == 'Multiple Choice' %}
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
-                                            <input type="text" name="quiz_{{ loop.index }}_option1" value="{{ quiz.options[0] if quiz.options else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 1" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 2</label>
-                                            <input type="text" name="quiz_{{ loop.index }}_option2" value="{{ quiz.options[1] if quiz.options else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 2" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 3</label>
-                                            <input type="text" name="quiz_{{ loop.index }}_option3" value="{{ quiz.options[2] if quiz.options else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 3" required>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 4</label>
-                                            <input type="text" name="quiz_{{ loop.index }}_option4" value="{{ quiz.options[3] if quiz.options else '' }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 4" required>
-                                        </div>
+                            <div class="mb-3">
+                                <label for="quiz_{{ loop.index }}_question" class="block text-sm font-medium text-gray-700 mb-1">Question</label>
+                                <input type="text" id="quiz_{{ loop.index }}_question" name="quiz_{{ loop.index }}_question" value="{{ quiz.question }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+                            </div>
+                            <div class="mb-3 quiz-options">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Options</label>
+                                <input type="text" name="quiz_{{ loop.index }}_option_1" value="{{ quiz.options['1'] }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white mb-2" placeholder="Option 1" required>
+                                <input type="text" name="quiz_{{ loop.index }}_option_2" value="{{ quiz.options['2'] }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white mb-2" placeholder="Option 2" required>
+                                <input type="text" name="quiz_{{ loop.index }}_option_3" value="{{ quiz.options['3'] }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white mb-2" placeholder="Option 3">
+                                <input type="text" name="quiz_{{ loop.index }}_option_4" value="{{ quiz.options['4'] }}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" placeholder="Option 4">
+                            </div>
+                            <div class="mb-3 quiz-answer">
+                                {% if quiz.type == 'Multiple Choices' %}
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answers (Select all that apply)</label>
+                                    <div class="space-y-2">
+                                        <label><input type="checkbox" name="quiz_{{ loop.index }}_correct_answers" value="1" {% if '1' in quiz.correct_answers %}checked{% endif %}> Option 1</label>
+                                        <label><input type="checkbox" name="quiz_{{ loop.index }}_correct_answers" value="2" {% if '2' in quiz.correct_answers %}checked{% endif %}> Option 2</label>
+                                        <label><input type="checkbox" name="quiz_{{ loop.index }}_correct_answers" value="3" {% if '3' in quiz.correct_answers %}checked{% endif %}> Option 3</label>
+                                        <label><input type="checkbox" name="quiz_{{ loop.index }}_correct_answers" value="4" {% if '4' in quiz.correct_answers %}checked{% endif %}> Option 4</label>
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-                                        <select name="quiz_{{ loop.index }}_correct_answer" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" required>
-                                            <option value="" disabled>Select Correct Answer</option>
-                                            {% for option in quiz.options|default([]) %}
-                                                <option value="{{ option }}" {% if quiz.correct_answer == option %}selected{% endif %}>{{ option }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                {% elif quiz.type == 'True/False' %}
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-                                        <select name="quiz_{{ loop.index }}_correct_answer" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" required>
-                                            <option value="" disabled>Select Correct Answer</option>
+                                {% else %}
+                                    <label for="quiz_{{ loop.index }}_correct_answer" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                                    <select id="quiz_{{ loop.index }}_correct_answer" name="quiz_{{ loop.index }}_correct_answer" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+                                        {% if quiz.type == 'True/False' %}
                                             <option value="True" {% if quiz.correct_answer == 'True' %}selected{% endif %}>True</option>
                                             <option value="False" {% if quiz.correct_answer == 'False' %}selected{% endif %}>False</option>
-                                        </select>
-                                    </div>
+                                        {% else %}
+                                            <option value="1" {% if quiz.correct_answer == '1' %}selected{% endif %}>Option 1</option>
+                                            <option value="2" {% if quiz.correct_answer == '2' %}selected{% endif %}>Option 2</option>
+                                            <option value="3" {% if quiz.correct_answer == '3' %}selected{% endif %}>Option 3</option>
+                                            <option value="4" {% if quiz.correct_answer == '4' %}selected{% endif %}>Option 4</option>
+                                        {% endif %}
+                                    </select>
                                 {% endif %}
                             </div>
                         </div>
                     {% endfor %}
                 </div>
-                <button type="button" id="add-quiz" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 ease-in-out"><i class="fas fa-plus mr-2"></i>Add New Quiz</button>
+                <button type="button" id="add_quiz" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><i class="fas fa-plus mr-2"></i>Add Quiz</button>
             </div>
-
-            <!-- Hidden Inputs for Counts -->
-            <input type="hidden" id="chapter_count" name="chapter_count" value="{{ course.chapters|default([])|length }}">
-            <input type="hidden" id="quiz_count" name="quiz_count" value="{{ course.quizzes|default([])|length }}">
 
             <!-- Submit Button -->
             <div class="text-center">
@@ -222,6 +266,169 @@
 </body>
 
 <script>
+    let chapterIndex = {{ course.chapters|length }};
+    let quizIndex = {{ course.quizzes|length }};
+    const modeOfClass = document.getElementById('mode_of_class');
+
+    // Add Chapter
+    document.getElementById('add_chapter').addEventListener('click', function() {
+        chapterIndex++;
+        const container = document.getElementById('chapters_container');
+        const chapterDiv = document.createElement('div');
+        chapterDiv.className = 'chapter bg-gray-50 p-4 rounded-lg relative';
+        chapterDiv.innerHTML = `
+            <button type="button" class="remove-chapter absolute top-2 right-2 text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+            <h4 class="text-md font-medium text-indigo-900 mb-2">Chapter ${chapterIndex}</h4>
+            <div class="mb-3">
+                <label for="chapter_${chapterIndex}_title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <input type="text" id="chapter_${chapterIndex}_title" name="chapter_${chapterIndex}_title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+            </div>
+            <div class="mb-3">
+                <label for="chapter_${chapterIndex}_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea id="chapter_${chapterIndex}_description" name="chapter_${chapterIndex}_description" rows="2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 resize-y focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required></textarea>
+            </div>
+            <div class="mb-3">
+                <label for="chapter_${chapterIndex}_note" class="block text-sm font-medium text-gray-700 mb-1">Note (Optional)</label>
+                <input type="text" id="chapter_${chapterIndex}_note" name="chapter_${chapterIndex}_note" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+            </div>
+            ${modeOfClass.value === 'Live' ? `
+                <div class="mb-3">
+                    <label for="chapter_${chapterIndex}_meeting_link" class="block text-sm font-medium text-gray-700 mb-1">Meeting Link</label>
+                    <input type="url" id="chapter_${chapterIndex}_meeting_link" name="chapter_${chapterIndex}_meeting_link" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+                </div>
+                <div class="mb-3">
+                    <label for="chapter_${chapterIndex}_date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                    <input type="date" id="chapter_${chapterIndex}_date" name="chapter_${chapterIndex}_date" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+                </div>
+                <div class="mb-3">
+                    <label for="chapter_${chapterIndex}_time" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                    <input type="time" id="chapter_${chapterIndex}_time" name="chapter_${chapterIndex}_time" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+                </div>
+            ` : `
+                <div class="mb-3">
+                    <label for="chapter_${chapterIndex}_course_link" class="block text-sm font-medium text-gray-700 mb-1">Video URL</label>
+                    <input type="url" id="chapter_${chapterIndex}_course_link" name="chapter_${chapterIndex}_course_link" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" placeholder="Enter YouTube URL">
+                </div>
+            `}
+            <div class="mb-3">
+                <label for="chapter_${chapterIndex}_assignment_link" class="block text-sm font-medium text-gray-700 mb-1">Assignment Link (Optional)</label>
+                <input type="url" id="chapter_${chapterIndex}_assignment_link" name="chapter_${chapterIndex}_assignment_link" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+            </div>
+            <div class="mb-3">
+                <label for="chapter_${chapterIndex}_assignment_name" class="block text-sm font-medium text-gray-700 mb-1">Assignment Name</label>
+                <input type="text" id="chapter_${chapterIndex}_assignment_name" name="chapter_${chapterIndex}_assignment_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+            </div>
+            <div class="mb-3">
+                <label for="chapter_${chapterIndex}_resources_link" class="block text-sm font-medium text-gray-700 mb-1">Resources Link (Optional)</label>
+                <input type="url" id="chapter_${chapterIndex}_resources_link" name="chapter_${chapterIndex}_resources_link" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+            </div>
+            <div class="mb-3">
+                <label for="chapter_${chapterIndex}_resources_name" class="block text-sm font-medium text-gray-700 mb-1">Resources Name</label>
+                <input type="text" id="chapter_${chapterIndex}_resources_name" name="chapter_${chapterIndex}_resources_name" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white">
+            </div>
+        `;
+        container.appendChild(chapterDiv);
+        attachRemoveListeners();
+    });
+
+    // Add Quiz
+    document.getElementById('add_quiz').addEventListener('click', function() {
+        quizIndex++;
+        const container = document.getElementById('quizzes_container');
+        const quizDiv = document.createElement('div');
+        quizDiv.className = 'quiz bg-gray-50 p-4 rounded-lg relative';
+        quizDiv.innerHTML = `
+            <button type="button" class="remove-quiz absolute top-2 right-2 text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+            <h4 class="text-md font-medium text-indigo-900 mb-2">Quiz ${quizIndex}</h4>
+            <div class="mb-3">
+                <label for="quiz_${quizIndex}_type" class="block text-sm font-medium text-gray-700 mb-1">Quiz Type</label>
+                <select id="quiz_${quizIndex}_type" name="quiz_${quizIndex}_type" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+                    <option value="True/False">True/False</option>
+                    <option value="MCQ">Multiple Choice (Single Answer)</option>
+                    <option value="Multiple Choices">Multiple Choices (Multiple Answers)</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="quiz_${quizIndex}_question" class="block text-sm font-medium text-gray-700 mb-1">Question</label>
+                <input type="text" id="quiz_${quizIndex}_question" name="quiz_${quizIndex}_question" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+            </div>
+            <div class="mb-3 quiz-options">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Options</label>
+                <input type="text" name="quiz_${quizIndex}_option_1" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white mb-2" placeholder="Option 1" required>
+                <input type="text" name="quiz_${quizIndex}_option_2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white mb-2" placeholder="Option 2" required>
+                <input type="text" name="quiz_${quizIndex}_option_3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white mb-2" placeholder="Option 3">
+                <input type="text" name="quiz_${quizIndex}_option_4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" placeholder="Option 4">
+            </div>
+            <div class="mb-3 quiz-answer">
+                <label for="quiz_${quizIndex}_correct_answer" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                <select id="quiz_${quizIndex}_correct_answer" name="quiz_${quizIndex}_correct_answer" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+                    <option value="True">True</option>
+                    <option value="False">False</option>
+                </select>
+            </div>
+        `;
+        container.appendChild(quizDiv);
+        attachQuizTypeListener(quizDiv);
+        attachRemoveListeners();
+    });
+
+    // Remove Chapter/Quiz
+    function attachRemoveListeners() {
+        document.querySelectorAll('.remove-chapter').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+        });
+        document.querySelectorAll('.remove-quiz').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.parentElement.remove();
+            });
+        });
+    }
+
+    // Quiz Type Change
+    function attachQuizTypeListener(quizDiv) {
+        const typeSelect = quizDiv.querySelector('select[name$="_type"]');
+        const optionsDiv = quizDiv.querySelector('.quiz-options');
+        const answerDiv = quizDiv.querySelector('.quiz-answer');
+
+        typeSelect.addEventListener('change', function() {
+            const type = this.value;
+
+            // Show/hide options based on quiz type
+            optionsDiv.classList.toggle('hidden', type === 'True/False');
+
+            // Update answer section based on quiz type
+            if (type === 'Multiple Choices') {
+                answerDiv.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answers (Select all that apply)</label>
+                    <div class="space-y-2">
+                        <label><input type="checkbox" name="${this.name.replace('_type', '_correct_answers')}" value="1"> Option 1</label>
+                        <label><input type="checkbox" name="${this.name.replace('_type', '_correct_answers')}" value="2"> Option 2</label>
+                        <label><input type="checkbox" name="${this.name.replace('_type', '_correct_answers')}" value="3"> Option 3</label>
+                        <label><input type="checkbox" name="${this.name.replace('_type', '_correct_answers')}" value="4"> Option 4</label>
+                    </div>
+                `;
+            } else {
+                answerDiv.innerHTML = `
+                    <label for="${this.name.replace('_type', '_correct_answer')}" class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
+                    <select id="${this.name.replace('_type', '_correct_answer')}" name="${this.name.replace('_type', '_correct_answer')}" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none bg-gray-50 hover:bg-white" required>
+                        ${type === 'True/False' ? `
+                            <option value="True">True</option>
+                            <option value="False">False</option>
+                        ` : `
+                            <option value="1">Option 1</option>
+                            <option value="2">Option 2</option>
+                            <option value="3">Option 3</option>
+                            <option value="4">Option 4</option>
+                        `}
+                    </select>
+                `;
+            }
+        });
+        typeSelect.dispatchEvent(new Event('change')); // Trigger initial setup
+    }
+
     // Domain handling
     document.getElementById('domain').addEventListener('change', function() {
         const domain = this.value;
@@ -244,164 +451,13 @@
         document.getElementById('price').required = paymentType === 'Paid';
     });
 
-    // Chapter handling
-    let chapterCount = {{ course.chapters|default([])|length }};
-    document.getElementById('add-chapter').addEventListener('click', function() {
-        chapterCount++;
-        const container = document.getElementById('chapters-container');
-        const newChapter = document.createElement('div');
-        newChapter.className = 'chapter-entry mb-6 p-6 border border-gray-300 rounded-lg bg-gray-100 shadow-sm';
-        newChapter.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <h4 class="text-md font-medium text-gray-800">Chapter ${chapterCount}</h4>
-                <button type="button" class="remove-chapter text-red-500 hover:text-red-700" title="Remove Chapter"><i class="fas fa-trash fa-lg"></i></button>
-            </div>
-            <div class="grid grid-cols-1 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Title</label>
-                    <input type="text" name="chapter_${chapterCount}_title" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Chapter Title" required>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea name="chapter_${chapterCount}_description" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 resize-y focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Chapter Description" required></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Duration (e.g., 1:30)</label>
-                    <input type="text" name="chapter_${chapterCount}_duration" value="0:00" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Duration (e.g., 1:30)" required>
-                </div>
-            </div>
-        `;
-        container.appendChild(newChapter);
-        updateChapterCount();
+    // Mode of Class handling (re-render chapters if changed)
+    modeOfClass.addEventListener('change', function() {
+        alert('Changing mode will reset chapter fields. Save changes first if needed.');
     });
 
-    document.getElementById('chapters-container').addEventListener('click', function(e) {
-        if (e.target.closest('.remove-chapter')) {
-            e.target.closest('.chapter-entry').remove();
-            updateChapterCount();
-        }
-    });
-
-    function updateChapterCount() {
-        document.getElementById('chapter_count').value = document.querySelectorAll('.chapter-entry').length;
-    }
-
-    // Quiz handling
-    let quizCount = {{ course.quizzes|default([])|length }};
-    document.getElementById('add-quiz').addEventListener('click', function() {
-        quizCount++;
-        const container = document.getElementById('quizzes-container');
-        const newQuiz = document.createElement('div');
-        newQuiz.className = 'quiz-entry mb-6 p-6 border border-gray-300 rounded-lg bg-gray-100 shadow-sm';
-        newQuiz.innerHTML = `
-            <div class="flex justify-between items-center mb-4">
-                <h4 class="text-md font-medium text-gray-800">Quiz ${quizCount}</h4>
-                <button type="button" class="remove-quiz text-red-500 hover:text-red-700" title="Remove Quiz"><i class="fas fa-trash fa-lg"></i></button>
-            </div>
-            <div class="grid grid-cols-1 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                    <select name="quiz_${quizCount}_type" class="quiz-type w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" required>
-                        <option value="Multiple Choice">Multiple Choice</option>
-                        <option value="True/False">True/False</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
-                    <input type="text" name="quiz_${quizCount}_question" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Quiz Question" required>
-                </div>
-                <div class="mc-options">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 1</label>
-                            <input type="text" name="quiz_${quizCount}_option1" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 1" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 2</label>
-                            <input type="text" name="quiz_${quizCount}_option2" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 2" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 3</label>
-                            <input type="text" name="quiz_${quizCount}_option3" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 3" required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Option 4</label>
-                            <input type="text" name="quiz_${quizCount}_option4" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" placeholder="Option 4" required>
-                        </div>
-                    </div>
-                    <div class="mt-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-                        <select name="quiz_${quizCount}_correct_answer" class="correct-answer w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" required>
-                            <option value="" disabled selected>Select Correct Answer</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="tf-options" style="display: none;">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Correct Answer</label>
-                        <select name="quiz_${quizCount}_correct_answer" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-800 focus:ring-2 focus:ring-indigo-400 focus:border-indigo-500 outline-none transition-all duration-200 ease-in-out bg-white" required>
-                            <option value="" disabled>Select Correct Answer</option>
-                            <option value="True">True</option>
-                            <option value="False">False</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-        `;
-        container.appendChild(newQuiz);
-        updateQuizCount();
-        attachQuizTypeListener(newQuiz.querySelector('.quiz-type'));
-        updateCorrectAnswerOptions(newQuiz);
-    });
-
-    document.getElementById('quizzes-container').addEventListener('click', function(e) {
-        if (e.target.closest('.remove-quiz')) {
-            e.target.closest('.quiz-entry').remove();
-            updateQuizCount();
-        }
-    });
-
-    function updateQuizCount() {
-        document.getElementById('quiz_count').value = document.querySelectorAll('.quiz-entry').length;
-    }
-
-    function attachQuizTypeListener(select) {
-        select.addEventListener('change', function() {
-            const quizEntry = this.closest('.quiz-entry');
-            const mcOptions = quizEntry.querySelector('.mc-options');
-            const tfOptions = quizEntry.querySelector('.tf-options');
-            const isMultipleChoice = this.value === 'Multiple Choice';
-            mcOptions.style.display = isMultipleChoice ? 'block' : 'none';
-            tfOptions.style.display = isMultipleChoice ? 'none' : 'block';
-            mcOptions.querySelectorAll('input, select').forEach(el => el.required = isMultipleChoice);
-            tfOptions.querySelector('select').required = !isMultipleChoice;
-            if (isMultipleChoice) updateCorrectAnswerOptions(quizEntry);
-        });
-    }
-
-    function updateCorrectAnswerOptions(quizEntry) {
-        const quizIndex = quizEntry.querySelector('h4').textContent.match(/\d+/)[0];
-        const options = [
-            quizEntry.querySelector(`input[name="quiz_${quizIndex}_option1"]`).value,
-            quizEntry.querySelector(`input[name="quiz_${quizIndex}_option2"]`).value,
-            quizEntry.querySelector(`input[name="quiz_${quizIndex}_option3"]`).value,
-            quizEntry.querySelector(`input[name="quiz_${quizIndex}_option4"]`).value
-        ].filter(opt => opt);
-        const select = quizEntry.querySelector('.correct-answer');
-        select.innerHTML = '<option value="" disabled selected>Select Correct Answer</option>';
-        options.forEach(opt => {
-            const option = document.createElement('option');
-            option.value = opt;
-            option.text = opt;
-            select.appendChild(option);
-        });
-    }
-
-    document.querySelectorAll('.quiz-type').forEach(attachQuizTypeListener);
-    document.querySelectorAll('.mc-options input').forEach(input => {
-        input.addEventListener('input', function() {
-            updateCorrectAnswerOptions(this.closest('.quiz-entry'));
-        });
-    });
+    // Initialize listeners
+    document.querySelectorAll('.quiz').forEach(attachQuizTypeListener);
+    attachRemoveListeners();
 </script>
 {% endblock %}

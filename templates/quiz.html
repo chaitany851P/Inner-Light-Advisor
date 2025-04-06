@@ -1,114 +1,133 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ course.name }} - Quiz</title>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gradient-to-br from-indigo-900 via-gray-800 to-gray-600 text-white min-h-screen font-sans">
-    <div class="container mx-auto px-4 py-8">
-        <header class="text-center py-10">
-            <h1 class="text-4xl md:text-5xl font-extrabold uppercase tracking-tight text-white drop-shadow-md">{{ course.name }} - Quiz</h1>
-            <p class="text-lg md:text-xl text-gray-200 mt-4 font-light">Score at least 60% to earn your certificate!</p>
-        </header>
-
-        <section class="max-w-4xl mx-auto bg-white text-gray-900 rounded-2xl shadow-xl p-6 md:p-8">
-            <form id="quizForm" class="space-y-8">
-                {% for quiz in course.quizzes %}
-                <div class="quiz-question bg-gradient-to-r from-indigo-100 to-purple-100 p-6 rounded-lg shadow-md transform hover:scale-105 transition duration-300">
-                    <h3 class="text-xl font-semibold text-indigo-900 mb-4">Question {{ loop.index }}</h3>
-                    <h4 class="text-lg text-gray-800 mb-6">{{ quiz.question }}</h4>
-                    <div class="space-y-4">
-                        {% if quiz.quiz_type == 'True/False' %}
-                            <div class="flex items-center">
-                                <input type="radio" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="1" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_1" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">True</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="radio" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="2" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_2" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">False</label>
-                            </div>
-                        {% elif quiz.quiz_type == 'Multiple Choices' %}
-                            <div class="flex items-center">
-                                <input type="checkbox" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="1" class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_1" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. {{ quiz.option_1 }}</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="2" class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_2" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. {{ quiz.option_2 }}</label>
-                            </div>
-                            {% if quiz.option_3 %}
-                            <div class="flex items-center">
-                                <input type="checkbox" id="quiz_{{ loop.index }}_option_3" name="question{{ loop.index }}" value="3" class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_3" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. {{ quiz.option_3 }}</label>
-                            </div>
-                            {% endif %}
-                            {% if quiz.option_4 %}
-                            <div class="flex items-center">
-                                <input type="checkbox" id="quiz_{{ loop.index }}_option_4" name="question{{ loop.index }}" value="4" class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_4" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">D. {{ quiz.option_4 }}</label>
-                            </div>
-                            {% endif %}
-                        {% else %} <!-- MCQ -->
-                            <div class="flex items-center">
-                                <input type="radio" id="quiz_{{ loop.index }}_option_1" name="question{{ loop.index }}" value="1" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_1" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">A. {{ quiz.option_1 }}</label>
-                            </div>
-                            <div class="flex items-center">
-                                <input type="radio" id="quiz_{{ loop.index }}_option_2" name="question{{ loop.index }}" value="2" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_2" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">B. {{ quiz.option_2 }}</label>
-                            </div>
-                            {% if quiz.option_3 %}
-                            <div class="flex items-center">
-                                <input type="radio" id="quiz_{{ loop.index }}_option_3" name="question{{ loop.index }}" value="3" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_3" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">C. {{ quiz.option_3 }}</label>
-                            </div>
-                            {% endif %}
-                            {% if quiz.option_4 %}
-                            <div class="flex items-center">
-                                <input type="radio" id="quiz_{{ loop.index }}_option_4" name="question{{ loop.index }}" value="4" required class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500 cursor-pointer">
-                                <label for="quiz_{{ loop.index }}_option_4" class="ml-3 text-gray-700 hover:text-indigo-700 cursor-pointer">D. {{ quiz.option_4 }}</label>
-                            </div>
-                            {% endif %}
-                        {% endif %}
-                    </div>
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+    <!-- Flashed Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="p-4 rounded-lg shadow-lg mb-6 mx-auto max-w-lg text-center text-sm sm:text-base 
+                    {% if category == 'success' %}bg-green-600 text-white{% elif category == 'error' %}bg-red-600 text-white{% else %}bg-yellow-600 text-white{% endif %}">
+                    {{ message }}
                 </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Header -->
+    <header class="text-center py-6 sm:py-10 bg-gradient-to-r from-indigo-600 to-indigo-800 rounded-xl shadow-md mb-6">
+        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white">{{ course.get('name', 'Unnamed Course') }} - Quiz</h1>
+        <p class="text-lg sm:text-xl text-gray-200 mt-2">Score at least 60% to earn your certificate!</p>
+    </header>
+
+    <!-- Quiz Section -->
+    <section class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 sm:p-8">
+        <form id="quizForm" action="{{ url_for('quiz', course_id=course_id) }}" method="POST" class="space-y-8">
+            {% if course.get('quizzes') %}
+                {% for quiz in course.get('quizzes', []) %}
+                    {% set question_index = loop.index %}
+                    <div class="quiz-question bg-gray-50 p-6 rounded-lg shadow-md">
+                        <h3 class="text-xl font-semibold text-indigo-900 mb-2">Question {{ question_index }}</h3>
+                        <h4 class="text-lg text-gray-800 mb-4">{{ quiz.get('question', 'No question provided') }}</h4>
+                        <div class="space-y-4">
+                            {% if quiz.get('type') == 'Multiple Choices' %}
+                                <p class="text-sm text-gray-600 italic">Select all correct answers:</p>
+                                {% for key, value in quiz.get('options', {}).items()|sort %}
+                                    <div class="flex items-center">
+                                        <input type="checkbox" 
+                                               id="quiz_{{ question_index }}_option_{{ key }}" 
+                                               name="question{{ question_index }}[]" 
+                                               value="{{ key }}" 
+                                               class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                        <label for="quiz_{{ question_index }}_option_{{ key }}" 
+                                               class="ml-3 text-gray-700">{{ 'ABCD'[key|int-1] }}. {{ value|default('Not Set') }}</label>
+                                    </div>
+                                {% endfor %}
+                            {% elif quiz.get('type') == 'True/False' %}
+                                <p class="text-sm text-gray-600 italic">Select one:</p>
+                                <div class="flex items-center">
+                                    <input type="radio" 
+                                           id="quiz_{{ question_index }}_option_true" 
+                                           name="question{{ question_index }}" 
+                                           value="True" 
+                                           required 
+                                           class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                    <label for="quiz_{{ question_index }}_option_true" 
+                                           class="ml-3 text-gray-700">True</label>
+                                </div>
+                                <div class="flex items-center">
+                                    <input type="radio" 
+                                           id="quiz_{{ question_index }}_option_false" 
+                                           name="question{{ question_index }}" 
+                                           value="False" 
+                                           required 
+                                           class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                    <label for="quiz_{{ question_index }}_option_false" 
+                                           class="ml-3 text-gray-700">False</label>
+                                </div>
+                            {% else %} <!-- MCQ (Single Correct) -->
+                                <p class="text-sm text-gray-600 italic">Select one:</p>
+                                {% for key, value in quiz.get('options', {}).items()|sort %}
+                                    <div class="flex items-center">
+                                        <input type="radio" 
+                                               id="quiz_{{ question_index }}_option_{{ key }}" 
+                                               name="question{{ question_index }}" 
+                                               value="{{ key }}" 
+                                               required 
+                                               class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                        <label for="quiz_{{ question_index }}_option_{{ key }}" 
+                                               class="ml-3 text-gray-700">{{ 'ABCD'[key|int-1] }}. {{ value|default('Not Set') }}</label>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
                 {% endfor %}
-                <button type="submit" class="w-full py-4 bg-indigo-600 text-white font-semibold text-lg rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-300 transition duration-300">Submit Quiz</button>
-            </form>
-        </section>
-    </div>
+                <div class="text-center">
+                    <button type="submit" 
+                            class="px-6 sm:px-8 py-3 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-base sm:text-lg font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900">Submit Quiz</button>
+                </div>
+            {% else %}
+                <p class="text-center text-gray-600 text-lg">No quizzes available for this course.</p>
+            {% endif %}
+        </form>
+    </section>
+</div>
 
-    <script>
-        $(document).ready(function() {
-            $('#quizForm').on('submit', function(event) {
-                event.preventDefault();
-                
-                console.log("Form submitted");
-                const formData = $(this).serializeArray();
-                console.log("Form data:", formData);
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const quizForm = document.getElementById('quizForm');
+        quizForm.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-                $.post(`/submit_quiz/{{ course.id }}`, formData, function(response) {
-                    console.log("Response:", response);
-                    if (response.passed) {
-                        alert(response.message);
-                        window.location.href = `/certificate/${response.course_id}`;
-                    } else {
-                        alert(response.message);
-                    }
-                }).fail(function(jqXHR, textStatus, errorThrown) {
-                    console.log("Request failed:", textStatus, errorThrown);
-                    alert("An error occurred while submitting the quiz. Please try again.");
-                });
+            const formData = new FormData(this);
+            console.log("FormData entries:");
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                console.log("Server response:", data);
+                alert(data.message);
+                if (data.passed) {
+                    window.location.href = `/certificate/${data.course_id}`;
+                }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                alert("An error occurred while submitting the quiz. Please try again.");
             });
         });
-    </script>
-</body>
-</html>
-
+    });
+</script>
 {% endblock %}

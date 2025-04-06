@@ -7,7 +7,6 @@
     <title>Inner Light Advisor - Courses</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Font Awesome for icons (used in teacher section) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -27,21 +26,23 @@
         <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
             Welcome {{ current_user.name }}!
         </h1>
-        <h2 class="text-xl sm:text-2xl font-semibold mt-2">
-            Learning Style: <strong class="text-indigo-400">{{ current_user.learning_style }}</strong>
-        </h2>
-        {% if current_user.learning_style == "Visual" %}
-            <p class="text-gray-300 mt-2">You learn best through images, charts, and videos.</p>
-        {% elif current_user.learning_style == "Auditory" %}
-            <p class="text-gray-300 mt-2">You learn best through listening to explanations and discussions.</p>
-        {% elif current_user.learning_style == "Kinesthetic" %}
-            <p class="text-gray-300 mt-2">You learn best through hands-on activities and practical experience.</p>
-        {% else %}
-            <p class="text-gray-300 mt-2">Your learning style is currently unassigned. Please take the test to determine it.</p>
+        {% if current_user.role != 'admin' %}
+            <h2 class="text-xl sm:text-2xl font-semibold mt-2">
+                Learning Style: <strong class="text-indigo-400">{{ current_user.learning_style or 'Not Set' }}</strong>
+            </h2>
+            {% if current_user.learning_style == "Visual" %}
+                <p class="text-gray-300 mt-2">You learn best through images, charts, and videos.</p>
+            {% elif current_user.learning_style == "Auditory" %}
+                <p class="text-gray-300 mt-2">You learn best through listening to explanations and discussions.</p>
+            {% elif current_user.learning_style == "Kinesthetic" %}
+                <p class="text-gray-300 mt-2">You learn best through hands-on activities and practical experience.</p>
+            {% else %}
+                <p class="text-gray-300 mt-2">Your learning style is currently unassigned. Please take the test to determine it.</p>
+            {% endif %}
+            <a href="{{ url_for('test') }}" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
+                Take the Learning Style Test
+            </a>
         {% endif %}
-        <a href="{{ url_for('test') }}" class="mt-4 inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300">
-            Take the Learning Style Test
-        </a>
     </div>
 
     <!-- Header -->
@@ -61,19 +62,21 @@
             {% endif %}
         {% elif current_user.role == 'teacher' %}
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">Your Courses</h1>
+        {% elif current_user.role == 'admin' %}
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">All Courses</h1>
         {% endif %}
     </div>
 
     <!-- Filters -->
-    <form method="POST" action="{{ url_for('courses') }}">
+    <form method="GET" action="{{ url_for('courses') }}">
         <div class="filters bg-gray-100 p-4 sm:p-6 rounded-lg shadow-md mb-6 max-w-4xl mx-auto flex flex-col sm:flex-row flex-wrap justify-center items-center gap-4 sm:gap-6">
             <div class="flex items-center">
                 <label for="level" class="text-gray-700 font-semibold text-sm sm:text-base mr-2">Level:</label>
                 <select id="level" name="level" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
                     <option value="">All</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Advanced">Advanced</option>
+                    <option value="Beginner" {% if current_filters.level == 'Beginner' %}selected{% endif %}>Beginner</option>
+                    <option value="Intermediate" {% if current_filters.level == 'Intermediate' %}selected{% endif %}>Intermediate</option>
+                    <option value="Advanced" {% if current_filters.level == 'Advanced' %}selected{% endif %}>Advanced</option>
                 </select>
             </div>
             <div class="flex items-center">
@@ -81,7 +84,7 @@
                 <select name="domain" id="domain" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
                     <option value="">All</option>
                     {% for domain in domains %}
-                        <option value="{{ domain.name }}">{{ domain.name }}</option>
+                        <option value="{{ domain.name }}" {% if current_filters.domain == domain.name %}selected{% endif %}>{{ domain.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -90,7 +93,7 @@
                 <select id="language" name="language" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
                     <option value="">All</option>
                     {% for language in languages %}
-                        <option value="{{ language.name }}">{{ language.name }}</option>
+                        <option value="{{ language.name }}" {% if current_filters.language == language.name %}selected{% endif %}>{{ language.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -98,11 +101,12 @@
                 <label for="payment" class="text-gray-700 font-semibold text-sm sm:text-base mr-2">Payment:</label>
                 <select id="payment" name="payment" class="p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-black bg-white text-sm sm:text-base">
                     <option value="">All</option>
-                    <option value="Free">Free</option>
-                    <option value="Paid">Paid</option>
+                    <option value="Free" {% if current_filters.payment == 'Free' %}selected{% endif %}>Free</option>
+                    <option value="Paid" {% if current_filters.payment == 'Paid' %}selected{% endif %}>Paid</option>
                 </select>
             </div>
             <button type="submit" class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">Apply Filters</button>
+            <a href="{{ url_for('courses') }}" class="px-4 sm:px-6 py-2 bg-gray-600 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:ring-2 focus:ring-gray-300 transform hover:-translate-y-1 transition-all duration-200">Clear Filters</a>
             {% if current_user.role == 'teacher' %}
                 <a href="{{ url_for('add_course') }}" class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">Add Course</a>
             {% endif %}
@@ -111,59 +115,59 @@
 
     <!-- Course List -->
     <div class="max-w-4xl mx-auto space-y-6">
-        {% if current_user.role == 'student' %}
-            {% if courses %}
+        {% if courses %}
             {% for course in courses %}
-            <div class="bg-white text-gray-900 rounded-xl shadow-lg overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row">
-                {% if course.thumbnail_img %}
-                <img src="data:{{ course.thumbnail_img.content_type }};base64,{{ course.thumbnail_img.data }}" alt="{{ course.thumbnail_img.name }}" style="max-width: 200px;">
-            {% else %}
-                <img src="{{ url_for('static', filename='img/default_thumbnail.jpg') }}" alt="Default Thumbnail" style="max-width: 200px;">
-            {% endif %}
-            <!-- l Debug: {{ course.thumbnail_img | tojson }}</p> --> -->
-                        <div class="p-4 sm:p-6 flex-1">
-                            <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-indigo-900 mb-2">{{ course.name }}</h2>
-                            <p class="text-gray-700 text-sm sm:text-base mb-4">{{ course.description }}</p>
-                            <a href="{{ url_for('course_detail', course_id=course.id) }}">
-                                <button class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">Enroll Now</button>
-                            </a>
-                        </div>
-                    </div>
-                {% endfor %}
-            {% else %}
                 <div class="bg-white text-gray-900 rounded-xl shadow-lg overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row">
-                    <img src="{{ url_for('static', filename='img/Inner_Light_Advisor_logo.png') }}" alt="No courses available" class="w-full sm:w-40 md:w-48 h-48 sm:h-36 md:h-40 object-cover">
+                    {% if course.thumbnail_img %}
+                        <img src="data:{{ course.thumbnail_img.content_type }};base64,{{ course.thumbnail_img.data }}" alt="{{ course.thumbnail_img.name }}" style="max-width: 200px;">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='img/default_thumbnail.jpg') }}" alt="Default Thumbnail" style="max-width: 200px;">
+                    {% endif %}
                     <div class="p-4 sm:p-6 flex-1">
-                        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-indigo-900 mb-2">No Courses Available</h2>
-                        <p class="text-gray-700 text-sm sm:text-base mb-4">There are no courses matching your filters or learning style yet. Check back later!</p>
-                    </div>
-                </div>
-            {% endif %}
-        {% elif current_user.role == 'teacher' %}
-            {% if courses %}
-                {% for course in courses %}
-                    <div class="bg-white text-gray-900 rounded-xl shadow-lg overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row mb-4 sm:mb-6">
-                        <img src="{{ course.thumbnail_img if course.thumbnail_img else url_for('static', filename='img/default_thumbnail.jpg') }}" alt="{{ course.name }}" class="w-full sm:w-40 md:w-48 h-48 sm:h-36 md:h-40 object-cover">
-                        <div class="p-4 sm:p-6 flex-1">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                                <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-indigo-900">{{ course.name }}</h2>
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                            <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-indigo-900">{{ course.name }}</h2>
+                            {% if current_user.role in ['teacher', 'admin'] %}
                                 <div class="mt-2 sm:mt-0 flex items-center gap-2">
-                                    <span class="inline-block px-3 py-1 text-xs sm:text-sm font-semibold rounded-full {% if course.status|default('Under Review') == 'Approved' %}bg-green-100 text-green-800{% elif course.status|default('Under Review') == 'Rejected' %}bg-red-100 text-red-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
-                                        {{ course.status|default('Under Review') }}
+                                    <span class="inline-block px-3 py-1 text-xs sm:text-sm font-semibold rounded-full 
+                                        {% if course.status == 'approved' %}bg-green-100 text-green-800
+                                        {% elif course.status == 'rejected' %}bg-red-100 text-red-800
+                                        {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                        {{ course.status|title }}
                                     </span>
-                                    {% if course.status|default('Under Review') == 'Under Review' %}
+                                    {% if course.status == 'pending' %}
                                         <i class="fas fa-hourglass-half text-yellow-600 text-sm sm:text-base" title="Pending Approval"></i>
-                                    {% elif course.status|default('Under Review') == 'Approved' %}
+                                    {% elif course.status == 'approved' %}
                                         <i class="fas fa-check-circle text-green-600 text-sm sm:text-base" title="Approved"></i>
-                                    {% elif course.status|default('Under Review') == 'Rejected' %}
+                                    {% elif course.status == 'rejected' %}
                                         <i class="fas fa-times-circle text-red-600 text-sm sm:text-base" title="Rejected"></i>
                                     {% endif %}
                                 </div>
-                            </div>
-                            <p class="text-gray-700 text-sm sm:text-base mb-4">{{ course.description }}</p>
-                            {% if course.status == 'Rejected' and course.rejection_reason %}
+                            {% endif %}
+                        </div>
+
+                        <!-- Course details visible to all roles -->
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">{{ course.level }}</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">{{ course.domain }}</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">{{ course.language }}</span>
+                            <span class="px-2 py-1 bg-gray-800 text-gray-100 text-xs rounded-full">{{ course.payment }}</span>
+                            <span class="px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">{{ course.learner_type }}</span>
+                        </div>
+
+                        <p class="text-gray-700 text-sm sm:text-base mb-4">{{ course.description }}</p>
+
+                        {% if current_user.role == 'student' %}
+                            <a href="{{ url_for('course_detail', course_id=course.id) }}">
+                                <button class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">
+                                    View Details
+                                </button>
+                            </a>
+                        {% elif current_user.role == 'teacher' %}
+                            {% if course.status == 'rejected' and course.rejection_reason %}
                                 <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                    <p class="text-sm sm:text-base text-red-800"><strong>Rejection Reason:</strong> {{ course.rejection_reason }}</p>
+                                    <p class="text-sm sm:text-base text-red-800">
+                                        <strong>Rejection Reason:</strong> {{ course.rejection_reason }}
+                                    </p>
                                 </div>
                             {% endif %}
                             <div class="flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -183,21 +187,37 @@
                                     </button>
                                 </form>
                             </div>
-                        </div>
+                        {% elif current_user.role == 'admin' %}
+                            <a href="{{ url_for('course_detail', course_id=course.id) }}">
+                                <button class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">
+                                    View Details
+                                </button>
+                            </a>
+                        {% endif %}
                     </div>
-                {% endfor %}
-            {% else %}
-                <div class="bg-white text-gray-900 rounded-xl shadow-lg overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row">
-                    <img src="{{ url_for('static', filename='img/Inner_Light_Advisor_logo.png') }}" alt="No courses" class="w-full sm:w-40 md:w-48 h-48 sm:h-36 md:h-40 object-cover">
-                    <div class="p-4 sm:p-6 flex-1">
-                        <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-indigo-900 mb-2">No Courses Yet</h2>
-                        <p class="text-gray-700 text-sm sm:text-base mb-4">You haven’t created any courses yet. Start by adding one!</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="bg-white text-gray-900 rounded-xl shadow-lg overflow-hidden transform hover:shadow-xl transition-shadow duration-300 flex flex-col sm:flex-row">
+                <img src="{{ url_for('static', filename='img/Inner_Light_Advisor_logo.png') }}" alt="No courses" class="w-full sm:w-40 md:w-48 h-48 sm:h-36 md:h-40 object-cover">
+                <div class="p-4 sm:p-6 flex-1">
+                    <h2 class="text-lg sm:text-xl md:text-2xl font-bold text-indigo-900 mb-2">No Courses Available</h2>
+                    <p class="text-gray-700 text-sm sm:text-base mb-4">
+                        {% if current_user.role == 'teacher' %}
+                            You haven’t created any courses yet. Start by adding one!
+                        {% elif current_user.role == 'student' %}
+                            There are no courses matching your filters or learning style yet. Check back later!
+                        {% else %}
+                            No courses exist yet.
+                        {% endif %}
+                    </p>
+                    {% if current_user.role == 'teacher' %}
                         <a href="{{ url_for('add_course') }}">
                             <button class="px-4 sm:px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white text-sm sm:text-base font-semibold rounded-lg shadow-md hover:from-indigo-700 hover:to-indigo-900 focus:ring-2 focus:ring-indigo-300 transform hover:-translate-y-1 transition-all duration-200">Add Course</button>
                         </a>
-                    </div>
+                    {% endif %}
                 </div>
-            {% endif %}
+            </div>
         {% endif %}
     </div>
 
