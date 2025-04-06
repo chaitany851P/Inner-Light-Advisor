@@ -40,8 +40,12 @@ app.config['MAIL_DEFAULT_SENDER'] = 'innerlightadvisor@gmail.com'
 mail = Mail(app)
 
 # Initialize Firebase
-cred = credentials.Certificate("firebase_config.json")
-firebase_admin.initialize_app(cred)
+if not firebase_admin._apps:
+    creds = os.getenv('FIREBASE_CREDENTIALS')  # Gets JSON string from Render
+    if not creds:
+        raise ValueError("FIREBASE_CREDENTIALS not set")
+    cred = credentials.Certificate(json.loads(creds))  # Parses string to dict
+    firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # Flask-Login setup
